@@ -780,10 +780,23 @@ function renderWeekly(){
   const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
   const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
   const m=CUR==='all'?'may':CUR;
-  const wC=WEEKLY[m], pM=prevMap[m], wP=pM?WEEKLY[pM]:null;
+  const pM=prevMap[m];
   const chs=['shopee','tiktok','lazada','line','fb'];
-  const isEmpty = CUR==='all' ? aMK().length===0 : (DB[m]&&DB[m].empty);
-  if(!wC||isEmpty){
+
+  // helper: true if weekly array has any non-zero value
+  const hasW = w => w && chs.some(ch => w[ch] && w[ch].some(v => v > 0));
+
+  // Use real WEEKLY data if populated; otherwise synthesise from DB monthly totals
+  const synthFromDB = key => {
+    if (!key || !DB[key] || DB[key].empty) return null;
+    const d = DB[key];
+    return { labels:['ยอดรวมเดือน (ยังไม่มี Weekly)'], shopee:[d.shopee.sales], tiktok:[d.tiktok.sales], lazada:[d.lazada.sales], line:[d.line.sales], fb:[d.fb.sales] };
+  };
+
+  let wC = hasW(WEEKLY[m])  ? WEEKLY[m]  : synthFromDB(m);
+  let wP = hasW(WEEKLY[pM]) ? WEEKLY[pM] : synthFromDB(pM);
+
+  if(!wC){
     ['cv-wk-total','cv-wk-sh','cv-wk-tt','cv-wk-lz','cv-wk-ln'].forEach(killChart);
     $('tbl-weekly').innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3)">⏳ ยังไม่มีข้อมูล — ไปที่ ⚙ Settings เพื่อซิงค์ข้อมูล</td></tr>';
     return;
