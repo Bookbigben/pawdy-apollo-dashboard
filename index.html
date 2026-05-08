@@ -518,11 +518,11 @@ const DB = {
     affi:  {sh_s:1832918,sh_o:3614,tt_s:1738503,tt_o:3458,lzd_s:174959,lzd_o:210},
   },
   may:{
-    shopee:{sales:1250132,orders:1418,visitors:10538,cr:13.0,aov:881,budget:98600,roi:10.34,target:9200000},
-    tiktok:{sales:771391.95,orders:1333,visitors:16403,cr:8.0,aov:578,budget:176895,reach:656006,roas:4.36,target:4800000},
-    lazada:{sales:135517.87,orders:142,visitors:3463,cr:4.0,aov:954,budget:20630,roas:6.57,target:1300000},
-    line:  {sales:457811,orders:236,cr:0.0,aov:1939,target:2000000},
-    fb:    {sales:101388,orders:96,reach:1380015,budget:33886.06,roas:2.99,target:1200000},
+    shopee:{sales:1250132,orders:1418,visitors:10538,cr:13.46,aov:882,budget:179000,roi:6.21,target:9200000},
+    tiktok:{sales:771392,orders:1333,visitors:16403,cr:8.13,aov:579,budget:176895,reach:656006,roas:4.36,target:4800000},
+    lazada:{sales:135518,orders:142,visitors:3463,cr:4.10,aov:954,budget:34260,roas:3.96,target:1300000},
+    line:  {sales:457811,orders:236,cr:0.16,aov:1940,target:2000000},
+    fb:    {sales:101388,orders:96,reach:1380015,budget:33886,roas:2.99,target:1200000},
     live:  {off:366914.0,raks:60651.0,shop:429085.0,ceo:17154.16,total:873804.16,hr_off:203,hr_raks:185,hr_shop:44,hr_ceo:108},
     affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
     partial:true,
@@ -1171,64 +1171,86 @@ function autoDetectMonth(rows) {
 // Parse percentage string like "5.91%" → 5.91
 function pctStr(v) { return parseFloat(String(v || '0').replace('%', '')) || 0; }
 
+// Detect where each channel's columns start by scanning header rows.
+// Returns {sh, lz, ln, tt, fb, ig} — column indices of each channel name.
+function findChannelStarts(rows, upTo) {
+  for (let ri = 0; ri < Math.min(upTo, 8); ri++) {
+    const row = rows[ri];
+    let sh, lz, ln, tt, fb, ig;
+    for (let ci = 0; ci < row.length; ci++) {
+      const c = (row[ci]||'').trim().toLowerCase();
+      if (!sh && c==='shopee') sh=ci;
+      else if (!lz && c==='lazada') lz=ci;
+      else if (!ln && (c==='line (official)' || c==='line oa' || c==='line')) ln=ci;
+      else if (!tt && c==='tiktok') tt=ci;
+      else if (!fb && c==='facebook') fb=ci;
+      else if (!ig && c==='instagram') ig=ci;
+    }
+    if (sh!==undefined && lz!==undefined && tt!==undefined && fb!==undefined) {
+      return {sh, lz, ln:ln??17, tt, fb, ig};
+    }
+  }
+  // Fallback to confirmed Jan layout
+  return {sh:1, lz:9, ln:17, tt:22, fb:33, ig:42};
+}
+
 function applySheetData(rows, targetMonth) {
   const m = targetMonth === 'all' ? 'may' : targetMonth;
   if (!DB[m]) return;
   const d = DB[m];
 
-  // ── 1. "Total" row — full KPI data from daily aggregates ──
-  // Col layout confirmed from actual sheet:
-  //   Shopee:  1=visitors 2=orders 3=sales 4=CR%  5=AOV  6=budgetPlan 7=budgetSpend 8=ROI
-  //   Lazada:  9=visitors 10=orders 11=sales 12=CR% 13=AOV 14=budgetPlan 15=budgetSpend 16=ROAS
-  //   Line:    17=friends 18=orders 19=sales 20=CR% 21=AOV
-  //   TikTok:  22=visitors 23=orders 24=sales 25=CR% 26=AOV 27=gmvPlan 28=gmvSpend 29=reach 30=awarePlan 31=awareSpend 32=ROAS
-  //   Facebook:33=reach  34=orders 35=sales 36=budgetInbox 37=budgetAware 38-40=trafficBudgets 41=ROAS
   const totalIdx = rows.findIndex(r => (r[0] || '').trim().toLowerCase() === 'total');
   if (totalIdx >= 0) {
-    const t = rows[totalIdx];
-    const n = v => pvNum(v);
-    const p = v => pctStr(v);
+    const t  = rows[totalIdx];
+    const n  = v => pvNum(v);
+    const p  = v => pctStr(v);
+    const cs = findChannelStarts(rows, totalIdx);
 
-    // Shopee
-    if (n(t[1]))  d.shopee.visitors = n(t[1]);
-    if (n(t[2]))  d.shopee.orders   = n(t[2]);
-    if (n(t[3]))  d.shopee.sales    = n(t[3]);
-    if (p(t[4]))  d.shopee.cr       = p(t[4]);
-    if (n(t[5]))  d.shopee.aov      = n(t[5]);
-    if (n(t[7]))  d.shopee.budget   = n(t[7]);  // use actual spend, not plan
-    if (n(t[8]))  d.shopee.roi      = n(t[8]);
+    // Shopee — relative offsets: +0=visitors +1=orders +2=sales +3=CR +4=AOV
+    // Budget spend = col before ROI (= lzStart-2); ROI = lzStart-1
+    if (n(t[cs.sh]))   d.shopee.visitors = n(t[cs.sh]);
+    if (n(t[cs.sh+1])) d.shopee.orders   = n(t[cs.sh+1]);
+    if (n(t[cs.sh+2])) d.shopee.sales    = n(t[cs.sh+2]);
+    if (p(t[cs.sh+3])) d.shopee.cr       = p(t[cs.sh+3]);
+    if (n(t[cs.sh+4])) d.shopee.aov      = n(t[cs.sh+4]);
+    if (n(t[cs.sh+6])) d.shopee.budget   = n(t[cs.sh+6]);  // In-platform budget spend (+6 consistent Jan & May)
+    if (n(t[cs.lz-1])) d.shopee.roi      = n(t[cs.lz-1]);  // ROI = last col before Lazada
 
-    // Lazada
-    if (n(t[9]))  d.lazada.visitors = n(t[9]);
-    if (n(t[10])) d.lazada.orders   = n(t[10]);
-    if (n(t[11])) d.lazada.sales    = n(t[11]);
-    if (p(t[12])) d.lazada.cr       = p(t[12]);
-    if (n(t[13])) d.lazada.aov      = n(t[13]);
-    if (n(t[15])) d.lazada.budget   = n(t[15]);
-    if (n(t[16])) d.lazada.roas     = n(t[16]);
+    // Lazada — +0=visitors +1=orders +2=sales +3=CR +4=AOV; end=lnStart-1
+    if (n(t[cs.lz]))   d.lazada.visitors = n(t[cs.lz]);
+    if (n(t[cs.lz+1])) d.lazada.orders   = n(t[cs.lz+1]);
+    if (n(t[cs.lz+2])) d.lazada.sales    = n(t[cs.lz+2]);
+    if (p(t[cs.lz+3])) d.lazada.cr       = p(t[cs.lz+3]);
+    if (n(t[cs.lz+4])) d.lazada.aov      = n(t[cs.lz+4]);
+    if (n(t[cs.ln-2])) d.lazada.budget   = n(t[cs.ln-2]);
+    if (n(t[cs.ln-1])) d.lazada.roas     = n(t[cs.ln-1]);
 
-    // Line OA
-    if (n(t[18])) d.line.orders = n(t[18]);
-    if (n(t[19])) d.line.sales  = n(t[19]);
-    if (p(t[20])) d.line.cr     = p(t[20]);
-    if (n(t[21])) d.line.aov    = n(t[21]);
+    // Line OA — +0=friends +1=orders +2=sales +3=CR +4=AOV
+    if (n(t[cs.ln+1])) d.line.orders = n(t[cs.ln+1]);
+    if (n(t[cs.ln+2])) d.line.sales  = n(t[cs.ln+2]);
+    if (p(t[cs.ln+3])) d.line.cr     = p(t[cs.ln+3]);
+    if (n(t[cs.ln+4])) d.line.aov    = n(t[cs.ln+4]);
 
-    // TikTok
-    if (n(t[22])) d.tiktok.visitors = n(t[22]);
-    if (n(t[23])) d.tiktok.orders   = n(t[23]);
-    if (n(t[24])) d.tiktok.sales    = n(t[24]);
-    if (p(t[25])) d.tiktok.cr       = p(t[25]);
-    if (n(t[26])) d.tiktok.aov      = n(t[26]);
-    if (n(t[28])) d.tiktok.budget   = n(t[28]);  // GMV spend
-    if (n(t[29])) d.tiktok.reach    = n(t[29]);
-    if (n(t[32])) d.tiktok.roas     = n(t[32]);
+    // TikTok — +0=visitors +1=orders +2=sales +3=CR +4=AOV +6=GMVspend +7=Reach; end=fbStart-1=ROAS
+    if (n(t[cs.tt]))   d.tiktok.visitors = n(t[cs.tt]);
+    if (n(t[cs.tt+1])) d.tiktok.orders   = n(t[cs.tt+1]);
+    if (n(t[cs.tt+2])) d.tiktok.sales    = n(t[cs.tt+2]);
+    if (p(t[cs.tt+3])) d.tiktok.cr       = p(t[cs.tt+3]);
+    if (n(t[cs.tt+4])) d.tiktok.aov      = n(t[cs.tt+4]);
+    if (n(t[cs.tt+6])) d.tiktok.budget   = n(t[cs.tt+6]);
+    if (n(t[cs.tt+7])) d.tiktok.reach    = n(t[cs.tt+7]);
+    if (n(t[cs.fb-1])) d.tiktok.roas     = n(t[cs.fb-1]);
 
-    // Facebook
-    if (n(t[33])) d.fb.reach  = n(t[33]);
-    if (n(t[34])) d.fb.orders = n(t[34]);
-    if (n(t[35])) d.fb.sales  = n(t[35]);
-    if (n(t[36])) d.fb.budget = n(t[36]);  // inbox/sales spend
-    if (n(t[41])) d.fb.roas   = n(t[41]);
+    // Facebook — +0=reach +1=orders +2=sales; budget & ROAS from sub-cols
+    if (n(t[cs.fb]))   d.fb.reach  = n(t[cs.fb]);
+    if (n(t[cs.fb+1])) d.fb.orders = n(t[cs.fb+1]);
+    if (n(t[cs.fb+2])) d.fb.sales  = n(t[cs.fb+2]);
+    // Budget = first non-zero col after fb+2 that's a spend value; ROAS = ig-1 or fb+8
+    const fbEnd = (cs.ig || cs.fb+9) - 1;
+    if (n(t[fbEnd]))   d.fb.roas   = n(t[fbEnd]);
+    // Inbox/sales budget = col at +3 (Jan) or +5 (May) — pick whichever has data
+    const fbBudget = n(t[cs.fb+5]) || n(t[cs.fb+3]);
+    if (fbBudget) d.fb.budget = fbBudget;
   }
 
   // ── 2. "Target" row in summary section (after Total row) ──
@@ -1594,6 +1616,7 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
   // Default channel sheet URLs (one per month tab)
   const DEFAULT_URLS = {
     jan: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?output=csv',
+    may: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?gid=1237068853&single=true&output=csv',
   };
   // Default Live & Affiliate URLs per month
   const DEFAULT_LIVE = {
