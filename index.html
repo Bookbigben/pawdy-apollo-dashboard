@@ -247,7 +247,7 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <div class="nav-dot" style="background:var(--green)"></div>เปรียบเทียบรายเดือน
     </div>
     <div class="nav-item" data-panel="weekly">
-      <div class="nav-dot" style="background:#a78bfa"></div>Weekly vs เดือนก่อน
+      <div class="nav-dot" style="background:#a78bfa"></div>Weekly
     </div>
     <div class="nav-group">Channel</div>
     <div class="nav-item" data-panel="shopee">
@@ -492,8 +492,8 @@ html.mob .score-box{flex-direction:column;gap:8px;}
           <div class="card"><div class="card-head">Orders &amp; Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-ordsales"></canvas></div></div>
         </div>
         <div class="g2">
-          <div class="card"><div class="card-head">Visitor Shopee</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-vis"></canvas></div></div>
-          <div class="card"><div class="card-head">Budget (Traffic Shopee vs Awareness)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-bud"></canvas></div></div>
+          <div class="card"><div class="card-head">Visitor</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-vis"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget (Traffic vs Awareness)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-bud"></canvas></div></div>
         </div>
         <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-ig-roas"></canvas></div></div>
       </div>
@@ -1102,8 +1102,8 @@ function renderWeekly(){
     mkLine('cv-dy-ig-reach',   [ln(cL+' Reach',  cur('ig','reach'),         IG), ln(pL+' Reach',  prev('ig','reach'),         IG, true)]);
     mkLine('cv-dy-ig-ordsales',[ln(cL+' Orders', cur('ig','orders'),        IG), ln(pL+' Orders', prev('ig','orders'),        IG, true),
                                  ln(cL+' Sales',  cur('ig','sales'),         IG2),ln(pL+' Sales',  prev('ig','sales'),         IG2,true)]);
-    mkLine('cv-dy-ig-vis',     [ln(cL+' Visitor Shopee', cur('ig','visitorShopee'), IG), ln(pL+' Visitor Shopee', prev('ig','visitorShopee'), IG, true)]);
-    mkLine('cv-dy-ig-bud',     [ln(cL+' Traffic Shopee', cur('ig','budgetShopee'), IG),  ln(pL+' Traffic Shopee', prev('ig','budgetShopee'), IG, true),
+    mkLine('cv-dy-ig-vis',     [ln(cL+' Visitor', cur('ig','visitorShopee'), IG), ln(pL+' Visitor', prev('ig','visitorShopee'), IG, true)]);
+    mkLine('cv-dy-ig-bud',     [ln(cL+' Traffic', cur('ig','budgetShopee'), IG),  ln(pL+' Traffic', prev('ig','budgetShopee'), IG, true),
                                  ln(cL+' Awareness',      cur('ig','budgetAware'),  IG2), ln(pL+' Awareness',      prev('ig','budgetAware'),  IG2,true)]);
     mkLine('cv-dy-ig-roas',    [ln(cL+' ROAS', cur('ig','roas'), IG), ln(pL+' ROAS', prev('ig','roas'), IG, true)], 'roas');
   }, 30);
