@@ -762,6 +762,11 @@ function renderOverview(){
 // ════ COMPARE ════
 function renderCompare(){
   const ak=aMK(),an=aMN();
+  if(ak.length===0){
+    ['cv-cmp-gmv','cv-cmp-ach','cv-cmp-live'].forEach(killChart);
+    $('cmp-table').innerHTML='<thead><tr><th>เดือน</th><th>GMV รวม</th><th>Target</th><th>%</th><th>Shopee</th><th>TikTok</th><th>Lazada</th><th>Line OA</th><th>Facebook</th><th>Live</th></tr></thead><tbody><tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text3)">⏳ ยังไม่มีข้อมูล — ไปที่ ⚙ Settings เพื่อซิงค์ข้อมูล</td></tr></tbody>';
+    return;
+  }
   setTimeout(()=>{
     mkChart('cv-cmp-gmv',{type:'bar',data:{labels:an,datasets:CH_CFG.map(c=>({label:c.label,data:ak.map(m=>DB[m][c.k].sales),backgroundColor:c.color+'bb',borderRadius:3}))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
     mkChart('cv-cmp-ach',{type:'line',data:{labels:an,datasets:CH_CFG.map(c=>({label:c.label,data:ak.map(m=>pctN(DB[m][c.k].sales,DB[m][c.k].target)),borderColor:c.color,backgroundColor:c.color+'20',tension:.3,pointRadius:4,fill:false,borderWidth:2}))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>v+'%'}}}}});
@@ -777,9 +782,10 @@ function renderWeekly(){
   const m=CUR==='all'?'may':CUR;
   const wC=WEEKLY[m], pM=prevMap[m], wP=pM?WEEKLY[pM]:null;
   const chs=['shopee','tiktok','lazada','line','fb'];
-  if(!wC){
+  const isEmpty = CUR==='all' ? aMK().length===0 : (DB[m]&&DB[m].empty);
+  if(!wC||isEmpty){
     ['cv-wk-total','cv-wk-sh','cv-wk-tt','cv-wk-lz','cv-wk-ln'].forEach(killChart);
-    $('tbl-weekly').innerHTML='<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text3)">ยังไม่มีข้อมูล Weekly สำหรับเดือนนี้</td></tr>';
+    $('tbl-weekly').innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3)">⏳ ยังไม่มีข้อมูล — ไปที่ ⚙ Settings เพื่อซิงค์ข้อมูล</td></tr>';
     return;
   }
   const nW=wC.labels.length;
