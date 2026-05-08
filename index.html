@@ -524,6 +524,30 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       </div>
 
       <div class="set-card">
+        <h3>📲 แชร์ข้อมูลข้ามเครื่อง</h3>
+        <p>URL ของ Google Sheets ถูกบันทึกใน browser นี้เท่านั้น — ใช้วิธีด้านล่างเพื่อใช้งานบนเครื่องอื่น</p>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:10px">
+
+          <div style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px">
+            <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">วิธีที่ 1 — ดาวน์โหลดไฟล์พร้อม URL <span style="font-size:10px;color:var(--green);font-weight:400">(แนะนำ)</span></div>
+            <p style="font-size:11.5px;color:var(--text2);margin-bottom:8px">สร้างไฟล์ <code>.html</code> ใหม่ที่มี URL ฝังอยู่แล้ว — เปิดบนเครื่องไหน, browser ไหน ก็โหลดข้อมูลได้ทันที</p>
+            <button class="btn btn-pri" onclick="downloadWithEmbeddedUrls()">💾 ดาวน์โหลดไฟล์พร้อม URL</button>
+          </div>
+
+          <div style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px">
+            <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">วิธีที่ 2 — Export / Import JSON</div>
+            <p style="font-size:11.5px;color:var(--text2);margin-bottom:8px">Export URL ทั้งหมดเป็น JSON → Copy → เปิดไฟล์บนเครื่องอื่น → Paste → Import</p>
+            <div class="btn-row" style="margin-bottom:8px">
+              <button class="btn btn-pri" onclick="exportUrlSettings()">📤 Export (Copy)</button>
+              <button class="btn btn-sec" onclick="importUrlSettings()">📥 Import (Paste)</button>
+            </div>
+            <textarea id="url-export-ta" class="url-input" rows="5" style="font-size:11px;resize:vertical" placeholder="กด Export เพื่อดู URL ทั้งหมด — หรือ Paste JSON จากเครื่องอื่นแล้วกด Import"></textarea>
+          </div>
+        </div>
+        <div id="export-import-status" class="status"></div>
+      </div>
+
+      <div class="set-card">
         <h3>⏱ Auto-Refresh</h3>
         <p>ดึงข้อมูลใหม่จาก Google Sheets อัตโนมัติทุก:</p>
         <div class="btn-row" style="margin-top:8px;align-items:center">
@@ -1436,6 +1460,15 @@ const LS_PREFIX = 'pawdy_sheet_';
 const LS_AFFI_PFX = 'pawdy_affi_';
 const LS_LIVE_PFX = 'pawdy_live_';
 const LS_INTERVAL_KEY = 'pawdy_refresh_ms';
+
+// ── DEFAULT_SHEET_URLS — URLs ฝังในไฟล์ (ใช้งานได้ทุกเครื่องที่เปิดไฟล์นี้) ──
+// ค่าเหล่านี้จะถูกอัปเดตอัตโนมัติเมื่อกด "💾 ดาวน์โหลดไฟล์พร้อม URL"
+const DEFAULT_SHEET_URLS = {
+  jan:{ch:'',live:'',affi:''},feb:{ch:'',live:'',affi:''},mar:{ch:'',live:'',affi:''},
+  apr:{ch:'',live:'',affi:''},may:{ch:'',live:'',affi:''},jun:{ch:'',live:'',affi:''},
+  jul:{ch:'',live:'',affi:''},aug:{ch:'',live:'',affi:''},sep:{ch:'',live:'',affi:''},
+  oct:{ch:'',live:'',affi:''},nov:{ch:'',live:'',affi:''},dec:{ch:'',live:'',affi:''},
+};
 let autoRefreshTimer = null;
 
 function setStatus(msg, type) {
@@ -2028,6 +2061,74 @@ function clearAllUrls() {
   if (el) { el.textContent = 'ล้าง URL ทั้งหมดแล้ว'; el.className = 'status info'; }
 }
 
+function exportUrlSettings() {
+  const cfg = {};
+  MK.forEach(m => {
+    const ch   = localStorage.getItem(LS_PREFIX   + m) || '';
+    const live = localStorage.getItem(LS_LIVE_PFX + m) || '';
+    const affi = localStorage.getItem(LS_AFFI_PFX + m) || '';
+    if (ch || live || affi) cfg[m] = {ch, live, affi};
+  });
+  const json = JSON.stringify(cfg, null, 2);
+  const ta = $('url-export-ta');
+  if (ta) { ta.value = json; ta.select(); }
+  try { navigator.clipboard.writeText(json); } catch(_){}
+  const el = $('export-import-status');
+  if (el) { el.textContent = '✓ Copy แล้ว — วาง JSON นี้บนเครื่องอื่น แล้วกด Import'; el.className = 'status ok'; }
+}
+
+function importUrlSettings() {
+  const ta = $('url-export-ta');
+  const el = $('export-import-status');
+  if (!ta || !ta.value.trim()) {
+    if (el) { el.textContent = '⚠ วาง JSON ก่อน แล้วกด Import'; el.className = 'status err'; }
+    return;
+  }
+  try {
+    const cfg = JSON.parse(ta.value.trim());
+    let count = 0;
+    MK.forEach(m => {
+      if (!cfg[m]) return;
+      if (cfg[m].ch)   { localStorage.setItem(LS_PREFIX   + m, cfg[m].ch);   count++; }
+      if (cfg[m].live) { localStorage.setItem(LS_LIVE_PFX + m, cfg[m].live); count++; }
+      if (cfg[m].affi) { localStorage.setItem(LS_AFFI_PFX + m, cfg[m].affi); count++; }
+    });
+    buildMonthCfgUI();
+    refreshSavedUrlsList();
+    if (el) { el.textContent = `✓ Import ${count} URL สำเร็จ — กด ↻ โหลดทุกเดือน เพื่อดึงข้อมูล`; el.className = 'status ok'; }
+  } catch(e) {
+    if (el) { el.textContent = '✗ JSON ไม่ถูกต้อง กรุณาตรวจสอบ'; el.className = 'status err'; }
+  }
+}
+
+function downloadWithEmbeddedUrls() {
+  const cfg = {};
+  MK.forEach(m => {
+    cfg[m] = {
+      ch:   localStorage.getItem(LS_PREFIX   + m) || '',
+      live: localStorage.getItem(LS_LIVE_PFX + m) || '',
+      affi: localStorage.getItem(LS_AFFI_PFX + m) || '',
+    };
+  });
+  const lines = MK.map(m => {
+    const e = cfg[m];
+    return `  ${m}:{ch:${JSON.stringify(e.ch)},live:${JSON.stringify(e.live)},affi:${JSON.stringify(e.affi)}}`;
+  }).join(',\n');
+  const newDef = `const DEFAULT_SHEET_URLS = {\n${lines},\n};`;
+  const html = document.documentElement.outerHTML;
+  const updated = html.replace(/const DEFAULT_SHEET_URLS = \{[\s\S]*?\};/, newDef);
+  const blob = new Blob([updated], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'pawdy_dashboard_v6_8.html';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+  const el = $('export-import-status');
+  if (el) { el.textContent = '✓ ดาวน์โหลดสำเร็จ — ไฟล์ใหม่มี URL ฝังอยู่แล้ว เปิดบนเครื่องไหนก็ได้'; el.className = 'status ok'; }
+}
+
 function clearAllData() {
   if (!confirm('ล้างข้อมูลทั้งหมดหรือไม่?\n\nURL ยังคงอยู่ใน Settings — กด "↻ โหลดทุกเดือน" เพื่อดึงข้อมูลใหม่')) return;
   MK.forEach(m => {
@@ -2182,13 +2283,14 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
     if (sel) sel.value = String(savedMs);
   }
 
-  // Load only months the user has explicitly saved URLs for
+  // Load months — localStorage first, then DEFAULT_SHEET_URLS as fallback
   (async () => {
     let anyLoaded = false;
     for (const m of MK) {
-      const chUrl   = localStorage.getItem(LS_PREFIX   + m);
-      const liveUrl = localStorage.getItem(LS_LIVE_PFX + m);
-      const affiUrl = localStorage.getItem(LS_AFFI_PFX + m);
+      const def = DEFAULT_SHEET_URLS[m] || {};
+      const chUrl   = localStorage.getItem(LS_PREFIX   + m) || def.ch   || '';
+      const liveUrl = localStorage.getItem(LS_LIVE_PFX + m) || def.live || '';
+      const affiUrl = localStorage.getItem(LS_AFFI_PFX + m) || def.affi || '';
       if (chUrl)   { try { const rows = await fetchSheetRows(chUrl);   applySheetData(rows, m); if(DB[m]) DB[m].empty=false; anyLoaded=true; } catch(_){} }
       if (liveUrl) { try { const rows = await fetchSheetRows(liveUrl); applyLiveData(rows, m);  anyLoaded=true; } catch(_){} }
       if (affiUrl) { try { const rows = await fetchSheetRows(affiUrl); applyAffiData(rows, m);  anyLoaded=true; } catch(_){} }
