@@ -167,9 +167,71 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
 .tl-text{font-size:12px;color:var(--text2);line-height:1.6;}
 .wk-section{margin-bottom:24px;}
 .wk-sec-hd{font-size:12px;font-weight:700;color:var(--sc,var(--accent));background:var(--bg3);border-left:3px solid var(--sc,var(--accent));padding:7px 12px;border-radius:0 var(--r) var(--r) 0;margin-bottom:10px;}
+
+/* ── MOBILE OVERLAY ── */
+.mob-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:199;backdrop-filter:blur(2px);cursor:pointer;}
+.mob-overlay.show{display:block;}
+
+/* ── HAMBURGER ── */
+.ham-btn{display:none;background:none;border:none;cursor:pointer;padding:5px;flex-direction:column;gap:4.5px;flex-shrink:0;}
+.ham-btn span{display:block;width:19px;height:2px;background:var(--text2);border-radius:2px;transition:all .2s;}
+
+/* ── VIEW TOGGLE ── */
+.view-toggle{padding:5px 10px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:11.5px;font-family:var(--font);cursor:pointer;transition:all .12s;white-space:nowrap;flex-shrink:0;}
+.view-toggle:hover{border-color:var(--accent);color:var(--text);}
+.view-toggle.mob-on{background:rgba(77,124,255,.15);border-color:var(--accent);color:var(--accent);}
+
+/* ── MOBILE LAYOUT — auto on real device ── */
+@media (max-width:768px){
+  .sidebar{transform:translateX(-196px);transition:transform .25s;box-shadow:none;}
+  .sidebar.sb-open{transform:translateX(0);box-shadow:6px 0 24px rgba(0,0,0,.5);}
+  .ham-btn{display:flex;}
+  .main{margin-left:0;}
+  .topbar{padding:9px 13px;gap:8px;}
+  .topbar-sub{display:none;}
+  .content{padding:11px 12px;}
+  .kpi-grid,.kpi4{grid-template-columns:repeat(2,1fr);}
+  .kpi3{grid-template-columns:repeat(2,1fr);}
+  .kpi-val{font-size:17px;}
+  .g2,.g3,.g32{grid-template-columns:1fr;}
+  .fc-grid{grid-template-columns:repeat(2,1fr);}
+  .sug-cards{grid-template-columns:1fr;}
+  .mtabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:calc(100vw - 130px);}
+  .mtabs::-webkit-scrollbar{display:none;}
+  .mt{flex-shrink:0;padding:5px 10px;}
+  .chart-wrap{height:170px!important;}
+  .card table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .btn-row{flex-wrap:wrap;}
+  .mc-row{padding:8px 10px;}
+  .score-box{flex-direction:column;gap:8px;}
+}
+
+/* ── MOBILE LAYOUT — manual toggle on desktop ── */
+html.mob .sidebar{transform:translateX(-196px);transition:transform .25s;box-shadow:none;}
+html.mob .sidebar.sb-open{transform:translateX(0);box-shadow:6px 0 24px rgba(0,0,0,.5);}
+html.mob .ham-btn{display:flex;}
+html.mob .main{margin-left:0;}
+html.mob .topbar{padding:9px 13px;gap:8px;}
+html.mob .topbar-sub{display:none;}
+html.mob .content{padding:11px 12px;}
+html.mob .kpi-grid,html.mob .kpi4{grid-template-columns:repeat(2,1fr);}
+html.mob .kpi3{grid-template-columns:repeat(2,1fr);}
+html.mob .kpi-val{font-size:17px;}
+html.mob .g2,html.mob .g3,html.mob .g32{grid-template-columns:1fr;}
+html.mob .fc-grid{grid-template-columns:repeat(2,1fr);}
+html.mob .sug-cards{grid-template-columns:1fr;}
+html.mob .mtabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;max-width:calc(100vw - 130px);}
+html.mob .mtabs::-webkit-scrollbar{display:none;}
+html.mob .mt{flex-shrink:0;padding:5px 10px;}
+html.mob .chart-wrap{height:170px!important;}
+html.mob .card table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+html.mob .btn-row{flex-wrap:wrap;}
+html.mob .mc-row{padding:8px 10px;}
+html.mob .score-box{flex-direction:column;gap:8px;}
 </style>
 </head>
 <body>
+<div class="mob-overlay" id="mobOverlay" onclick="closeSidebar()"></div>
 
 <nav class="sidebar">
   <div class="logo-area">
@@ -222,12 +284,15 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
   <div class="sidebar-foot">
     <div class="sync-row"><div class="pulse"></div><span id="syncLbl">Static · ม.ค.–พ.ค. 2026</span></div>
     <button class="sync-btn" onclick="goSettings()">⟳ Sync ข้อมูลใหม่</button>
+    <button class="sync-btn" style="margin-top:5px;background:rgba(239,68,68,.15);color:#f87171;border-color:rgba(239,68,68,.3)" onclick="clearAllData()">🗑 ล้างข้อมูล</button>
   </div>
 </nav>
 
 <div class="main">
   <div class="topbar">
+    <button class="ham-btn" id="hamBtn" onclick="openSidebar()" aria-label="เมนู"><span></span><span></span><span></span></button>
     <div><span class="topbar-title">Team Apollo</span>&nbsp;<span class="topbar-sub">Sales Performance Report</span></div>
+    <button class="view-toggle" id="viewToggle" onclick="toggleMobileView()" title="สลับ Mobile / Desktop">📱 Mobile</button>
     <div class="mtabs">
       <button class="mt" data-m="jan">ม.ค.</button>
       <button class="mt" data-m="feb">ก.พ.</button>
@@ -452,6 +517,7 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
         <div class="btn-row" style="margin-top:10px">
           <button class="btn btn-pri" onclick="loadAllMonths()">↻ โหลดทุกเดือน</button>
           <button class="btn btn-sec" onclick="clearAllUrls()">✕ ล้าง URL ทั้งหมด</button>
+          <button class="btn" style="background:#ef4444;color:#fff;border:none" onclick="clearAllData()">🗑 ล้างข้อมูลทั้งหมด</button>
         </div>
         <div id="all-months-status" class="status"></div>
         <div id="month-cfg-container" style="margin-top:10px"></div>
@@ -1962,6 +2028,35 @@ function clearAllUrls() {
   if (el) { el.textContent = 'ล้าง URL ทั้งหมดแล้ว'; el.className = 'status info'; }
 }
 
+function clearAllData() {
+  if (!confirm('ล้างข้อมูลทั้งหมดหรือไม่?\n\nURL ยังคงอยู่ใน Settings — กด "↻ โหลดทุกเดือน" เพื่อดึงข้อมูลใหม่')) return;
+  MK.forEach(m => {
+    const d = DB[m];
+    if (!d) return;
+    ['shopee','tiktok','lazada','fb'].forEach(ch => {
+      if (!d[ch]) return;
+      const tgt = d[ch].target;
+      Object.keys(d[ch]).forEach(k => { if (k !== 'target') d[ch][k] = 0; });
+      d[ch].target = tgt;
+    });
+    if (d.line) { const tgt=d.line.target; Object.keys(d.line).forEach(k=>{if(k!=='target')d.line[k]=0;}); d.line.target=tgt; }
+    d.live = {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0};
+    d.affi = {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0};
+    d.empty = true;
+    if (DAILY[m]) {
+      DAILY[m].days = [];
+      Object.keys(DAILY[m]).forEach(k => { if (k !== 'days') Object.keys(DAILY[m][k]).forEach(kk => { DAILY[m][k][kk] = []; }); });
+    }
+  });
+  $('syncLbl').textContent = 'รอการซิงค์';
+  setSyncDot(false);
+  const ap = document.querySelector('.panel.active');
+  if (ap) renderActive(ap.id.replace('panel-', ''));
+  const el = $('all-months-status');
+  if (el) { el.textContent = '✓ ล้างข้อมูลแล้ว — กด ↻ โหลดทุกเดือน เพื่อดึงข้อมูลใหม่'; el.className = 'status info'; }
+  goSettings();
+}
+
 function refreshSavedUrlsList() {
   const el = $('saved-urls-list');
   if (!el) return;
@@ -2017,6 +2112,31 @@ function updateSettingsMonthLabel() {
 const RENDERERS={overview:renderOverview,compare:renderCompare,weekly:renderWeekly,suggest:renderSuggest,shopee:renderShopee,tiktok:renderTiktok,lazada:renderLazada,line:renderLine,fb:renderFb,live:renderLive,affiliate:renderAffiliate,settings:()=>{}};
 function renderActive(id){if(RENDERERS[id])RENDERERS[id]();}
 
+// ── Mobile view helpers ──
+function openSidebar() {
+  document.querySelector('nav.sidebar').classList.add('sb-open');
+  $('mobOverlay').classList.add('show');
+}
+function closeSidebar() {
+  document.querySelector('nav.sidebar').classList.remove('sb-open');
+  $('mobOverlay').classList.remove('show');
+}
+function toggleMobileView() {
+  const on = document.documentElement.classList.toggle('mob');
+  const btn = $('viewToggle');
+  if (btn) { btn.textContent = on ? '🖥 Desktop' : '📱 Mobile'; btn.classList.toggle('mob-on', on); }
+  localStorage.setItem('pawdy_mob', on ? '1' : '0');
+  if (!on) closeSidebar();
+}
+// Restore saved view preference
+(function(){
+  if (localStorage.getItem('pawdy_mob') === '1') {
+    document.documentElement.classList.add('mob');
+    const btn = $('viewToggle');
+    if (btn) { btn.textContent = '🖥 Desktop'; btn.classList.add('mob-on'); }
+  }
+})();
+
 document.querySelectorAll('.nav-item').forEach(el=>{
   el.addEventListener('click',()=>{
     document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -2025,6 +2145,7 @@ document.querySelectorAll('.nav-item').forEach(el=>{
     const pid=el.dataset.panel;
     $('panel-'+pid).classList.add('active');
     renderActive(pid);
+    closeSidebar();
   });
 });
 
