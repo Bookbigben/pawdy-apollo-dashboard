@@ -165,6 +165,8 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
 .tl-row:last-child{border-bottom:none;}
 .tl-month{font-size:10px;font-weight:700;padding:4px 8px;border-radius:6px;background:var(--bg4);white-space:nowrap;flex-shrink:0;letter-spacing:.04em;}
 .tl-text{font-size:12px;color:var(--text2);line-height:1.6;}
+.wk-section{margin-bottom:24px;}
+.wk-sec-hd{font-size:12px;font-weight:700;color:var(--sc,var(--accent));background:var(--bg3);border-left:3px solid var(--sc,var(--accent));padding:7px 12px;border-radius:0 var(--r) var(--r) 0;margin-bottom:10px;}
 </style>
 </head>
 <body>
@@ -343,16 +345,93 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
 
     <!-- WEEKLY -->
     <div class="panel" id="panel-weekly">
-      <div class="card"><div class="card-head"><div class="cdot" style="background:#a78bfa"></div>GMV รายสัปดาห์ เทียบเดือนก่อน</div><div class="chart-wrap" style="height:280px"><canvas id="cv-wk-total"></canvas></div></div>
-      <div class="g2">
-        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>Shopee Weekly</div><div class="chart-wrap" style="height:220px"><canvas id="cv-wk-sh"></canvas></div></div>
-        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>TikTok Weekly</div><div class="chart-wrap" style="height:220px"><canvas id="cv-wk-tt"></canvas></div></div>
+      <div id="wk-empty-msg" style="display:none;text-align:center;padding:60px 20px;color:var(--text3);font-size:13px">⏳ ยังไม่มีข้อมูลรายวัน — ไปที่ ⚙ Settings เพื่อซิงค์ข้อมูล</div>
+
+      <!-- Shopee -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:var(--shopee)">🛒 Shopee — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-vis"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-ord"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Sales (In-Plat vs Off-Plat)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-sales"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget (In-Plat vs Off-Plat)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-bud"></canvas></div></div>
+        </div>
+        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-sh-roas"></canvas></div></div>
       </div>
-      <div class="g2">
-        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--lazada)"></div>Lazada Weekly</div><div class="chart-wrap" style="height:220px"><canvas id="cv-wk-lz"></canvas></div></div>
-        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--line)"></div>Line OA Weekly</div><div class="chart-wrap" style="height:220px"><canvas id="cv-wk-ln"></canvas></div></div>
+
+      <!-- TikTok -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:var(--tiktok)">🎵 TikTok — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-vis"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-ord"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-sales"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-bud"></canvas></div></div>
+        </div>
+        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-tt-roas"></canvas></div></div>
       </div>
-      <div class="card"><div class="card-head"><div class="cdot" style="background:#a78bfa"></div>ตาราง Week-over-Month</div><table class="tbl" id="tbl-weekly"></table></div>
+
+      <!-- Lazada -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:var(--lazada)">🟠 Lazada — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-vis"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-ord"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-sales"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-bud"></canvas></div></div>
+        </div>
+        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-lz-roas"></canvas></div></div>
+      </div>
+
+      <!-- Line OA -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:var(--line)">💬 Line OA — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Current Friends</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-fri"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-ord"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-sales"></canvas></div></div>
+          <div class="card"><div class="card-head">CR% &amp; AOV</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-cr"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Facebook -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:#4a90e2">📘 Facebook — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Reach</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-reach"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders &amp; Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-ord"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Inbox FB→ปิดไลน์ (Orders &amp; Sales)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-ibconv"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget (Inbox/Sales vs Awareness)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-bud1"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Budget (Traffic: Shopee / Web / Line)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-bud2"></canvas></div></div>
+          <div class="card"><div class="card-head">ROAS (Inbox/Sales)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-roas"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Instagram -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:#e1306c">📸 Instagram — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Reach</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-reach"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders &amp; Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-ordsales"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Visitor Shopee</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-vis"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget (Traffic Shopee vs Awareness)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-bud"></canvas></div></div>
+        </div>
+        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-ig-roas"></canvas></div></div>
+      </div>
     </div>
 
     <!-- SUGGEST -->
@@ -533,6 +612,18 @@ const WEEKLY = {
   apr:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-30)'],shopee:[0,0,0,0],tiktok:[0,0,0,0],lazada:[0,0,0,0],line:[0,0,0,0],fb:[0,0,0,0]},
   may:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-31)'],shopee:[0,0,0,0],tiktok:[0,0,0,0],lazada:[0,0,0,0],line:[0,0,0,0],fb:[0,0,0,0]},
 };
+
+// Daily data — populated from sheet rows when synced
+const DAILY = {};
+MK.forEach(m => { DAILY[m] = {
+  days:[],
+  shopee:{visitors:[],orders:[],sales:[],offSales:[],inBudget:[],offBudget:[]},
+  tiktok:{visitors:[],orders:[],sales:[],budget:[]},
+  lazada:{visitors:[],orders:[],sales:[],budget:[]},
+  line:  {friends:[],orders:[],sales:[],cr:[],aov:[]},
+  fb:    {reach:[],orders:[],sales:[],ibOrders:[],ibSales:[],budgetIbSales:[],budgetAware:[],budgetShopee:[],budgetWeb:[],budgetLine:[],roasIb:[]},
+  ig:    {reach:[],orders:[],sales:[],visitorShopee:[],budgetShopee:[],budgetAware:[],roas:[]},
+};});
 
 const MC_SPH = {
   jan: {
@@ -786,48 +877,146 @@ function renderCompare(){
 function renderWeekly(){
   const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
   const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
-  const m=CUR==='all'?'may':CUR;
-  const pM=prevMap[m];
-  const chs=['shopee','tiktok','lazada','line','fb'];
+  const m = CUR==='all' ? 'may' : CUR;
+  const pM = prevMap[m];
+  const curDD  = DAILY[m]  || {};
+  const prevDD = pM ? DAILY[pM] : null;
 
-  // helper: true if weekly array has any non-zero value
-  const hasW = w => w && chs.some(ch => w[ch] && w[ch].some(v => v > 0));
+  const MAX = 31;
+  const dayLabels = Array.from({length:MAX}, (_,i) => String(i+1));
+  const allIds = [
+    'cv-dy-sh-vis','cv-dy-sh-ord','cv-dy-sh-sales','cv-dy-sh-bud','cv-dy-sh-roas',
+    'cv-dy-tt-vis','cv-dy-tt-ord','cv-dy-tt-sales','cv-dy-tt-bud','cv-dy-tt-roas',
+    'cv-dy-lz-vis','cv-dy-lz-ord','cv-dy-lz-sales','cv-dy-lz-bud','cv-dy-lz-roas',
+    'cv-dy-ln-fri','cv-dy-ln-ord','cv-dy-ln-sales','cv-dy-ln-cr',
+    'cv-dy-fb-reach','cv-dy-fb-ord','cv-dy-fb-ibconv','cv-dy-fb-bud1','cv-dy-fb-bud2','cv-dy-fb-roas',
+    'cv-dy-ig-reach','cv-dy-ig-ordsales','cv-dy-ig-vis','cv-dy-ig-bud','cv-dy-ig-roas',
+  ];
 
-  // Use real WEEKLY data if populated; otherwise synthesise from DB monthly totals
-  const synthFromDB = key => {
-    if (!key || !DB[key] || DB[key].empty) return null;
-    const d = DB[key];
-    return { labels:['ยอดรวมเดือน (ยังไม่มี Weekly)'], shopee:[d.shopee.sales], tiktok:[d.tiktok.sales], lazada:[d.lazada.sales], line:[d.line.sales], fb:[d.fb.sales] };
-  };
+  const emptyEl = $('wk-empty-msg');
+  const hasDays = curDD.days && curDD.days.length > 0;
 
-  let wC = hasW(WEEKLY[m])  ? WEEKLY[m]  : synthFromDB(m);
-  let wP = hasW(WEEKLY[pM]) ? WEEKLY[pM] : synthFromDB(pM);
-
-  if(!wC){
-    ['cv-wk-total','cv-wk-sh','cv-wk-tt','cv-wk-lz','cv-wk-ln'].forEach(killChart);
-    $('tbl-weekly').innerHTML='<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3)">⏳ ยังไม่มีข้อมูล — ไปที่ ⚙ Settings เพื่อซิงค์ข้อมูล</td></tr>';
+  if (!hasDays) {
+    allIds.forEach(killChart);
+    if (emptyEl) emptyEl.style.display = '';
     return;
   }
-  const nW=wC.labels.length;
-  const norm=arr=>{if(!arr)return Array(nW).fill(0);const r=[...arr];while(r.length<nW)r.push(0);return r.slice(0,nW);};
-  const cL=mLbl[m]||m, pL=pM?mLbl[pM]:'';
-  const chColors={shopee:'rgba(255,72,32,',tiktok:'rgba(66,212,212,',lazada:'rgba(96,112,255,',line:'rgba(0,184,86,',fb:'rgba(46,128,255,'};
-  setTimeout(()=>{
-    const totC=wC.labels.map((_,i)=>chs.reduce((s,c)=>s+(wC[c][i]||0),0));
-    const ds=[{label:cL+' GMV',data:totC,backgroundColor:'rgba(167,139,250,.75)',borderRadius:4}];
-    if(wP){const totP=wP.labels.map((_,i)=>chs.reduce((s,c)=>s+(norm(wP[c])[i]||0),0));ds.push({label:pL+' GMV',data:norm(totP),backgroundColor:'rgba(255,255,255,.12)',borderRadius:4});}
-    mkChart('cv-wk-total',{type:'bar',data:{labels:wC.labels,datasets:ds},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
-    const mkW=(id,ch)=>{const d2=[{label:cL,data:wC[ch],backgroundColor:chColors[ch]+'0.75)',borderRadius:4}];if(wP)d2.push({label:pL,data:norm(wP[ch]),backgroundColor:'rgba(255,255,255,.12)',borderRadius:4});mkChart(id,{type:'bar',data:{labels:wC.labels,datasets:d2},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});};
-    mkW('cv-wk-sh','shopee');mkW('cv-wk-tt','tiktok');mkW('cv-wk-lz','lazada');mkW('cv-wk-ln','line');
-  },30);
-  const rows=wC.labels.map((lbl,wi)=>{
-    const tot=chs.reduce((s,c)=>s+(wC[c][wi]||0),0);
-    const pt=wP?chs.reduce((s,c)=>s+(norm(wP[c])[wi]||0),0):0;
-    const df=pt>0?((tot-pt)/pt*100).toFixed(1):null;
-    const db2=df!==null?`<span class="badge ${+df>=0?'ok':'bad'}">${+df>=0?'+':''}${df}%</span>`:'-';
-    return`<tr><td class="hl">${lbl}</td><td class="num">${fmtB(wC.shopee[wi]||0)}</td><td class="num">${fmtB(wC.tiktok[wi]||0)}</td><td class="num">${fmtB(wC.lazada[wi]||0)}</td><td class="num">${fmtB(wC.line[wi]||0)}</td><td class="num">${fmtB(wC.fb[wi]||0)}</td><td class="num hl">${fmtB(tot)}</td><td class="num">${pt>0?fmtB(pt)+' ':''} ${db2}</td></tr>`;
-  }).join('');
-  $('tbl-weekly').innerHTML=`<thead><tr><th>สัปดาห์</th><th>Shopee</th><th>TikTok</th><th>Lazada</th><th>Line OA</th><th>Facebook</th><th>Total GMV</th><th>vs เดือนก่อน</th></tr></thead><tbody>${rows}</tbody>`;
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  // Expand sparse day array into fixed 31-slot array (null = no data)
+  const expand = (days, vals) => {
+    const r = Array(MAX).fill(null);
+    days.forEach((d, i) => { if (d >= 1 && d <= MAX) r[d-1] = vals[i] ?? null; });
+    return r;
+  };
+  const cur  = (ch, k) => expand(curDD.days, curDD[ch][k]);
+  const prev = (ch, k) => prevDD && prevDD.days && prevDD.days.length
+    ? expand(prevDD.days, prevDD[ch][k])
+    : Array(MAX).fill(null);
+  const calcRoas = (dd, sKey, bKey, ch) => {
+    const r = Array(MAX).fill(null);
+    if (!dd || !dd.days || !dd.days.length) return r;
+    dd.days.forEach((d, i) => {
+      if (d < 1 || d > MAX) return;
+      const s = dd[ch][sKey][i] || 0, b = dd[ch][bKey][i] || 0;
+      r[d-1] = b > 0 ? +(s / b).toFixed(2) : null;
+    });
+    return r;
+  };
+
+  const cL = mLbl[m] || m;
+  const pL = pM ? (mLbl[pM] || pM) : '';
+
+  // Dataset builder
+  const ln = (label, data, color, dashed=false) => ({
+    label, data,
+    borderColor: color, backgroundColor: color+'20',
+    borderWidth: dashed ? 1.5 : 2,
+    borderDash: dashed ? [5,4] : [],
+    tension: .25, pointRadius: 1.5, pointHoverRadius: 5,
+    fill: false, spanGaps: false,
+  });
+
+  const optLine = (yFmt='num') => ({
+    ...cDef,
+    plugins: { ...cDef.plugins, legend: legOpts },
+    scales: {
+      x: { ...cDef.scales.x, ticks: { ...cDef.scales.x.ticks, maxTicksLimit: 16 } },
+      y: { ...cDef.scales.y, ticks: { ...cDef.scales.y.ticks,
+        callback: yFmt==='pct' ? v=>v+'%' : yFmt==='roas' ? v=>v+'x' : v=>fmtB(v) } },
+    },
+  });
+  const mkLine = (id, datasets, yFmt='num') =>
+    mkChart(id, {type:'line', data:{labels:dayLabels, datasets}, options:optLine(yFmt)});
+
+  setTimeout(() => {
+    // ── Shopee ──
+    const SH='#ff4820', SH2='#ff9966';
+    mkLine('cv-dy-sh-vis',  [ln(cL+' Visitors', cur('shopee','visitors'), SH), ln(pL+' Visitors', prev('shopee','visitors'), SH, true)]);
+    mkLine('cv-dy-sh-ord',  [ln(cL+' Orders',   cur('shopee','orders'),   SH), ln(pL+' Orders',   prev('shopee','orders'),   SH, true)]);
+    mkLine('cv-dy-sh-sales',[ln(cL+' In-Plat',  cur('shopee','sales'),    SH), ln(pL+' In-Plat',  prev('shopee','sales'),    SH, true),
+                              ln(cL+' Off-Plat', cur('shopee','offSales'), SH2),ln(pL+' Off-Plat', prev('shopee','offSales'), SH2,true)]);
+    mkLine('cv-dy-sh-bud',  [ln(cL+' In-Budget',cur('shopee','inBudget'), SH), ln(pL+' In-Budget',prev('shopee','inBudget'), SH, true),
+                              ln(cL+' Off-Budget',cur('shopee','offBudget'),SH2),ln(pL+' Off-Budget',prev('shopee','offBudget'),SH2,true)]);
+    mkLine('cv-dy-sh-roas', [
+      ln(cL+' ROAS', calcRoas(curDD,  'sales','inBudget','shopee'), SH),
+      ln(pL+' ROAS', calcRoas(prevDD, 'sales','inBudget','shopee'), SH, true),
+    ], 'roas');
+
+    // ── TikTok ──
+    const TT='#44d4d4';
+    mkLine('cv-dy-tt-vis',  [ln(cL+' Visitors', cur('tiktok','visitors'), TT), ln(pL+' Visitors', prev('tiktok','visitors'), TT, true)]);
+    mkLine('cv-dy-tt-ord',  [ln(cL+' Orders',   cur('tiktok','orders'),   TT), ln(pL+' Orders',   prev('tiktok','orders'),   TT, true)]);
+    mkLine('cv-dy-tt-sales',[ln(cL+' Sales',    cur('tiktok','sales'),    TT), ln(pL+' Sales',    prev('tiktok','sales'),    TT, true)]);
+    mkLine('cv-dy-tt-bud',  [ln(cL+' Budget',   cur('tiktok','budget'),   TT), ln(pL+' Budget',   prev('tiktok','budget'),   TT, true)]);
+    mkLine('cv-dy-tt-roas', [
+      ln(cL+' ROAS', calcRoas(curDD,  'sales','budget','tiktok'), TT),
+      ln(pL+' ROAS', calcRoas(prevDD, 'sales','budget','tiktok'), TT, true),
+    ], 'roas');
+
+    // ── Lazada ──
+    const LZ='#6070ff';
+    mkLine('cv-dy-lz-vis',  [ln(cL+' Visitors', cur('lazada','visitors'), LZ), ln(pL+' Visitors', prev('lazada','visitors'), LZ, true)]);
+    mkLine('cv-dy-lz-ord',  [ln(cL+' Orders',   cur('lazada','orders'),   LZ), ln(pL+' Orders',   prev('lazada','orders'),   LZ, true)]);
+    mkLine('cv-dy-lz-sales',[ln(cL+' Sales',    cur('lazada','sales'),    LZ), ln(pL+' Sales',    prev('lazada','sales'),    LZ, true)]);
+    mkLine('cv-dy-lz-bud',  [ln(cL+' Budget',   cur('lazada','budget'),   LZ), ln(pL+' Budget',   prev('lazada','budget'),   LZ, true)]);
+    mkLine('cv-dy-lz-roas', [
+      ln(cL+' ROAS', calcRoas(curDD,  'sales','budget','lazada'), LZ),
+      ln(pL+' ROAS', calcRoas(prevDD, 'sales','budget','lazada'), LZ, true),
+    ], 'roas');
+
+    // ── Line OA ──
+    const LN='#00b856', LN2='#66ddaa';
+    mkLine('cv-dy-ln-fri',  [ln(cL+' Friends',  cur('line','friends'),    LN), ln(pL+' Friends',  prev('line','friends'),    LN, true)]);
+    mkLine('cv-dy-ln-ord',  [ln(cL+' Orders',   cur('line','orders'),     LN), ln(pL+' Orders',   prev('line','orders'),     LN, true)]);
+    mkLine('cv-dy-ln-sales',[ln(cL+' Sales',    cur('line','sales'),      LN), ln(pL+' Sales',    prev('line','sales'),      LN, true)]);
+    mkLine('cv-dy-ln-cr',   [ln(cL+' CR%',      cur('line','cr'),         LN), ln(pL+' CR%',      prev('line','cr'),         LN, true),
+                              ln(cL+' AOV',      cur('line','aov'),        LN2),ln(pL+' AOV',      prev('line','aov'),        LN2,true)], 'num');
+
+    // ── Facebook ──
+    const FB='#4a90e2', FB2='#82b4f0', FB3='#c0d9ff';
+    mkLine('cv-dy-fb-reach', [ln(cL+' Reach',  cur('fb','reach'),   FB), ln(pL+' Reach',  prev('fb','reach'),   FB, true)]);
+    mkLine('cv-dy-fb-ord',   [ln(cL+' Orders', cur('fb','orders'),  FB), ln(pL+' Orders', prev('fb','orders'),  FB, true),
+                               ln(cL+' Sales',  cur('fb','sales'),   FB2),ln(pL+' Sales',  prev('fb','sales'),  FB2,true)]);
+    mkLine('cv-dy-fb-ibconv',[ln(cL+' IB Orders', cur('fb','ibOrders'), FB), ln(pL+' IB Orders', prev('fb','ibOrders'), FB, true),
+                               ln(cL+' IB Sales',  cur('fb','ibSales'),  FB2),ln(pL+' IB Sales',  prev('fb','ibSales'),  FB2,true)]);
+    mkLine('cv-dy-fb-bud1',  [ln(cL+' Inbox/Sales',  cur('fb','budgetIbSales'), FB),  ln(pL+' Inbox/Sales',  prev('fb','budgetIbSales'), FB, true),
+                               ln(cL+' Awareness',    cur('fb','budgetAware'),   FB2), ln(pL+' Awareness',    prev('fb','budgetAware'),   FB2,true)]);
+    mkLine('cv-dy-fb-bud2',  [ln(cL+' Shopee',  cur('fb','budgetShopee'), FB),  ln(pL+' Shopee',  prev('fb','budgetShopee'), FB, true),
+                               ln(cL+' Web',     cur('fb','budgetWeb'),    FB2), ln(pL+' Web',     prev('fb','budgetWeb'),    FB2,true),
+                               ln(cL+' Line',    cur('fb','budgetLine'),   FB3), ln(pL+' Line',    prev('fb','budgetLine'),   FB3,true)]);
+    mkLine('cv-dy-fb-roas',  [ln(cL+' ROAS', cur('fb','roasIb'), FB), ln(pL+' ROAS', prev('fb','roasIb'), FB, true)], 'roas');
+
+    // ── Instagram ──
+    const IG='#e1306c', IG2='#f77fb0';
+    mkLine('cv-dy-ig-reach',   [ln(cL+' Reach',  cur('ig','reach'),         IG), ln(pL+' Reach',  prev('ig','reach'),         IG, true)]);
+    mkLine('cv-dy-ig-ordsales',[ln(cL+' Orders', cur('ig','orders'),        IG), ln(pL+' Orders', prev('ig','orders'),        IG, true),
+                                 ln(cL+' Sales',  cur('ig','sales'),         IG2),ln(pL+' Sales',  prev('ig','sales'),         IG2,true)]);
+    mkLine('cv-dy-ig-vis',     [ln(cL+' Visitor Shopee', cur('ig','visitorShopee'), IG), ln(pL+' Visitor Shopee', prev('ig','visitorShopee'), IG, true)]);
+    mkLine('cv-dy-ig-bud',     [ln(cL+' Traffic Shopee', cur('ig','budgetShopee'), IG),  ln(pL+' Traffic Shopee', prev('ig','budgetShopee'), IG, true),
+                                 ln(cL+' Awareness',      cur('ig','budgetAware'),  IG2), ln(pL+' Awareness',      prev('ig','budgetAware'),  IG2,true)]);
+    mkLine('cv-dy-ig-roas',    [ln(cL+' ROAS', cur('ig','roas'), IG), ln(pL+' ROAS', prev('ig','roas'), IG, true)], 'roas');
+  }, 30);
 }
 
 // ════ SHOPEE ════
@@ -1314,6 +1503,57 @@ function applySheetData(rows, targetMonth) {
     // Inbox/sales budget = col at +3 (Jan) or +5 (May) — pick whichever has data
     const fbBudget = n(t[cs.fb+5]) || n(t[cs.fb+3]);
     if (fbBudget) d.fb.budget = fbBudget;
+
+    // ── Daily rows (rows 0..totalIdx-1) ──
+    const dd = DAILY[m];
+    dd.days = [];
+    Object.keys(dd).forEach(k => { if (k !== 'days') Object.keys(dd[k]).forEach(kk => { dd[k][kk] = []; }); });
+    for (let ri = 0; ri < totalIdx; ri++) {
+      const row = rows[ri];
+      const dayNum = parseInt((row[0] || '').trim().split(',')[0]);
+      if (isNaN(dayNum) || dayNum < 1 || dayNum > 31) continue;
+      dd.days.push(dayNum);
+      dd.shopee.visitors.push(n(row[cs.sh])   || 0);
+      dd.shopee.orders.push(n(row[cs.sh+1])   || 0);
+      dd.shopee.sales.push(n(row[cs.sh+2])    || 0);
+      dd.shopee.inBudget.push(n(row[cs.sh+6]) || 0);
+      dd.shopee.offSales.push(n(row[cs.sh+8]) || 0);
+      dd.shopee.offBudget.push(n(row[cs.sh+9])|| 0);
+      dd.tiktok.visitors.push(n(row[cs.tt])   || 0);
+      dd.tiktok.orders.push(n(row[cs.tt+1])   || 0);
+      dd.tiktok.sales.push(n(row[cs.tt+2])    || 0);
+      dd.tiktok.budget.push(n(row[cs.tt+6])   || 0);
+      dd.lazada.visitors.push(n(row[cs.lz])   || 0);
+      dd.lazada.orders.push(n(row[cs.lz+1])   || 0);
+      dd.lazada.sales.push(n(row[cs.lz+2])    || 0);
+      dd.lazada.budget.push(n(row[cs.ln-2])   || 0);
+      dd.line.orders.push(n(row[cs.ln+1])     || 0);
+      dd.line.sales.push(n(row[cs.ln+2])      || 0);
+      dd.line.cr.push(p(row[cs.ln+3])         || 0);
+      dd.line.aov.push(n(row[cs.ln+4])        || 0);
+      if (cs.fb !== undefined) {
+        dd.fb.reach.push(n(row[cs.fb])            || 0);
+        dd.fb.orders.push(n(row[cs.fb+1])         || 0);
+        dd.fb.sales.push(n(row[cs.fb+2])          || 0);
+        dd.fb.ibOrders.push(n(row[cs.fb+3])       || 0);
+        dd.fb.ibSales.push(n(row[cs.fb+4])        || 0);
+        dd.fb.budgetIbSales.push(n(row[cs.fb+5])  || 0);
+        dd.fb.budgetAware.push(n(row[cs.fb+6])    || 0);
+        dd.fb.budgetShopee.push(n(row[cs.fb+7])   || 0);
+        dd.fb.budgetWeb.push(n(row[cs.fb+8])      || 0);
+        dd.fb.budgetLine.push(n(row[cs.fb+9])     || 0);
+        dd.fb.roasIb.push(n(row[cs.fb+10])        || 0);
+      }
+      if (cs.ig !== undefined) {
+        dd.ig.reach.push(n(row[cs.ig])            || 0);
+        dd.ig.orders.push(n(row[cs.ig+1])         || 0);
+        dd.ig.sales.push(n(row[cs.ig+2])          || 0);
+        dd.ig.visitorShopee.push(n(row[cs.ig+3])  || 0);
+        dd.ig.budgetShopee.push(n(row[cs.ig+4])   || 0);
+        dd.ig.budgetAware.push(n(row[cs.ig+5])    || 0);
+        dd.ig.roas.push(n(row[cs.ig+6])           || 0);
+      }
+    }
   }
 
   // ── 2. "Target" row in summary section (after Total row) ──
@@ -1803,7 +2043,7 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
 // ── Startup init ──
 (function initDashboard() {
   // Version bump — increment to wipe all saved URLs and start fresh
-  const DATA_V = '4';
+  const DATA_V = '5';
   if (localStorage.getItem('pawdy_data_v') !== DATA_V) {
     MK.forEach(m => {
       localStorage.removeItem(LS_PREFIX    + m);
