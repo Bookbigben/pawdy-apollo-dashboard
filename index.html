@@ -1722,24 +1722,17 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
 
 // ── Startup init ──
 (function initDashboard() {
-  const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub';
-  const DEFAULT_URLS = {
-    jan: BASE + '?output=csv',
-    feb: BASE + '?gid=1889909742&single=true&output=csv',
-    mar: BASE + '?gid=36092252&single=true&output=csv',
-    apr: BASE + '?gid=383206303&single=true&output=csv',
-    may: BASE + '?gid=1237068853&single=true&output=csv',
-  };
-  const DEFAULT_LIVE = {
-    may: BASE + '?gid=1108897936&single=true&output=csv',
-  };
-  const DEFAULT_AFFI = {
-    may: BASE + '?gid=651367032&single=true&output=csv',
-  };
-
-  Object.entries(DEFAULT_URLS).forEach(([m,url]) => { if(!localStorage.getItem(LS_PREFIX+m)) localStorage.setItem(LS_PREFIX+m,url); });
-  Object.entries(DEFAULT_LIVE).forEach(([m,url]) => { if(!localStorage.getItem(LS_LIVE_PFX+m)) localStorage.setItem(LS_LIVE_PFX+m,url); });
-  Object.entries(DEFAULT_AFFI).forEach(([m,url]) => { if(!localStorage.getItem(LS_AFFI_PFX+m)) localStorage.setItem(LS_AFFI_PFX+m,url); });
+  // Version bump — increment to wipe all saved URLs and start fresh
+  const DATA_V = '4';
+  if (localStorage.getItem('pawdy_data_v') !== DATA_V) {
+    MK.forEach(m => {
+      localStorage.removeItem(LS_PREFIX    + m);
+      localStorage.removeItem(LS_LIVE_PFX  + m);
+      localStorage.removeItem(LS_AFFI_PFX  + m);
+    });
+    localStorage.removeItem(LS_INTERVAL_KEY);
+    localStorage.setItem('pawdy_data_v', DATA_V);
+  }
 
   // Restore saved interval selector
   const savedMs = parseInt(localStorage.getItem(LS_INTERVAL_KEY));
@@ -1748,21 +1741,24 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
     if (sel) sel.value = String(savedMs);
   }
 
-  // Load all saved data sources for every month, then re-render
+  // Load only months the user has explicitly saved URLs for
   (async () => {
+    let anyLoaded = false;
     for (const m of MK) {
       const chUrl   = localStorage.getItem(LS_PREFIX   + m);
       const liveUrl = localStorage.getItem(LS_LIVE_PFX + m);
       const affiUrl = localStorage.getItem(LS_AFFI_PFX + m);
-      if (chUrl)   { try { const rows = await fetchSheetRows(chUrl);   applySheetData(rows, m); if(DB[m]) DB[m].empty=false; } catch(_){} }
-      if (liveUrl) { try { const rows = await fetchSheetRows(liveUrl); applyLiveData(rows, m); } catch(_){} }
-      if (affiUrl) { try { const rows = await fetchSheetRows(affiUrl); applyAffiData(rows, m); } catch(_){} }
+      if (chUrl)   { try { const rows = await fetchSheetRows(chUrl);   applySheetData(rows, m); if(DB[m]) DB[m].empty=false; anyLoaded=true; } catch(_){} }
+      if (liveUrl) { try { const rows = await fetchSheetRows(liveUrl); applyLiveData(rows, m);  anyLoaded=true; } catch(_){} }
+      if (affiUrl) { try { const rows = await fetchSheetRows(affiUrl); applyAffiData(rows, m);  anyLoaded=true; } catch(_){} }
     }
 
-    const anyLoaded = MK.some(m => localStorage.getItem(LS_PREFIX+m)||localStorage.getItem(LS_LIVE_PFX+m)||localStorage.getItem(LS_AFFI_PFX+m));
     if (anyLoaded) {
       $('syncLbl').textContent = `Live · ${new Date().toLocaleTimeString('th-TH')}`;
       setSyncDot(true);
+    } else {
+      $('syncLbl').textContent = 'รอการซิงค์';
+      setSyncDot(false);
     }
 
     const ap = document.querySelector('.panel.active');
