@@ -878,7 +878,7 @@ const fmt  = v => v >= 1e6 ? (v/1e6).toFixed(2)+'M' : v >= 1e3 ? (v/1e3).toFixed
 const fmtB = v => '฿' + fmt(v);
 const pctN = (a,t) => t ? +(a/t*100).toFixed(1) : 0;
 const bCls = p => p >= 100 ? 'ok' : p >= 85 ? 'warn' : 'bad';
-const aMK  = () => MK.filter(m => !DB[m].empty);
+const aMK  = () => { const upTo = CUR === 'all' ? MK.length - 1 : MK.indexOf(CUR); return MK.filter((m, i) => !DB[m].empty && i <= upTo); };
 const aMN  = () => aMK().map(m => MN[MK.indexOf(m)]);
 
 function gmvTotal(m){ return CH_CFG.reduce((s,c)=>s+DB[m][c.k].sales,0); }
