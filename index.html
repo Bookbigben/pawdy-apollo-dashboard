@@ -531,7 +531,7 @@ html.mob .score-box{flex-direction:column;gap:8px;}
           <div style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px">
             <div style="font-size:11px;font-weight:700;color:var(--accent);margin-bottom:6px">วิธีที่ 1 — ดาวน์โหลดไฟล์พร้อม URL <span style="font-size:10px;color:var(--green);font-weight:400">(แนะนำ)</span></div>
             <p style="font-size:11.5px;color:var(--text2);margin-bottom:8px">สร้างไฟล์ <code>.html</code> ใหม่ที่มี URL ฝังอยู่แล้ว — เปิดบนเครื่องไหน, browser ไหน ก็โหลดข้อมูลได้ทันที</p>
-            <button class="btn btn-pri" onclick="downloadWithEmbeddedUrls()">💾 ดาวน์โหลดไฟล์พร้อม URL</button>
+            <button class="btn btn-pri" onclick="downloadWithEmbeddedUrls()">💾 ดาวน์โหลดไฟล์ (URL + ข้อมูลล่าสุด)</button>
           </div>
 
           <div style="background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px">
@@ -1461,6 +1461,50 @@ const LS_AFFI_PFX = 'pawdy_affi_';
 const LS_LIVE_PFX = 'pawdy_live_';
 const LS_INTERVAL_KEY = 'pawdy_refresh_ms';
 
+// ── Data cache keys ──
+const LS_DB_CACHE    = 'pawdy_db';
+const LS_DAILY_CACHE = 'pawdy_daily';
+const LS_CACHE_TIME  = 'pawdy_ts';
+
+// Embedded snapshot — replaced by downloadWithEmbeddedUrls()
+const EMBEDDED_DATA = null;
+
+function saveDataCache() {
+  try {
+    localStorage.setItem(LS_DB_CACHE, JSON.stringify(DB));
+    const dsnap = {};
+    MK.forEach(m => { if (DAILY[m] && DAILY[m].days && DAILY[m].days.length) dsnap[m] = DAILY[m]; });
+    localStorage.setItem(LS_DAILY_CACHE, JSON.stringify(dsnap));
+    localStorage.setItem(LS_CACHE_TIME, Date.now().toString());
+  } catch(e) {}
+}
+
+function restoreDataCache(src) {
+  try {
+    const dbRaw    = src ? src.db    : localStorage.getItem(LS_DB_CACHE);
+    const dailyRaw = src ? src.daily : localStorage.getItem(LS_DAILY_CACHE);
+    const ts       = src ? src.ts    : parseInt(localStorage.getItem(LS_CACHE_TIME) || '0');
+    if (!dbRaw) return 0;
+    const dbData    = typeof dbRaw    === 'string' ? JSON.parse(dbRaw)    : dbRaw;
+    const dailyData = dailyRaw ? (typeof dailyRaw === 'string' ? JSON.parse(dailyRaw) : dailyRaw) : null;
+    MK.forEach(m => {
+      if (dbData[m])              Object.assign(DB[m],    dbData[m]);
+      if (dailyData && dailyData[m]) Object.assign(DAILY[m], dailyData[m]);
+    });
+    return ts || Date.now();
+  } catch(e) { return 0; }
+}
+
+function cacheAgeLabel(ts) {
+  if (!ts) return '';
+  const min = Math.round((Date.now() - ts) / 60000);
+  if (min < 1)  return 'เมื่อกี้';
+  if (min < 60) return `${min} นาทีที่แล้ว`;
+  const hr = Math.round(min / 60);
+  if (hr < 24)  return `${hr} ชม.ที่แล้ว`;
+  return `${Math.round(hr / 24)} วันที่แล้ว`;
+}
+
 // ── DEFAULT_SHEET_URLS — URLs ฝังในไฟล์ (ใช้งานได้ทุกเครื่องที่เปิดไฟล์นี้) ──
 // ค่าเหล่านี้จะถูกอัปเดตอัตโนมัติเมื่อกด "💾 ดาวน์โหลดไฟล์พร้อม URL"
 const DEFAULT_SHEET_URLS = {
@@ -1999,8 +2043,9 @@ async function loadMonthAll(m) {
 
   const timeStr = new Date().toLocaleTimeString('th-TH');
   setS(`✓ โหลดสำเร็จ ${ok} แหล่งข้อมูล — ${timeStr}`, 'ok');
-  $('syncLbl').textContent = `Live · ${MN[MK.indexOf(m)]} · ${timeStr}`;
+  $('syncLbl').textContent = `Synced · ${timeStr}`;
   setSyncDot(true);
+  saveDataCache();
   const ap = document.querySelector('.panel.active');
   if (ap) renderActive(ap.id.replace('panel-', ''));
 }
@@ -2014,7 +2059,11 @@ async function loadAllMonths() {
       || (($('mc-ch-'+m)||{}).value||'').trim() || (($('mc-live-'+m)||{}).value||'').trim() || (($('mc-affi-'+m)||{}).value||'').trim();
     if (hasUrl) await loadMonthAll(m);
   }
-  if (el) { el.textContent = `✓ โหลดครบทุกเดือนแล้ว — ${new Date().toLocaleTimeString('th-TH')}`; el.className = 'status ok'; }
+  const tsAll = new Date().toLocaleTimeString('th-TH');
+  if (el) { el.textContent = `✓ โหลดครบทุกเดือนแล้ว — ${tsAll}`; el.className = 'status ok'; }
+  saveDataCache();
+  $('syncLbl').textContent = `Synced · ${tsAll}`;
+  setSyncDot(true);
 }
 
 function applyLiveData(rows, m) {
@@ -2114,10 +2163,18 @@ function downloadWithEmbeddedUrls() {
     const e = cfg[m];
     return `  ${m}:{ch:${JSON.stringify(e.ch)},live:${JSON.stringify(e.live)},affi:${JSON.stringify(e.affi)}}`;
   }).join(',\n');
-  const newDef = `const DEFAULT_SHEET_URLS = {\n${lines},\n};`;
-  const html = document.documentElement.outerHTML;
-  const updated = html.replace(/const DEFAULT_SHEET_URLS = \{[\s\S]*?\};/, newDef);
-  const blob = new Blob([updated], {type:'text/html;charset=utf-8'});
+  const newUrls = `const DEFAULT_SHEET_URLS = {\n${lines},\n};`;
+
+  const dsnap = {};
+  MK.forEach(m => { if (DAILY[m] && DAILY[m].days && DAILY[m].days.length) dsnap[m] = DAILY[m]; });
+  const payload = { db: DB, daily: dsnap, ts: Date.now() };
+  const newData = `const EMBEDDED_DATA = ${JSON.stringify(payload)};`;
+
+  let html = document.documentElement.outerHTML;
+  html = html.replace(/const DEFAULT_SHEET_URLS = \{[\s\S]*?\};/, newUrls);
+  html = html.replace(/const EMBEDDED_DATA = null;/, newData);
+
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
   a.download = 'pawdy_dashboard_v6_8.html';
@@ -2126,7 +2183,7 @@ function downloadWithEmbeddedUrls() {
   document.body.removeChild(a);
   URL.revokeObjectURL(a.href);
   const el = $('export-import-status');
-  if (el) { el.textContent = '✓ ดาวน์โหลดสำเร็จ — ไฟล์ใหม่มี URL ฝังอยู่แล้ว เปิดบนเครื่องไหนก็ได้'; el.className = 'status ok'; }
+  if (el) { el.textContent = '✓ ดาวน์โหลดสำเร็จ — ไฟล์มี URL + ข้อมูลล่าสุด เปิดบนเครื่องไหนก็เห็นข้อมูลทันที'; el.className = 'status ok'; }
 }
 
 function clearAllData() {
@@ -2151,6 +2208,9 @@ function clearAllData() {
   });
   $('syncLbl').textContent = 'รอการซิงค์';
   setSyncDot(false);
+  localStorage.removeItem(LS_DB_CACHE);
+  localStorage.removeItem(LS_DAILY_CACHE);
+  localStorage.removeItem(LS_CACHE_TIME);
   const ap = document.querySelector('.panel.active');
   if (ap) renderActive(ap.id.replace('panel-', ''));
   const el = $('all-months-status');
@@ -2273,6 +2333,9 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
       localStorage.removeItem(LS_AFFI_PFX  + m);
     });
     localStorage.removeItem(LS_INTERVAL_KEY);
+    localStorage.removeItem(LS_DB_CACHE);
+    localStorage.removeItem(LS_DAILY_CACHE);
+    localStorage.removeItem(LS_CACHE_TIME);
     localStorage.setItem('pawdy_data_v', DATA_V);
   }
 
@@ -2283,8 +2346,23 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
     if (sel) sel.value = String(savedMs);
   }
 
-  // Load months — localStorage first, then DEFAULT_SHEET_URLS as fallback
+  // Load from cache (instant) — localStorage first, embedded data as fallback
   (async () => {
+    const savedMs = parseInt(localStorage.getItem(LS_INTERVAL_KEY));
+    const ms = !isNaN(savedMs) && savedMs > 0 ? savedMs : 300000;
+
+    const cacheTs = restoreDataCache(null) || (EMBEDDED_DATA ? restoreDataCache(EMBEDDED_DATA) : 0);
+
+    if (cacheTs) {
+      $('syncLbl').textContent = `แคช · ${cacheAgeLabel(cacheTs)}`;
+      setSyncDot(true);
+      const ap = document.querySelector('.panel.active');
+      if (ap) renderActive(ap.id.replace('panel-', ''));
+      setupAutoRefresh(ms);
+      return;
+    }
+
+    // No cache — first-time fetch from Sheets
     let anyLoaded = false;
     for (const m of MK) {
       const def = DEFAULT_SHEET_URLS[m] || {};
@@ -2295,20 +2373,17 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
       if (liveUrl) { try { const rows = await fetchSheetRows(liveUrl); applyLiveData(rows, m);  anyLoaded=true; } catch(_){} }
       if (affiUrl) { try { const rows = await fetchSheetRows(affiUrl); applyAffiData(rows, m);  anyLoaded=true; } catch(_){} }
     }
-
     if (anyLoaded) {
-      $('syncLbl').textContent = `Live · ${new Date().toLocaleTimeString('th-TH')}`;
+      saveDataCache();
+      $('syncLbl').textContent = `Synced · ${new Date().toLocaleTimeString('th-TH')}`;
       setSyncDot(true);
     } else {
       $('syncLbl').textContent = 'รอการซิงค์';
       setSyncDot(false);
     }
-
     const ap = document.querySelector('.panel.active');
     if (ap) renderActive(ap.id.replace('panel-', ''));
-
-    const ms = parseInt(localStorage.getItem(LS_INTERVAL_KEY));
-    setupAutoRefresh(!isNaN(ms) && ms > 0 ? ms : 300000);
+    setupAutoRefresh(ms);
   })();
 
   buildMonthCfgUI();
