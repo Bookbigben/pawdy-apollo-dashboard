@@ -352,30 +352,90 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
     <!-- SETTINGS -->
     <div class="panel" id="panel-settings">
       <div class="set-card">
-        <h3>🔗 เชื่อมต่อ Google Sheets</h3>
-        <p>วิธีใช้: เปิด Google Sheets → <code>File → Share → Publish to web</code> → เลือก Format = <strong>CSV</strong> → Copy URL → วางด้านล่าง</p>
+        <h3>🔗 เชื่อมต่อ Google Sheets — เดือน: <span id="sync-month-name" style="color:var(--accent)">พ.ค.</span></h3>
+        <p>วิธีใช้: เปิด Google Sheets → <code>File → Share → Publish to web</code> → เลือก Sheet + Format = <strong>CSV</strong> → Copy URL → วางด้านล่าง</p>
+        <p style="margin-top:5px;font-size:11px;color:var(--text3)">URL จะถูกบันทึกแยกตามเดือน — เปลี่ยนเดือนที่ Tab ด้านบน แล้ววาง URL ของเดือนนั้น</p>
         <input id="sheet-url" class="url-input" placeholder="https://docs.google.com/spreadsheets/d/.../pub?gid=...&single=true&output=csv"/>
         <div class="btn-row">
           <button class="btn btn-pri" onclick="testSheet()">▶ ทดสอบ Connection</button>
-          <button class="btn btn-sec" onclick="loadSheet()">↻ โหลดข้อมูล</button>
-          <button class="btn btn-sec" onclick="resetData()">↺ ใช้ข้อมูล Default</button>
+          <button class="btn btn-pri" onclick="loadSheet()">↻ โหลด &amp; บันทึก URL</button>
+          <button class="btn btn-sec" onclick="resetData()">↺ ข้อมูล Default</button>
+          <button class="btn btn-sec" onclick="clearMonthUrl()">✕ ลบ URL เดือนนี้</button>
         </div>
         <div id="sheet-status" class="status"></div>
       </div>
+
+      <div class="set-card">
+        <h3>⏱ Auto-Refresh</h3>
+        <p>ดึงข้อมูลใหม่จาก Google Sheets อัตโนมัติทุก:</p>
+        <div class="btn-row" style="margin-top:8px;align-items:center">
+          <select id="refresh-interval" class="url-input" style="width:auto;padding:7px 12px">
+            <option value="0">ปิด Auto-Refresh</option>
+            <option value="60000">ทุก 1 นาที</option>
+            <option value="300000" selected>ทุก 5 นาที</option>
+            <option value="900000">ทุก 15 นาที</option>
+            <option value="1800000">ทุก 30 นาที</option>
+          </select>
+          <button class="btn btn-pri" onclick="applyRefreshInterval()">✓ บันทึก</button>
+        </div>
+        <div id="auto-refresh-status" style="font-size:11px;color:var(--text3);margin-top:8px">สถานะ: ยังไม่ได้เชื่อมต่อ</div>
+      </div>
+
+      <div class="set-card">
+        <h3>📊 Format Google Sheet (Template)</h3>
+        <p>สร้าง Sheet ตาม format นี้ (1 Sheet Tab ต่อ 1 เดือน — publish แต่ละ tab แยกกัน):</p>
+        <div style="overflow-x:auto;margin-top:10px">
+          <table class="tbl" style="min-width:680px;font-size:11px">
+            <thead><tr><th>Col A — Metric</th><th>Col B — Shopee</th><th>Col C — TikTok</th><th>Col D — Lazada</th><th>Col E — Line OA</th><th>Col F — Facebook</th></tr></thead>
+            <tbody>
+              <tr><td class="hl">Target</td><td class="num">9200000</td><td class="num">4800000</td><td class="num">1300000</td><td class="num">2000000</td><td class="num">1200000</td></tr>
+              <tr><td class="hl">Actual Sales</td><td class="num">ยอดขายจริง</td><td class="num">ยอดขายจริง</td><td class="num">ยอดขายจริง</td><td class="num">ยอดขายจริง</td><td class="num">ยอดขายจริง</td></tr>
+              <tr><td class="hl">Orders</td><td class="num">จำนวน orders</td><td class="num">จำนวน orders</td><td class="num">จำนวน orders</td><td class="num">จำนวน orders</td><td class="num">จำนวน orders</td></tr>
+              <tr><td class="hl">Visitors</td><td class="num">visitors</td><td class="num">visitors</td><td class="num">visitors</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">CR%</td><td class="num">เปอร์เซ็นต์</td><td class="num">เปอร์เซ็นต์</td><td class="num">เปอร์เซ็นต์</td><td class="num">เปอร์เซ็นต์</td><td style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">AOV</td><td class="num">฿ เฉลี่ย</td><td class="num">฿ เฉลี่ย</td><td class="num">฿ เฉลี่ย</td><td class="num">฿ เฉลี่ย</td><td style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Budget</td><td class="num">งบโฆษณา</td><td class="num">งบโฆษณา</td><td class="num">งบโฆษณา</td><td style="color:var(--text3)">—</td><td class="num">งบโฆษณา</td></tr>
+              <tr><td class="hl">ROAS</td><td class="num">ROI (x)</td><td class="num">ROAS (x)</td><td class="num">ROAS (x)</td><td style="color:var(--text3)">—</td><td class="num">ROAS (x)</td></tr>
+              <tr><td class="hl">Reach</td><td style="color:var(--text3)">—</td><td class="num">reach</td><td style="color:var(--text3)">—</td><td style="color:var(--text3)">—</td><td class="num">reach</td></tr>
+              <tr><td colspan="6" style="color:var(--text3);font-size:10px;padding:6px 8px">— Live Data: ใส่ค่าใน Col B ทั้งหมด (Col C–F เว้นว่าง) —</td></tr>
+              <tr><td class="hl">Live TT Off Sales</td><td class="num">ยอดขาย</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Live TT Off Hours</td><td class="num">ชั่วโมง</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Live TT Raks Sales</td><td class="num">ยอดขาย</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Live TT Raks Hours</td><td class="num">ชั่วโมง</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Live Shopee Sales</td><td class="num">ยอดขาย</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Live Shopee Hours</td><td class="num">ชั่วโมง</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Live CEO Sales</td><td class="num">ยอดขาย</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Live CEO Hours</td><td class="num">ชั่วโมง</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td colspan="6" style="color:var(--text3);font-size:10px;padding:6px 8px">— Affiliate Data: ใส่ค่าใน Col B ทั้งหมด —</td></tr>
+              <tr><td class="hl">Affi Shopee Sales</td><td class="num">ยอดขาย</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Affi Shopee Orders</td><td class="num">orders</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Affi TikTok Sales</td><td class="num">ยอดขาย</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Affi TikTok Orders</td><td class="num">orders</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Affi Lazada Sales</td><td class="num">ยอดขาย</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+              <tr><td class="hl">Affi Lazada Orders</td><td class="num">orders</td><td colspan="4" style="color:var(--text3)">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p style="margin-top:10px;font-size:11px;color:var(--text3)">* ไม่จำเป็นต้องมีทุก row — ใส่เฉพาะข้อมูลที่มี Dashboard จะอัปเดตเฉพาะ field นั้น field อื่นคงค่าเดิม</p>
+      </div>
+
       <div class="set-card">
         <h3>📋 วิธี Setup (Step-by-step)</h3>
-        <p><strong>Step 1</strong> — เปิด Google Sheets ของคุณ<br>
-        <strong>Step 2</strong> — <code>File → Share → Publish to web</code><br>
-        <strong>Step 3</strong> — เลือก Sheet ที่ต้องการ → Format = <strong>CSV</strong> → Publish<br>
-        <strong>Step 4</strong> — Copy URL → วางในช่องด้านบน<br>
-        <strong>Step 5</strong> — กด ทดสอบ → โหลดข้อมูล<br>
-        <em style="font-size:11px;color:var(--text3)">* Auto-refresh ทุก 5 นาทีเมื่อเชื่อมต่อสำเร็จ</em></p>
+        <ol style="margin-left:18px;line-height:2">
+          <li>สร้าง Google Sheet ตาม format ด้านบน (1 Tab ต่อ 1 เดือน)</li>
+          <li>ไปที่ <code>File → Share → Publish to web</code></li>
+          <li>เลือก Tab เดือนนั้น → Format = <strong>CSV</strong> → กด <strong>Publish</strong></li>
+          <li>Copy URL ที่ได้ → กลับมาที่ Dashboard → เลือก Tab เดือน (ด้านบน)</li>
+          <li>วาง URL ในช่องด้านบน → กด <strong>"โหลด &amp; บันทึก URL"</strong></li>
+          <li>URL จะถูกบันทึกในเครื่องถาวร — Auto-refresh ทุก 5 นาที</li>
+        </ol>
+        <p style="margin-top:10px;font-size:11px;color:var(--amber)">⚠ ต้อง Publish to web ก่อนเท่านั้น — URL ปกติของ Google Sheets ใช้ไม่ได้เพราะ CORS</p>
+        <p style="margin-top:6px;font-size:11px;color:var(--text3)">✓ URL ที่ถูกต้องจะขึ้นต้นด้วย <code>https://docs.google.com/spreadsheets/d/...</code> และลงท้ายด้วย <code>&amp;output=csv</code></p>
       </div>
-      <div class="set-card">
-        <h3>📊 Format Sheet ที่รองรับ</h3>
-        <p>Dashboard อ่านค่าตาม column layout เดียวกับ สรุปยอดรายวัน Apollo 2026.xlsx<br>
-        <code>Col B = Shopee | D = Lazada | F = Line | H = TikTok | J = FB</code><br>
-        Row ที่ต้องมี: <code>Target</code> และ <code>Actual sales</code></p>
+
+      <div class="set-card" id="saved-urls-card">
+        <h3>🗂 URL ที่บันทึกไว้ (รายเดือน)</h3>
+        <div id="saved-urls-list" style="font-size:12px;color:var(--text2);margin-top:6px"></div>
       </div>
     </div>
 
@@ -1026,12 +1086,299 @@ function renderSuggest(){
   }
 }
 
-// ════ SETTINGS ════
-function setStatus(msg,type){const el=$('sheet-status');el.textContent=msg;el.className='status '+type;}
-async function testSheet(){const url=$('sheet-url').value.trim();if(!url){setStatus('กรุณาใส่ URL ก่อน','err');return;}setStatus('กำลังทดสอบ...','info');try{const r=await fetch(url);r.ok?setStatus('✓ เชื่อมต่อสำเร็จ','ok'):setStatus('✗ เชื่อมต่อไม่ได้','err');}catch(e){setStatus('✗ Error: '+e.message,'err');}}
-async function loadSheet(){const url=$('sheet-url').value.trim();if(!url){setStatus('กรุณาใส่ URL ก่อน','err');return;}setStatus('กำลังโหลด...','info');try{const r=await fetch(url),text=await r.text();const rows=text.split('\n').map(r=>r.split(','));let tRow=null,aRow=null;rows.forEach((row,i)=>{if(row[0]?.trim()==='Target')tRow=i;if(row[0]?.trim()==='Actual sales')aRow=i;});if(tRow!==null&&aRow!==null){const t=rows[tRow],a=rows[aRow];const pv=v=>+(v||'0').replace(/[^0-9.]/g,'');const m=CUR==='all'?'may':CUR;DB[m].shopee.target=pv(t[1])||DB[m].shopee.target;DB[m].shopee.sales=pv(a[1])||DB[m].shopee.sales;DB[m].lazada.target=pv(t[3])||DB[m].lazada.target;DB[m].lazada.sales=pv(a[3])||DB[m].lazada.sales;DB[m].line.target=pv(t[5])||DB[m].line.target;DB[m].line.sales=pv(a[5])||DB[m].line.sales;DB[m].tiktok.target=pv(t[7])||DB[m].tiktok.target;DB[m].tiktok.sales=pv(a[7])||DB[m].tiktok.sales;DB[m].fb.target=pv(t[9])||DB[m].fb.target;DB[m].fb.sales=pv(a[9])||DB[m].fb.sales;setStatus('✓ อัปเดตสำเร็จ!','ok');$('syncLbl').textContent='Live · '+new Date().toLocaleTimeString('th-TH');const ap=document.querySelector('.panel.active');if(ap)renderActive(ap.id.replace('panel-',''));}else{setStatus('✗ ไม่พบ row Target/Actual sales','err');}}catch(e){setStatus('✗ Error: '+e.message,'err');}}
-function resetData(){$('syncLbl').textContent='Static · ม.ค.–พ.ค. 2026';setStatus('ใช้ข้อมูล Default','info');const ap=document.querySelector('.panel.active');if(ap)renderActive(ap.id.replace('panel-',''));}
-function goSettings(){document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));$('panel-settings').classList.add('active');document.querySelector('[data-panel=settings]').classList.add('active');}
+// ════ GOOGLE SHEETS SYNC ════
+const LS_PREFIX = 'pawdy_sheet_';
+const LS_INTERVAL_KEY = 'pawdy_refresh_ms';
+let autoRefreshTimer = null;
+
+function setStatus(msg, type) {
+  const el = $('sheet-status');
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'status ' + type;
+}
+
+function parseCSVRow(rowStr) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  for (let i = 0; i < rowStr.length; i++) {
+    const ch = rowStr[i];
+    if (ch === '"') {
+      if (inQuotes && rowStr[i + 1] === '"') { current += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  result.push(current.trim());
+  return result;
+}
+
+function pvNum(v) { return Math.abs(+(String(v || '0').replace(/[^0-9.]/g, '')) || 0); }
+
+async function fetchSheetRows(url) {
+  const r = await fetch(url, { redirect: 'follow' });
+  if (!r.ok) throw new Error('HTTP ' + r.status + ' — ตรวจสอบว่า Publish to web แล้ว');
+  const text = await r.text();
+  return text.split('\n').map(row => parseCSVRow(row));
+}
+
+function applySheetData(rows, targetMonth) {
+  const m = targetMonth === 'all' ? 'may' : targetMonth;
+  if (!DB[m]) return;
+  const d = DB[m];
+
+  // Build case-insensitive row index
+  const rowIdx = {};
+  rows.forEach((row, i) => {
+    const key = (row[0] || '').trim().toLowerCase();
+    if (key) rowIdx[key] = i;
+  });
+
+  function getRow(key) {
+    const idx = rowIdx[key.toLowerCase()];
+    return idx !== undefined ? rows[idx] : null;
+  }
+  function apply(key, fn) { const row = getRow(key); if (row) fn(row); }
+
+  // Col mapping: A=0, B=1(Shopee), C=2(TikTok), D=3(Lazada), E=4(Line), F=5(FB)
+  apply('target', row => {
+    if (pvNum(row[1])) d.shopee.target = pvNum(row[1]);
+    if (pvNum(row[2])) d.tiktok.target = pvNum(row[2]);
+    if (pvNum(row[3])) d.lazada.target = pvNum(row[3]);
+    if (pvNum(row[4])) d.line.target   = pvNum(row[4]);
+    if (pvNum(row[5])) d.fb.target     = pvNum(row[5]);
+  });
+
+  // Support both "Actual Sales" and "Actual sales"
+  ['actual sales', 'actual sale', 'gmv'].forEach(k => apply(k, row => {
+    if (pvNum(row[1])) d.shopee.sales = pvNum(row[1]);
+    if (pvNum(row[2])) d.tiktok.sales = pvNum(row[2]);
+    if (pvNum(row[3])) d.lazada.sales = pvNum(row[3]);
+    if (pvNum(row[4])) d.line.sales   = pvNum(row[4]);
+    if (pvNum(row[5])) d.fb.sales     = pvNum(row[5]);
+  }));
+
+  apply('orders', row => {
+    if (pvNum(row[1])) d.shopee.orders = pvNum(row[1]);
+    if (pvNum(row[2])) d.tiktok.orders = pvNum(row[2]);
+    if (pvNum(row[3])) d.lazada.orders = pvNum(row[3]);
+    if (pvNum(row[4])) d.line.orders   = pvNum(row[4]);
+    if (pvNum(row[5])) d.fb.orders     = pvNum(row[5]);
+  });
+
+  apply('visitors', row => {
+    if (pvNum(row[1])) d.shopee.visitors = pvNum(row[1]);
+    if (pvNum(row[2])) d.tiktok.visitors = pvNum(row[2]);
+    if (pvNum(row[3])) d.lazada.visitors = pvNum(row[3]);
+  });
+
+  apply('cr%', row => {
+    if (pvNum(row[1])) d.shopee.cr = pvNum(row[1]);
+    if (pvNum(row[2])) d.tiktok.cr = pvNum(row[2]);
+    if (pvNum(row[3])) d.lazada.cr = pvNum(row[3]);
+    if (pvNum(row[4])) d.line.cr   = pvNum(row[4]);
+  });
+
+  apply('aov', row => {
+    if (pvNum(row[1])) d.shopee.aov = pvNum(row[1]);
+    if (pvNum(row[2])) d.tiktok.aov = pvNum(row[2]);
+    if (pvNum(row[3])) d.lazada.aov = pvNum(row[3]);
+    if (pvNum(row[4])) d.line.aov   = pvNum(row[4]);
+  });
+
+  apply('budget', row => {
+    if (pvNum(row[1])) d.shopee.budget = pvNum(row[1]);
+    if (pvNum(row[2])) d.tiktok.budget = pvNum(row[2]);
+    if (pvNum(row[3])) d.lazada.budget = pvNum(row[3]);
+    if (pvNum(row[5])) d.fb.budget     = pvNum(row[5]);
+  });
+
+  ['roas', 'roi'].forEach(k => apply(k, row => {
+    if (pvNum(row[1])) { d.shopee.roi = pvNum(row[1]); }
+    if (pvNum(row[2])) d.tiktok.roas = pvNum(row[2]);
+    if (pvNum(row[3])) d.lazada.roas = pvNum(row[3]);
+    if (pvNum(row[5])) d.fb.roas     = pvNum(row[5]);
+  }));
+
+  apply('reach', row => {
+    if (pvNum(row[2])) d.tiktok.reach = pvNum(row[2]);
+    if (pvNum(row[5])) d.fb.reach     = pvNum(row[5]);
+  });
+
+  // Live data (all in col B)
+  const liveMap = [
+    ['live tt off sales',   v => d.live.off      = v],
+    ['live tt off hours',   v => d.live.hr_off   = v],
+    ['live tt raks sales',  v => d.live.raks     = v],
+    ['live tt raks hours',  v => d.live.hr_raks  = v],
+    ['live shopee sales',   v => d.live.shop     = v],
+    ['live shopee hours',   v => d.live.hr_shop  = v],
+    ['live ceo sales',      v => d.live.ceo      = v],
+    ['live ceo hours',      v => d.live.hr_ceo   = v],
+  ];
+  liveMap.forEach(([key, setter]) => apply(key, row => { if (pvNum(row[1])) setter(pvNum(row[1])); }));
+  d.live.total = d.live.off + d.live.raks + d.live.shop + d.live.ceo;
+
+  // Affiliate data (all in col B)
+  const affiMap = [
+    ['affi shopee sales',   v => d.affi.sh_s  = v],
+    ['affi shopee orders',  v => d.affi.sh_o  = v],
+    ['affi tiktok sales',   v => d.affi.tt_s  = v],
+    ['affi tiktok orders',  v => d.affi.tt_o  = v],
+    ['affi lazada sales',   v => d.affi.lzd_s = v],
+    ['affi lazada orders',  v => d.affi.lzd_o = v],
+  ];
+  affiMap.forEach(([key, setter]) => apply(key, row => { if (pvNum(row[1])) setter(pvNum(row[1])); }));
+
+  if (DB[m].empty) DB[m].empty = false;
+}
+
+async function testSheet() {
+  const url = ($('sheet-url').value || '').trim();
+  if (!url) { setStatus('กรุณาใส่ URL ก่อน', 'err'); return; }
+  setStatus('กำลังทดสอบ...', 'info');
+  try {
+    const rows = await fetchSheetRows(url);
+    const keys = rows.map(r => r[0]).filter(Boolean).slice(0, 8).join(', ');
+    setStatus(`✓ เชื่อมต่อสำเร็จ — พบ ${rows.length} rows · Keys: [${keys}...]`, 'ok');
+  } catch (e) {
+    setStatus('✗ ' + e.message, 'err');
+  }
+}
+
+async function loadSheet(silent = false) {
+  const inputEl = $('sheet-url');
+  const url = (inputEl ? inputEl.value.trim() : '') || localStorage.getItem(LS_PREFIX + CUR) || '';
+  if (!url) {
+    if (!silent) setStatus('กรุณาใส่ URL ก่อน', 'err');
+    return false;
+  }
+  if (!silent) setStatus('กำลังโหลด...', 'info');
+  try {
+    const rows = await fetchSheetRows(url);
+    applySheetData(rows, CUR);
+    localStorage.setItem(LS_PREFIX + CUR, url);
+
+    const timeStr = new Date().toLocaleTimeString('th-TH');
+    $('syncLbl').textContent = 'Live · ' + timeStr;
+    setSyncDot(true);
+    if (!silent) {
+      setStatus(`✓ อัปเดตสำเร็จ! (${MN[MK.indexOf(CUR === 'all' ? 'may' : CUR)]}) — ${timeStr}`, 'ok');
+    }
+    refreshSavedUrlsList();
+    const ap = document.querySelector('.panel.active');
+    if (ap) renderActive(ap.id.replace('panel-', ''));
+    return true;
+  } catch (e) {
+    if (!silent) setStatus('✗ ' + e.message, 'err');
+    return false;
+  }
+}
+
+function setSyncDot(live) {
+  const dot = document.querySelector('.pulse');
+  if (!dot) return;
+  dot.style.background = live ? 'var(--green)' : 'var(--text3)';
+  dot.style.boxShadow  = live ? '0 0 5px var(--green)' : 'none';
+  dot.style.animation  = live ? 'blink 2s infinite' : 'none';
+}
+
+function setupAutoRefresh(ms) {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  if (!ms || ms <= 0) return;
+  autoRefreshTimer = setInterval(() => {
+    const url = localStorage.getItem(LS_PREFIX + CUR);
+    if (!url) return;
+    const inputEl = $('sheet-url');
+    if (inputEl && !inputEl.value.trim()) inputEl.value = url;
+    loadSheet(true);
+  }, ms);
+  localStorage.setItem(LS_INTERVAL_KEY, ms);
+  const mins = Math.round(ms / 60000);
+  const el = $('auto-refresh-status');
+  if (el) el.textContent = `Auto-refresh ทุก ${mins} นาที — เปิดใช้งานแล้ว`;
+}
+
+function applyRefreshInterval() {
+  const sel = $('refresh-interval');
+  const ms = sel ? parseInt(sel.value) : 300000;
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  if (ms > 0) {
+    setupAutoRefresh(ms);
+    setStatus(`✓ ตั้ง Auto-refresh ทุก ${ms / 60000} นาทีแล้ว`, 'ok');
+  } else {
+    localStorage.setItem(LS_INTERVAL_KEY, 0);
+    const el = $('auto-refresh-status');
+    if (el) el.textContent = 'Auto-refresh: ปิด';
+    setStatus('ปิด Auto-refresh แล้ว', 'info');
+  }
+}
+
+function clearMonthUrl() {
+  const m = CUR === 'all' ? 'may' : CUR;
+  localStorage.removeItem(LS_PREFIX + m);
+  const inputEl = $('sheet-url');
+  if (inputEl) inputEl.value = '';
+  setStatus(`ลบ URL ของเดือน ${MN[MK.indexOf(m)]} แล้ว`, 'info');
+  refreshSavedUrlsList();
+}
+
+function refreshSavedUrlsList() {
+  const el = $('saved-urls-list');
+  if (!el) return;
+  const items = MK.map(m => {
+    const url = localStorage.getItem(LS_PREFIX + m);
+    if (!url) return null;
+    const short = url.length > 60 ? url.slice(0, 57) + '...' : url;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border)">
+      <span style="color:var(--accent);font-weight:600;min-width:42px">${MN[MK.indexOf(m)]}</span>
+      <span style="flex:1;margin:0 10px;font-family:var(--mono);font-size:10px;color:var(--text3);overflow:hidden;white-space:nowrap">${short}</span>
+      <button class="btn btn-sec" style="padding:3px 8px;font-size:10px" onclick="loadMonthUrl('${m}')">โหลด</button>
+    </div>`;
+  }).filter(Boolean);
+  el.innerHTML = items.length ? items.join('') : '<span style="color:var(--text3)">ยังไม่มี URL ที่บันทึกไว้</span>';
+}
+
+function loadMonthUrl(m) {
+  const url = localStorage.getItem(LS_PREFIX + m);
+  if (!url) return;
+  // Switch to that month
+  document.querySelectorAll('.mt[data-m]').forEach(t => t.classList.toggle('active', t.dataset.m === m));
+  CUR = m;
+  const inputEl = $('sheet-url');
+  if (inputEl) inputEl.value = url;
+  updateSettingsMonthLabel();
+  loadSheet();
+}
+
+function resetData() {
+  $('syncLbl').textContent = 'Static · ม.ค.–พ.ค. 2026';
+  setSyncDot(false);
+  setStatus('ใช้ข้อมูล Default แล้ว', 'info');
+  const ap = document.querySelector('.panel.active');
+  if (ap) renderActive(ap.id.replace('panel-', ''));
+}
+
+function goSettings() {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  $('panel-settings').classList.add('active');
+  document.querySelector('[data-panel=settings]').classList.add('active');
+  const savedUrl = localStorage.getItem(LS_PREFIX + CUR);
+  if (savedUrl && $('sheet-url')) $('sheet-url').value = savedUrl;
+  updateSettingsMonthLabel();
+  refreshSavedUrlsList();
+}
+
+function updateSettingsMonthLabel() {
+  const el = $('sync-month-name');
+  if (el) el.textContent = CUR === 'all' ? 'ทั้งปี (จะอัปเดต พ.ค.)' : (MN[MK.indexOf(CUR)] || CUR);
+}
 
 // ════ ROUTER ════
 const RENDERERS={overview:renderOverview,compare:renderCompare,weekly:renderWeekly,suggest:renderSuggest,shopee:renderShopee,tiktok:renderTiktok,lazada:renderLazada,line:renderLine,fb:renderFb,live:renderLive,affiliate:renderAffiliate,settings:()=>{}};
@@ -1048,17 +1395,48 @@ document.querySelectorAll('.nav-item').forEach(el=>{
   });
 });
 
-document.querySelectorAll('.mt[data-m]').forEach(el=>{
-  el.addEventListener('click',()=>{
-    document.querySelectorAll('.mt[data-m]').forEach(t=>t.classList.remove('active'));
+document.querySelectorAll('.mt[data-m]').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.mt[data-m]').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    CUR=el.dataset.m;
-    const ap=document.querySelector('.panel.active');
-    if(ap)renderActive(ap.id.replace('panel-',''));
+    CUR = el.dataset.m;
+    // Restore saved URL for this month (show in settings input if open)
+    const savedUrl = localStorage.getItem(LS_PREFIX + CUR);
+    const inputEl = $('sheet-url');
+    if (inputEl) inputEl.value = savedUrl || '';
+    updateSettingsMonthLabel();
+    const ap = document.querySelector('.panel.active');
+    if (ap) renderActive(ap.id.replace('panel-', ''));
   });
 });
 
-renderOverview();
+// ── Startup init ──
+(function initDashboard() {
+  // Restore saved interval selector
+  const savedMs = parseInt(localStorage.getItem(LS_INTERVAL_KEY));
+  if (!isNaN(savedMs) && savedMs >= 0) {
+    const sel = $('refresh-interval');
+    if (sel) sel.value = String(savedMs);
+  }
+
+  // Restore URL for current month
+  const savedUrl = localStorage.getItem(LS_PREFIX + CUR);
+  if (savedUrl) {
+    const inputEl = $('sheet-url');
+    if (inputEl) inputEl.value = savedUrl;
+    // Auto-load silently then start auto-refresh
+    loadSheet(true).then(ok => {
+      if (ok) {
+        const ms = parseInt(localStorage.getItem(LS_INTERVAL_KEY));
+        setupAutoRefresh(!isNaN(ms) && ms > 0 ? ms : 300000);
+      }
+    });
+  }
+
+  refreshSavedUrlsList();
+  updateSettingsMonthLabel();
+  renderOverview();
+})();
 
 </script>
 </body>
