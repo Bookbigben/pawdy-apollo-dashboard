@@ -322,6 +322,7 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
         <div class="card"><div class="card-head"><div class="cdot" style="background:#b06fff"></div>SPH รายMC — TikTok Raksus</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-mc-raks"></canvas></div></div>
         <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>SPH รายMC — Shopee Live</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-mc-shop"></canvas></div></div>
       </div>
+      <div class="card"><div class="card-head"><div class="cdot" style="background:#a78bfa"></div>📈 SPH Trend รายMC — ทุกช่อง รวมกัน (฿/ชม. รายเดือน)</div><div class="chart-wrap" style="height:300px"><canvas id="cv-lv-mc-trend"></canvas></div></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>Live Performance รายเดือน</div><table class="tbl" id="tbl-live"></table></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:#a78bfa"></div>SPH รายMC × รายเดือน (ทุกช่อง รวมกัน)</div><table class="tbl" id="tbl-mc-sph"></table></div>
     </div>
@@ -946,6 +947,38 @@ function renderLive(){
       label:mc, data:ak.map(m=>getMCSPH(m,'shopee',mc)),
       backgroundColor:mcClr(mc)+'cc', borderRadius:3,
     }))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
+
+    // Chart 6: SPH Trend per MC — line chart across months (all channels combined)
+    const trendDatasets = allMCs_all.map(mc=>({
+      label: mc,
+      data: ak.map(m => {
+        let sales=0, hrs=0;
+        ['tt_off','tt_raks','shopee','ceo'].forEach(ch=>{
+          const e=MC_SPH[m]?.[ch]?.[mc];
+          if(e&&e.hr>0){sales+=e.sales;hrs+=e.hr;}
+        });
+        return hrs>0 ? Math.round(sales/hrs) : null;
+      }),
+      borderColor: mcClr(mc),
+      backgroundColor: mcClr(mc)+'33',
+      tension: 0.35,
+      pointRadius: 6,
+      pointHoverRadius: 9,
+      pointBorderWidth: 2,
+      pointBorderColor: '#0a0c12',
+      fill: false,
+      borderWidth: 2.5,
+      spanGaps: false,
+    })).filter(ds => ds.data.some(v=>v!==null));
+    mkChart('cv-lv-mc-trend',{type:'line',data:{labels:an,datasets:trendDatasets},options:{
+      ...cDef,
+      plugins:{...cDef.plugins,legend:legOpts,
+        annotation:{annotations:{
+          target:{type:'line',yMin:4000,yMax:4000,borderColor:'rgba(255,193,77,.4)',borderWidth:1.5,borderDash:[6,4],label:{display:true,content:'Target ฿4,000',color:'#ffc14d',font:{size:10}}},
+        }}
+      },
+      scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}},
+    }});
   },30);
 
   // Table 1: Monthly Live Performance
