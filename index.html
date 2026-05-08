@@ -1127,114 +1127,124 @@ async function fetchSheetRows(url) {
   return text.split('\n').map(row => parseCSVRow(row));
 }
 
+// Auto-detect month from daily-data rows (col 0 = " 1,Thursday,Jan")
+function autoDetectMonth(rows) {
+  const eng = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  for (const row of rows.slice(0, 45)) {
+    const c0 = (row[0] || '').toLowerCase();
+    for (let i = 0; i < eng.length; i++) {
+      if (c0.includes(',' + eng[i])) return MK[i];
+    }
+  }
+  return null;
+}
+
+// Parse percentage string like "5.91%" → 5.91
+function pctStr(v) { return parseFloat(String(v || '0').replace('%', '')) || 0; }
+
 function applySheetData(rows, targetMonth) {
   const m = targetMonth === 'all' ? 'may' : targetMonth;
   if (!DB[m]) return;
   const d = DB[m];
 
-  // Build case-insensitive row index
-  const rowIdx = {};
-  rows.forEach((row, i) => {
-    const key = (row[0] || '').trim().toLowerCase();
-    if (key) rowIdx[key] = i;
-  });
+  // ── 1. "Total" row — full KPI data from daily aggregates ──
+  // Col layout confirmed from actual sheet:
+  //   Shopee:  1=visitors 2=orders 3=sales 4=CR%  5=AOV  6=budgetPlan 7=budgetSpend 8=ROI
+  //   Lazada:  9=visitors 10=orders 11=sales 12=CR% 13=AOV 14=budgetPlan 15=budgetSpend 16=ROAS
+  //   Line:    17=friends 18=orders 19=sales 20=CR% 21=AOV
+  //   TikTok:  22=visitors 23=orders 24=sales 25=CR% 26=AOV 27=gmvPlan 28=gmvSpend 29=reach 30=awarePlan 31=awareSpend 32=ROAS
+  //   Facebook:33=reach  34=orders 35=sales 36=budgetInbox 37=budgetAware 38-40=trafficBudgets 41=ROAS
+  const totalIdx = rows.findIndex(r => (r[0] || '').trim().toLowerCase() === 'total');
+  if (totalIdx >= 0) {
+    const t = rows[totalIdx];
+    const n = v => pvNum(v);
+    const p = v => pctStr(v);
 
-  function getRow(key) {
-    const idx = rowIdx[key.toLowerCase()];
-    return idx !== undefined ? rows[idx] : null;
+    // Shopee
+    if (n(t[1]))  d.shopee.visitors = n(t[1]);
+    if (n(t[2]))  d.shopee.orders   = n(t[2]);
+    if (n(t[3]))  d.shopee.sales    = n(t[3]);
+    if (p(t[4]))  d.shopee.cr       = p(t[4]);
+    if (n(t[5]))  d.shopee.aov      = n(t[5]);
+    if (n(t[7]))  d.shopee.budget   = n(t[7]);  // use actual spend, not plan
+    if (n(t[8]))  d.shopee.roi      = n(t[8]);
+
+    // Lazada
+    if (n(t[9]))  d.lazada.visitors = n(t[9]);
+    if (n(t[10])) d.lazada.orders   = n(t[10]);
+    if (n(t[11])) d.lazada.sales    = n(t[11]);
+    if (p(t[12])) d.lazada.cr       = p(t[12]);
+    if (n(t[13])) d.lazada.aov      = n(t[13]);
+    if (n(t[15])) d.lazada.budget   = n(t[15]);
+    if (n(t[16])) d.lazada.roas     = n(t[16]);
+
+    // Line OA
+    if (n(t[18])) d.line.orders = n(t[18]);
+    if (n(t[19])) d.line.sales  = n(t[19]);
+    if (p(t[20])) d.line.cr     = p(t[20]);
+    if (n(t[21])) d.line.aov    = n(t[21]);
+
+    // TikTok
+    if (n(t[22])) d.tiktok.visitors = n(t[22]);
+    if (n(t[23])) d.tiktok.orders   = n(t[23]);
+    if (n(t[24])) d.tiktok.sales    = n(t[24]);
+    if (p(t[25])) d.tiktok.cr       = p(t[25]);
+    if (n(t[26])) d.tiktok.aov      = n(t[26]);
+    if (n(t[28])) d.tiktok.budget   = n(t[28]);  // GMV spend
+    if (n(t[29])) d.tiktok.reach    = n(t[29]);
+    if (n(t[32])) d.tiktok.roas     = n(t[32]);
+
+    // Facebook
+    if (n(t[33])) d.fb.reach  = n(t[33]);
+    if (n(t[34])) d.fb.orders = n(t[34]);
+    if (n(t[35])) d.fb.sales  = n(t[35]);
+    if (n(t[36])) d.fb.budget = n(t[36]);  // inbox/sales spend
+    if (n(t[41])) d.fb.roas   = n(t[41]);
   }
-  function apply(key, fn) { const row = getRow(key); if (row) fn(row); }
 
-  // Col mapping: A=0, B=1(Shopee), C=2(TikTok), D=3(Lazada), E=4(Line), F=5(FB)
-  apply('target', row => {
-    if (pvNum(row[1])) d.shopee.target = pvNum(row[1]);
-    if (pvNum(row[2])) d.tiktok.target = pvNum(row[2]);
-    if (pvNum(row[3])) d.lazada.target = pvNum(row[3]);
-    if (pvNum(row[4])) d.line.target   = pvNum(row[4]);
-    if (pvNum(row[5])) d.fb.target     = pvNum(row[5]);
-  });
+  // ── 2. "Target" row in summary section (after Total row) ──
+  // Col layout: 0=label, 1=Shopee, 3=Lazada, 5=Line, 7=TikTok, 9=FB  (alternating with empty cols)
+  const targetIdx = rows.findIndex((r, i) => i > Math.max(totalIdx, 0) && (r[0] || '').trim().toLowerCase() === 'target');
+  if (targetIdx >= 0) {
+    const t = rows[targetIdx];
+    if (pvNum(t[1])) d.shopee.target = pvNum(t[1]);
+    if (pvNum(t[3])) d.lazada.target  = pvNum(t[3]);
+    if (pvNum(t[5])) d.line.target    = pvNum(t[5]);
+    if (pvNum(t[7])) d.tiktok.target  = pvNum(t[7]);
+    if (pvNum(t[9])) d.fb.target      = pvNum(t[9]);
+  }
 
-  // Support both "Actual Sales" and "Actual sales"
-  ['actual sales', 'actual sale', 'gmv'].forEach(k => apply(k, row => {
-    if (pvNum(row[1])) d.shopee.sales = pvNum(row[1]);
-    if (pvNum(row[2])) d.tiktok.sales = pvNum(row[2]);
-    if (pvNum(row[3])) d.lazada.sales = pvNum(row[3]);
-    if (pvNum(row[4])) d.line.sales   = pvNum(row[4]);
-    if (pvNum(row[5])) d.fb.sales     = pvNum(row[5]);
-  }));
+  // ── 3. "Total All Channel" section — affiliate + live sales ──
+  // Layout: rows after header have col[5]=channelLabel, col[6]=affiliateSales, col[8]=liveSales
+  const totalAllIdx = rows.findIndex(r => (r[0] || '').trim().toLowerCase().includes('total all channel'));
+  if (totalAllIdx >= 0) {
+    for (let i = totalAllIdx + 1; i < Math.min(totalAllIdx + 8, rows.length); i++) {
+      const r = rows[i];
+      const lbl = (r[5] || '').trim().toLowerCase();
+      if (lbl === 'tiktok') {
+        if (pvNum(r[6])) d.affi.tt_s = pvNum(r[6]);
+        // TikTok live total = off + raks; keep existing split ratio if we have it
+        if (pvNum(r[8])) {
+          const newTT = pvNum(r[8]);
+          const oldSum = d.live.off + d.live.raks;
+          if (oldSum > 0) {
+            const ratio = d.live.off / oldSum;
+            d.live.off  = Math.round(newTT * ratio);
+            d.live.raks = newTT - d.live.off;
+          } else {
+            d.live.off = newTT;
+          }
+        }
+      } else if (lbl === 'shopee') {
+        if (pvNum(r[6])) d.affi.sh_s = pvNum(r[6]);
+        if (pvNum(r[8])) d.live.shop = pvNum(r[8]);
+      } else if (lbl === 'lazada') {
+        if (pvNum(r[6])) d.affi.lzd_s = pvNum(r[6]);
+      }
+    }
+  }
 
-  apply('orders', row => {
-    if (pvNum(row[1])) d.shopee.orders = pvNum(row[1]);
-    if (pvNum(row[2])) d.tiktok.orders = pvNum(row[2]);
-    if (pvNum(row[3])) d.lazada.orders = pvNum(row[3]);
-    if (pvNum(row[4])) d.line.orders   = pvNum(row[4]);
-    if (pvNum(row[5])) d.fb.orders     = pvNum(row[5]);
-  });
-
-  apply('visitors', row => {
-    if (pvNum(row[1])) d.shopee.visitors = pvNum(row[1]);
-    if (pvNum(row[2])) d.tiktok.visitors = pvNum(row[2]);
-    if (pvNum(row[3])) d.lazada.visitors = pvNum(row[3]);
-  });
-
-  apply('cr%', row => {
-    if (pvNum(row[1])) d.shopee.cr = pvNum(row[1]);
-    if (pvNum(row[2])) d.tiktok.cr = pvNum(row[2]);
-    if (pvNum(row[3])) d.lazada.cr = pvNum(row[3]);
-    if (pvNum(row[4])) d.line.cr   = pvNum(row[4]);
-  });
-
-  apply('aov', row => {
-    if (pvNum(row[1])) d.shopee.aov = pvNum(row[1]);
-    if (pvNum(row[2])) d.tiktok.aov = pvNum(row[2]);
-    if (pvNum(row[3])) d.lazada.aov = pvNum(row[3]);
-    if (pvNum(row[4])) d.line.aov   = pvNum(row[4]);
-  });
-
-  apply('budget', row => {
-    if (pvNum(row[1])) d.shopee.budget = pvNum(row[1]);
-    if (pvNum(row[2])) d.tiktok.budget = pvNum(row[2]);
-    if (pvNum(row[3])) d.lazada.budget = pvNum(row[3]);
-    if (pvNum(row[5])) d.fb.budget     = pvNum(row[5]);
-  });
-
-  ['roas', 'roi'].forEach(k => apply(k, row => {
-    if (pvNum(row[1])) { d.shopee.roi = pvNum(row[1]); }
-    if (pvNum(row[2])) d.tiktok.roas = pvNum(row[2]);
-    if (pvNum(row[3])) d.lazada.roas = pvNum(row[3]);
-    if (pvNum(row[5])) d.fb.roas     = pvNum(row[5]);
-  }));
-
-  apply('reach', row => {
-    if (pvNum(row[2])) d.tiktok.reach = pvNum(row[2]);
-    if (pvNum(row[5])) d.fb.reach     = pvNum(row[5]);
-  });
-
-  // Live data (all in col B)
-  const liveMap = [
-    ['live tt off sales',   v => d.live.off      = v],
-    ['live tt off hours',   v => d.live.hr_off   = v],
-    ['live tt raks sales',  v => d.live.raks     = v],
-    ['live tt raks hours',  v => d.live.hr_raks  = v],
-    ['live shopee sales',   v => d.live.shop     = v],
-    ['live shopee hours',   v => d.live.hr_shop  = v],
-    ['live ceo sales',      v => d.live.ceo      = v],
-    ['live ceo hours',      v => d.live.hr_ceo   = v],
-  ];
-  liveMap.forEach(([key, setter]) => apply(key, row => { if (pvNum(row[1])) setter(pvNum(row[1])); }));
   d.live.total = d.live.off + d.live.raks + d.live.shop + d.live.ceo;
-
-  // Affiliate data (all in col B)
-  const affiMap = [
-    ['affi shopee sales',   v => d.affi.sh_s  = v],
-    ['affi shopee orders',  v => d.affi.sh_o  = v],
-    ['affi tiktok sales',   v => d.affi.tt_s  = v],
-    ['affi tiktok orders',  v => d.affi.tt_o  = v],
-    ['affi lazada sales',   v => d.affi.lzd_s = v],
-    ['affi lazada orders',  v => d.affi.lzd_o = v],
-  ];
-  affiMap.forEach(([key, setter]) => apply(key, row => { if (pvNum(row[1])) setter(pvNum(row[1])); }));
-
   if (DB[m].empty) DB[m].empty = false;
 }
 
@@ -1261,14 +1271,29 @@ async function loadSheet(silent = false) {
   if (!silent) setStatus('กำลังโหลด...', 'info');
   try {
     const rows = await fetchSheetRows(url);
-    applySheetData(rows, CUR);
-    localStorage.setItem(LS_PREFIX + CUR, url);
 
+    // Auto-detect month from sheet data; fallback to currently selected month
+    const detected = autoDetectMonth(rows);
+    const targetMonth = detected || (CUR === 'all' ? 'may' : CUR);
+
+    applySheetData(rows, targetMonth);
+
+    // Sync UI month selection to detected month
+    if (detected && detected !== CUR) {
+      CUR = detected;
+      document.querySelectorAll('.mt[data-m]').forEach(t => t.classList.toggle('active', t.dataset.m === detected));
+      updateSettingsMonthLabel();
+    }
+
+    // Save URL keyed to the detected month
+    localStorage.setItem(LS_PREFIX + targetMonth, url);
+
+    const mnLabel = MN[MK.indexOf(targetMonth)] || targetMonth;
     const timeStr = new Date().toLocaleTimeString('th-TH');
-    $('syncLbl').textContent = 'Live · ' + timeStr;
+    $('syncLbl').textContent = `Live · ${mnLabel} · ${timeStr}`;
     setSyncDot(true);
     if (!silent) {
-      setStatus(`✓ อัปเดตสำเร็จ! (${MN[MK.indexOf(CUR === 'all' ? 'may' : CUR)]}) — ${timeStr}`, 'ok');
+      setStatus(`✓ โหลดข้อมูล ${mnLabel} สำเร็จ — ${timeStr}`, 'ok');
     }
     refreshSavedUrlsList();
     const ap = document.querySelector('.panel.active');
@@ -1412,6 +1437,21 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
 
 // ── Startup init ──
 (function initDashboard() {
+  // Default URLs — pre-seeded so the dashboard loads real data on first open.
+  // Add more months by copying the sheet URL with the correct ?gid=... parameter.
+  const DEFAULT_URLS = {
+    jan: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?output=csv',
+    // feb: 'https://...pub?gid=XXXXXXX&single=true&output=csv',
+    // mar: 'https://...pub?gid=XXXXXXX&single=true&output=csv',
+  };
+
+  // Seed localStorage with defaults only if no URL is saved yet for that month
+  Object.entries(DEFAULT_URLS).forEach(([m, url]) => {
+    if (url && !localStorage.getItem(LS_PREFIX + m)) {
+      localStorage.setItem(LS_PREFIX + m, url);
+    }
+  });
+
   // Restore saved interval selector
   const savedMs = parseInt(localStorage.getItem(LS_INTERVAL_KEY));
   if (!isNaN(savedMs) && savedMs >= 0) {
@@ -1419,18 +1459,34 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
     if (sel) sel.value = String(savedMs);
   }
 
-  // Restore URL for current month
+  // Show saved URL for current month in the input
   const savedUrl = localStorage.getItem(LS_PREFIX + CUR);
-  if (savedUrl) {
-    const inputEl = $('sheet-url');
-    if (inputEl) inputEl.value = savedUrl;
-    // Auto-load silently then start auto-refresh
-    loadSheet(true).then(ok => {
-      if (ok) {
-        const ms = parseInt(localStorage.getItem(LS_INTERVAL_KEY));
-        setupAutoRefresh(!isNaN(ms) && ms > 0 ? ms : 300000);
+  if (savedUrl && $('sheet-url')) $('sheet-url').value = savedUrl;
+
+  // Load ALL months that have a saved URL, then re-render
+  const monthsToLoad = MK.filter(m => localStorage.getItem(LS_PREFIX + m));
+  if (monthsToLoad.length > 0) {
+    (async () => {
+      for (const m of monthsToLoad) {
+        const url = localStorage.getItem(LS_PREFIX + m);
+        try {
+          const rows = await fetchSheetRows(url);
+          applySheetData(rows, m);
+        } catch (_) { /* skip failed months silently */ }
       }
-    });
+      const timeStr = new Date().toLocaleTimeString('th-TH');
+      $('syncLbl').textContent = `Live · ${timeStr}`;
+      setSyncDot(true);
+      refreshSavedUrlsList();
+
+      // Re-render active panel with fresh data
+      const ap = document.querySelector('.panel.active');
+      if (ap) renderActive(ap.id.replace('panel-', ''));
+
+      // Start auto-refresh
+      const ms = parseInt(localStorage.getItem(LS_INTERVAL_KEY));
+      setupAutoRefresh(!isNaN(ms) && ms > 0 ? ms : 300000);
+    })();
   }
 
   refreshSavedUrlsList();
