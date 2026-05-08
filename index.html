@@ -118,6 +118,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13
 .status.err{background:var(--red-bg);color:var(--red);display:block;}
 .status.info{background:var(--glow);color:var(--accent);display:block;}
 code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--mono);font-size:11px;}
+/* ── MONTH CONFIG ROWS ── */
+.mc-row{background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:8px;}
+.mc-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.mc-lbl{font-size:13px;font-weight:700;color:var(--accent);min-width:38px;}
+.mc-field{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.mc-tag{font-size:12px;min-width:20px;flex-shrink:0;}
+.mc-field .url-input{margin-top:0;flex:1;}
+.btn-sm{padding:4px 10px;font-size:11px;}
 
 /* scrollbar */
 ::-webkit-scrollbar{width:4px;height:4px;}
@@ -352,44 +360,15 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
     <!-- SETTINGS -->
     <div class="panel" id="panel-settings">
       <div class="set-card">
-        <h3>🔗 Google Sheets — เดือน: <span id="sync-month-name" style="color:var(--accent)">พ.ค.</span></h3>
-        <p>วิธีใช้: เปิด Google Sheets → <code>File → Share → Publish to web</code> → เลือก Tab + Format = <strong>CSV</strong> → Copy URL → วางด้านล่าง</p>
-        <p style="margin-top:5px;font-size:11px;color:var(--text3)">URL บันทึกแยกตามเดือน — เปลี่ยนเดือนที่ Tab ด้านบน แล้ววาง URL ของเดือนนั้น</p>
-
-        <div style="margin-top:12px">
-          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px">📊 ภาพรวมช่องทาง (Channel Overview)</div>
-          <input id="sheet-url" class="url-input" placeholder="...pub?gid=CHANNEL_TAB&single=true&output=csv"/>
-          <div class="btn-row" style="margin-top:6px">
-            <button class="btn btn-pri" onclick="testSheet()">▶ ทดสอบ</button>
-            <button class="btn btn-pri" onclick="loadSheet()">↻ โหลด &amp; บันทึก</button>
-            <button class="btn btn-sec" onclick="clearMonthUrl()">✕ ลบ</button>
-          </div>
+        <h3>🔗 Google Sheets — อัปเดตข้อมูลตามเดือน</h3>
+        <p>วิธีใช้: เปิด Google Sheets → <code>File → Share → Publish to web</code> → เลือก Tab + <strong>CSV</strong> → Copy URL → วางในช่องเดือนด้านล่าง</p>
+        <p style="margin-top:5px;font-size:11px;color:var(--amber)">⚠ แต่ละเดือนมี 3 ช่อง: 📊 Channel Overview · 🎥 Live Performance · 🛒 Affiliate</p>
+        <div class="btn-row" style="margin-top:10px">
+          <button class="btn btn-pri" onclick="loadAllMonths()">↻ โหลดทุกเดือน</button>
+          <button class="btn btn-sec" onclick="clearAllUrls()">✕ ล้าง URL ทั้งหมด</button>
         </div>
-
-        <div style="margin-top:14px">
-          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px">🎥 Live Performance (แยก Tab ต่อเดือน)</div>
-          <input id="live-sheet-url" class="url-input" placeholder="...pub?gid=LIVE_TAB&single=true&output=csv"/>
-          <div class="btn-row" style="margin-top:6px">
-            <button class="btn btn-pri" onclick="loadLiveSheet()">↻ โหลด &amp; บันทึก</button>
-            <button class="btn btn-sec" onclick="clearLiveUrl()">✕ ลบ</button>
-          </div>
-        </div>
-
-        <div style="margin-top:14px">
-          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px">🛒 Affiliate (แยก Tab ต่อเดือน)</div>
-          <input id="affi-sheet-url" class="url-input" placeholder="...pub?gid=AFFI_TAB&single=true&output=csv"/>
-          <div class="btn-row" style="margin-top:6px">
-            <button class="btn btn-pri" onclick="loadAffiSheet()">↻ โหลด &amp; บันทึก</button>
-            <button class="btn btn-sec" onclick="clearAffiUrl()">✕ ลบ</button>
-          </div>
-        </div>
-
-        <div style="margin-top:8px">
-          <button class="btn btn-sec" onclick="resetData()" style="font-size:11px">↺ Reset ข้อมูล Default</button>
-        </div>
-        <div id="sheet-status" class="status"></div>
-        <div id="affi-status" class="status" style="margin-top:4px"></div>
-        <div id="live-status" class="status" style="margin-top:4px"></div>
+        <div id="all-months-status" class="status"></div>
+        <div id="month-cfg-container" style="margin-top:10px"></div>
       </div>
 
       <div class="set-card">
@@ -449,12 +428,12 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
       <div class="set-card">
         <h3>📋 วิธี Setup (Step-by-step)</h3>
         <ol style="margin-left:18px;line-height:2">
-          <li>สร้าง Google Sheet ตาม format ด้านบน (1 Tab ต่อ 1 เดือน)</li>
-          <li>ไปที่ <code>File → Share → Publish to web</code></li>
-          <li>เลือก Tab เดือนนั้น → Format = <strong>CSV</strong> → กด <strong>Publish</strong></li>
-          <li>Copy URL ที่ได้ → กลับมาที่ Dashboard → เลือก Tab เดือน (ด้านบน)</li>
-          <li>วาง URL ในช่องด้านบน → กด <strong>"โหลด &amp; บันทึก URL"</strong></li>
-          <li>URL จะถูกบันทึกในเครื่องถาวร — Auto-refresh ทุก 5 นาที</li>
+          <li>เปิด Google Sheets → <code>File → Share → Publish to web</code></li>
+          <li>เลือก <strong>Tab ของเดือนนั้น</strong> (เช่น ม.ค., ก.พ., …) → Format = <strong>CSV</strong> → กด <strong>Publish</strong></li>
+          <li>Copy URL ที่ได้ → วางในช่อง 📊 Channel ของเดือนนั้นด้านบน</li>
+          <li>ทำซ้ำสำหรับ Tab Live (🎥) และ Affiliate (🛒) ถ้ามี</li>
+          <li>กด <strong>↻ โหลด</strong> ที่เดือนนั้น หรือ <strong>↻ โหลดทุกเดือน</strong> เพื่ออัปเดตทีเดียว</li>
+          <li>URL บันทึกในเครื่องถาวร — Auto-refresh ดึงข้อมูลใหม่ทุกเดือนอัตโนมัติ</li>
         </ol>
         <p style="margin-top:10px;font-size:11px;color:var(--amber)">⚠ ต้อง Publish to web ก่อนเท่านั้น — URL ปกติของ Google Sheets ใช้ไม่ได้เพราะ CORS</p>
         <p style="margin-top:6px;font-size:11px;color:var(--text3)">✓ URL ที่ถูกต้องจะขึ้นต้นด้วย <code>https://docs.google.com/spreadsheets/d/...</code> และลงท้ายด้วย <code>&amp;output=csv</code></p>
@@ -482,50 +461,54 @@ const MK = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','d
 
 const DB = {
   jan:{
-    shopee:{sales:5634303,orders:7375,visitors:124810,cr:6.0,aov:763,budget:390800,roi:14.42,target:5800000},
-    tiktok:{sales:3329526.01,orders:5780,visitors:50308,cr:11.0,aov:576,budget:725583,reach:1268516,roas:4.59,target:3500000},
-    lazada:{sales:646725.98,orders:753,visitors:20008,cr:4.0,aov:858,budget:63175,roas:10.24,target:700000},
-    line:  {sales:1778052,orders:1162,cr:3.0,aov:1530,target:2000000},
-    fb:    {sales:1161465,orders:1045,reach:5457574,budget:380880,roas:3.05,target:1700000},
-    live:  {off:1059067.28,raks:467951.38,shop:652124.78,ceo:0,total:2179143.44,hr_off:230,hr_raks:115,hr_shop:115,hr_ceo:0},
-    affi:  {sh_s:1792310,sh_o:2737,tt_s:1204798,tt_o:2449,lzd_s:159799,lzd_o:219},
+    shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,roi:0,target:5800000},
+    tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,reach:0,roas:0,target:3500000},
+    lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,roas:0,target:700000},
+    line:  {sales:0,orders:0,cr:0,aov:0,target:2000000},
+    fb:    {sales:0,orders:0,reach:0,budget:0,roas:0,target:1700000},
+    live:  {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},
+    affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
+    empty:true,
   },
   feb:{
-    shopee:{sales:7326743,orders:7588,visitors:102593,cr:7.0,aov:965,budget:389400,roi:16.26,target:6200000},
-    tiktok:{sales:3440343.07,orders:5430,visitors:64000,cr:8.0,aov:633,budget:707235,reach:1427148,roas:4.86,target:3600000},
-    lazada:{sales:621238.96,orders:687,visitors:14880,cr:5.0,aov:904,budget:76413,roas:8.13,target:700000},
-    line:  {sales:1729332,orders:1034,cr:3.0,aov:1672,target:2000000},
-    fb:    {sales:1151551,orders:979,reach:7582227,budget:450800.64,roas:2.55,target:1500000},
-    live:  {off:914552.39,raks:437415.21,shop:1187829.0,ceo:3719.0,total:2543515.6,hr_off:240,hr_raks:127,hr_shop:152,hr_ceo:8},
-    affi:  {sh_s:1696033,sh_o:2851,tt_s:1520362,tt_o:2550,lzd_s:166536,lzd_o:196},
+    shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,roi:0,target:6200000},
+    tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,reach:0,roas:0,target:3600000},
+    lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,roas:0,target:700000},
+    line:  {sales:0,orders:0,cr:0,aov:0,target:2000000},
+    fb:    {sales:0,orders:0,reach:0,budget:0,roas:0,target:1500000},
+    live:  {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},
+    affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
+    empty:true,
   },
   mar:{
-    shopee:{sales:9639922,orders:9415,visitors:151362,cr:6.0,aov:1023,budget:427640,roi:18.26,target:5800000},
-    tiktok:{sales:5393621.43,orders:8590,visitors:108927,cr:8.0,aov:627,budget:1390388,reach:4740365,roas:3.88,target:3600000},
-    lazada:{sales:1149624.03,orders:1149,visitors:19909,cr:6.0,aov:1000,budget:146340,roas:7.86,target:600000},
-    line:  {sales:1870244,orders:1132,cr:3.0,aov:1652,target:2000000},
-    fb:    {sales:1205493,orders:911,reach:12656193,budget:466879.6,roas:2.68,target:1500000},
-    live:  {off:1280407.77,raks:556098.5,shop:1679640.64,ceo:235669.92,total:3751816.83,hr_off:246,hr_raks:128,hr_shop:172,hr_ceo:64},
-    affi:  {sh_s:2149418,sh_o:3601,tt_s:2445093,tt_o:4224,lzd_s:359909,lzd_o:327},
+    shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,roi:0,target:5800000},
+    tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,reach:0,roas:0,target:3600000},
+    lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,roas:0,target:600000},
+    line:  {sales:0,orders:0,cr:0,aov:0,target:2000000},
+    fb:    {sales:0,orders:0,reach:0,budget:0,roas:0,target:1500000},
+    live:  {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},
+    affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
+    empty:true,
   },
   apr:{
-    shopee:{sales:9037026,orders:9356,visitors:64499,cr:15.0,aov:965,budget:462500,roi:14.54,target:8700000},
-    tiktok:{sales:4459948.62,orders:7370,visitors:183100,cr:4.0,aov:605,budget:1035253,reach:3556116,roas:4.31,target:4500000},
-    lazada:{sales:699878.43,orders:752,visitors:18299,cr:4.0,aov:930,budget:85820,roas:8.16,target:1100000},
-    line:  {sales:1512194,orders:950,cr:0.0,aov:1591,target:2000000},
-    fb:    {sales:817262,orders:688,reach:10122984,budget:333870.35,roas:2.45,target:1200000},
-    live:  {off:1329668.96,raks:469275.4,shop:1607502.3,ceo:208632.76,total:3615079.42,hr_off:256,hr_raks:143,hr_shop:178,hr_ceo:50},
-    affi:  {sh_s:1832918,sh_o:3614,tt_s:1738503,tt_o:3458,lzd_s:174959,lzd_o:210},
+    shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,roi:0,target:8700000},
+    tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,reach:0,roas:0,target:4500000},
+    lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,roas:0,target:1100000},
+    line:  {sales:0,orders:0,cr:0,aov:0,target:2000000},
+    fb:    {sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},
+    live:  {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},
+    affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
+    empty:true,
   },
   may:{
-    shopee:{sales:1250132,orders:1418,visitors:10538,cr:13.46,aov:882,budget:179000,roi:6.21,target:9200000},
-    tiktok:{sales:771392,orders:1333,visitors:16403,cr:8.13,aov:579,budget:176895,reach:656006,roas:4.36,target:4800000},
-    lazada:{sales:135518,orders:142,visitors:3463,cr:4.10,aov:954,budget:34260,roas:3.96,target:1300000},
-    line:  {sales:457811,orders:236,cr:0.16,aov:1940,target:2000000},
-    fb:    {sales:101388,orders:96,reach:1380015,budget:33886,roas:2.99,target:1200000},
-    live:  {off:366914.0,raks:60651.0,shop:429085.0,ceo:17154.16,total:873804.16,hr_off:203,hr_raks:185,hr_shop:44,hr_ceo:108},
+    shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,roi:0,target:9200000},
+    tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,reach:0,roas:0,target:4800000},
+    lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,budget:0,roas:0,target:1300000},
+    line:  {sales:0,orders:0,cr:0,aov:0,target:2000000},
+    fb:    {sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},
+    live:  {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},
     affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
-    partial:true,
+    empty:true,
   },
   jun:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},empty:true},
   jul:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},empty:true},
@@ -537,11 +520,11 @@ const DB = {
 };
 
 const WEEKLY = {
-  jan:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-31)'],shopee:[1186000,1320000,1498000,1630303],tiktok:[685000,760000,880000,1004526],lazada:[118000,145000,178000,205726],line:[380000,410000,470000,518052],fb:[240000,270000,310000,341465]},
-  feb:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-28)'],shopee:[1560000,1820000,2180000,1766743],tiktok:[720000,820000,960000,940343],lazada:[130000,145000,185000,161239],line:[380000,420000,480000,449332],fb:[250000,280000,330000,291551]},
-  mar:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-31)'],shopee:[2100000,2400000,2580000,2559922],tiktok:[1100000,1280000,1460000,1553621],lazada:[240000,290000,330000,289624],line:[420000,460000,500000,490244],fb:[270000,300000,340000,295493]},
-  apr:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-30)'],shopee:[2380000,2140000,2360000,2157026],tiktok:[1050000,1100000,1140000,1169949],lazada:[175000,172000,185000,167878],line:[380000,370000,400000,362194],fb:[210000,205000,215000,187262]},
-  may:{labels:['W1 (1-3 พ.ค.)','W2-W4 (รอข้อมูล)'],shopee:[1250132,0],tiktok:[771392,0],lazada:[135518,0],line:[457811,0],fb:[101388,0]},
+  jan:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-31)'],shopee:[0,0,0,0],tiktok:[0,0,0,0],lazada:[0,0,0,0],line:[0,0,0,0],fb:[0,0,0,0]},
+  feb:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-28)'],shopee:[0,0,0,0],tiktok:[0,0,0,0],lazada:[0,0,0,0],line:[0,0,0,0],fb:[0,0,0,0]},
+  mar:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-31)'],shopee:[0,0,0,0],tiktok:[0,0,0,0],lazada:[0,0,0,0],line:[0,0,0,0],fb:[0,0,0,0]},
+  apr:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-30)'],shopee:[0,0,0,0],tiktok:[0,0,0,0],lazada:[0,0,0,0],line:[0,0,0,0],fb:[0,0,0,0]},
+  may:{labels:['W1 (1-7)','W2 (8-14)','W3 (15-21)','W4 (22-31)'],shopee:[0,0,0,0],tiktok:[0,0,0,0],lazada:[0,0,0,0],line:[0,0,0,0],fb:[0,0,0,0]},
 };
 
 const MC_SPH = {
@@ -1300,7 +1283,7 @@ function applySheetData(rows, targetMonth) {
 }
 
 async function testSheet() {
-  const url = ($('sheet-url').value || '').trim();
+  const url = (($('sheet-url') || {}).value || '').trim();
   if (!url) { setStatus('กรุณาใส่ URL ก่อน', 'err'); return; }
   setStatus('กำลังทดสอบ...', 'info');
   try {
@@ -1367,16 +1350,19 @@ function setSyncDot(live) {
 function setupAutoRefresh(ms) {
   if (autoRefreshTimer) clearInterval(autoRefreshTimer);
   if (!ms || ms <= 0) return;
-  autoRefreshTimer = setInterval(() => {
-    const url = localStorage.getItem(LS_PREFIX + CUR);
-    if (url) {
-      const inputEl = $('sheet-url');
-      if (inputEl && !inputEl.value.trim()) inputEl.value = url;
-      loadSheet(true);
+  autoRefreshTimer = setInterval(async () => {
+    for (const m of MK) {
+      const chUrl   = localStorage.getItem(LS_PREFIX   + m);
+      const liveUrl = localStorage.getItem(LS_LIVE_PFX + m);
+      const affiUrl = localStorage.getItem(LS_AFFI_PFX + m);
+      if (chUrl)   { try { const rows = await fetchSheetRows(chUrl);   applySheetData(rows, m); if(DB[m]) DB[m].empty=false; } catch(_){} }
+      if (liveUrl) { try { const rows = await fetchSheetRows(liveUrl); applyLiveData(rows, m); } catch(_){} }
+      if (affiUrl) { try { const rows = await fetchSheetRows(affiUrl); applyAffiData(rows, m); } catch(_){} }
     }
-    const mc = CUR === 'all' ? 'may' : CUR;
-    if (localStorage.getItem(LS_LIVE_PFX + mc)) loadLiveSheet(true);
-    if (localStorage.getItem(LS_AFFI_PFX + mc)) loadAffiSheet(true);
+    const ap = document.querySelector('.panel.active');
+    if (ap) renderActive(ap.id.replace('panel-', ''));
+    $('syncLbl').textContent = `Live · ${new Date().toLocaleTimeString('th-TH')}`;
+    setSyncDot(true);
   }, ms);
   localStorage.setItem(LS_INTERVAL_KEY, ms);
   const mins = Math.round(ms / 60000);
@@ -1524,6 +1510,138 @@ function clearAffiUrl() {
   const s = $('affi-status'); if(s){s.textContent='ลบ URL Affiliate แล้ว';s.className='status info';}
 }
 
+// ── MULTI-MONTH SETTINGS ──
+
+function buildMonthCfgUI() {
+  const container = $('month-cfg-container');
+  if (!container) return;
+  const activeMths = MK.slice(0, 5); // ม.ค.–พ.ค.; extend slice as months are added
+  container.innerHTML = activeMths.map((m, i) => `
+    <div class="mc-row" id="mc-row-${m}">
+      <div class="mc-head">
+        <span class="mc-lbl">${MN[i]}</span>
+        <button class="btn btn-pri btn-sm" onclick="loadMonthAll('${m}')">↻ โหลด</button>
+        <button class="btn btn-sec btn-sm" onclick="clearMonthAllUrls('${m}')">✕ ล้าง</button>
+      </div>
+      <div class="mc-field">
+        <span class="mc-tag">📊</span>
+        <input id="mc-ch-${m}" class="url-input" value="${localStorage.getItem(LS_PREFIX+m)||''}" placeholder="Channel: ...pub?gid=...&amp;output=csv">
+      </div>
+      <div class="mc-field" style="margin-top:5px">
+        <span class="mc-tag">🎥</span>
+        <input id="mc-live-${m}" class="url-input" value="${localStorage.getItem(LS_LIVE_PFX+m)||''}" placeholder="Live: ...pub?gid=...&amp;output=csv">
+      </div>
+      <div class="mc-field" style="margin-top:5px">
+        <span class="mc-tag">🛒</span>
+        <input id="mc-affi-${m}" class="url-input" value="${localStorage.getItem(LS_AFFI_PFX+m)||''}" placeholder="Affiliate: ...pub?gid=...&amp;output=csv">
+      </div>
+      <div id="mc-status-${m}" class="status"></div>
+    </div>`).join('');
+}
+
+async function loadMonthAll(m) {
+  const setS = (msg, cls) => {
+    const s = $('mc-status-' + m);
+    if (s) { s.textContent = msg; s.className = 'status ' + cls; }
+  };
+  const chUrl   = (($('mc-ch-'   + m) || {}).value || '').trim() || localStorage.getItem(LS_PREFIX    + m) || '';
+  const liveUrl = (($('mc-live-' + m) || {}).value || '').trim() || localStorage.getItem(LS_LIVE_PFX  + m) || '';
+  const affiUrl = (($('mc-affi-' + m) || {}).value || '').trim() || localStorage.getItem(LS_AFFI_PFX  + m) || '';
+
+  if (!chUrl && !liveUrl && !affiUrl) { setS('กรุณาใส่ URL อย่างน้อย 1 ช่อง', 'err'); return; }
+  setS('กำลังโหลด...', 'info');
+
+  let ok = 0;
+  if (chUrl) {
+    try {
+      const rows = await fetchSheetRows(chUrl);
+      applySheetData(rows, m);
+      localStorage.setItem(LS_PREFIX + m, chUrl);
+      if (DB[m]) DB[m].empty = false;
+      ok++;
+    } catch(e) { setS('✗ Channel: ' + e.message, 'err'); return; }
+  }
+  if (liveUrl) {
+    try {
+      const rows = await fetchSheetRows(liveUrl);
+      applyLiveData(rows, m);
+      localStorage.setItem(LS_LIVE_PFX + m, liveUrl);
+      ok++;
+    } catch(e) {}
+  }
+  if (affiUrl) {
+    try {
+      const rows = await fetchSheetRows(affiUrl);
+      applyAffiData(rows, m);
+      localStorage.setItem(LS_AFFI_PFX + m, affiUrl);
+      ok++;
+    } catch(e) {}
+  }
+
+  const timeStr = new Date().toLocaleTimeString('th-TH');
+  setS(`✓ โหลดสำเร็จ ${ok} แหล่งข้อมูล — ${timeStr}`, 'ok');
+  $('syncLbl').textContent = `Live · ${MN[MK.indexOf(m)]} · ${timeStr}`;
+  setSyncDot(true);
+  const ap = document.querySelector('.panel.active');
+  if (ap) renderActive(ap.id.replace('panel-', ''));
+}
+
+async function loadAllMonths() {
+  const el = $('all-months-status');
+  if (el) { el.textContent = 'กำลังโหลดทุกเดือน...'; el.className = 'status info'; }
+  const activeMths = MK.slice(0, 5);
+  for (const m of activeMths) {
+    const hasUrl = localStorage.getItem(LS_PREFIX+m) || localStorage.getItem(LS_LIVE_PFX+m) || localStorage.getItem(LS_AFFI_PFX+m)
+      || (($('mc-ch-'+m)||{}).value||'').trim() || (($('mc-live-'+m)||{}).value||'').trim() || (($('mc-affi-'+m)||{}).value||'').trim();
+    if (hasUrl) await loadMonthAll(m);
+  }
+  if (el) { el.textContent = `✓ โหลดครบทุกเดือนแล้ว — ${new Date().toLocaleTimeString('th-TH')}`; el.className = 'status ok'; }
+}
+
+function applyLiveData(rows, m) {
+  const d = DB[m]; if (!d) return;
+  const si = rows.findIndex(r => (r[1]||'').trim() === 'ยอดรวม');
+  if (si >= 0 && rows[si+1]) {
+    const r = rows[si+1];
+    const off=pvNum(r[2]),raks=pvNum(r[3]),ceo=pvNum(r[4]),shop=pvNum(r[5]);
+    if (off||raks||ceo||shop) { d.live.off=off; d.live.raks=raks; d.live.ceo=ceo; d.live.shop=shop; d.live.total=off+raks+ceo+shop; }
+  }
+  const hi = rows.findIndex(r => (r[1]||'').trim() === 'Live Hour');
+  if (hi >= 0 && rows[hi+1]) {
+    const r = rows[hi+1];
+    const hO=pvNum(r[2]),hR=pvNum(r[3]),hC=pvNum(r[4]),hS=pvNum(r[5]);
+    if (hO||hR||hC||hS) { d.live.hr_off=hO; d.live.hr_raks=hR; d.live.hr_ceo=hC; d.live.hr_shop=hS; }
+  }
+  if (d.empty) d.empty = false;
+}
+
+function applyAffiData(rows, m) {
+  const d = DB[m]; if (!d) return;
+  const tr = rows.find(r => (r[0]||'').trim().toLowerCase() === 'total');
+  if (tr) {
+    const sh_o=pvNum(tr[1]),sh_s=pvNum(tr[2]),tt_o=pvNum(tr[3]),tt_s=pvNum(tr[4]),lzd_o=pvNum(tr[5]),lzd_s=pvNum(tr[6]);
+    if (sh_s||tt_s||lzd_s) { d.affi={sh_s,sh_o,tt_s,tt_o,lzd_s,lzd_o}; if(d.empty) d.empty=false; }
+  }
+}
+
+function clearMonthAllUrls(m) {
+  localStorage.removeItem(LS_PREFIX    + m);
+  localStorage.removeItem(LS_LIVE_PFX  + m);
+  localStorage.removeItem(LS_AFFI_PFX  + m);
+  const chEl = $('mc-ch-'+m);   if (chEl)   chEl.value = '';
+  const liEl = $('mc-live-'+m); if (liEl)   liEl.value = '';
+  const afEl = $('mc-affi-'+m); if (afEl)   afEl.value = '';
+  const s = $('mc-status-'+m);
+  if (s) { s.textContent = `ล้าง URL ${MN[MK.indexOf(m)]} แล้ว`; s.className = 'status info'; }
+}
+
+function clearAllUrls() {
+  MK.forEach(m => { localStorage.removeItem(LS_PREFIX+m); localStorage.removeItem(LS_LIVE_PFX+m); localStorage.removeItem(LS_AFFI_PFX+m); });
+  buildMonthCfgUI();
+  const el = $('all-months-status');
+  if (el) { el.textContent = 'ล้าง URL ทั้งหมดแล้ว'; el.className = 'status info'; }
+}
+
 function refreshSavedUrlsList() {
   const el = $('saved-urls-list');
   if (!el) return;
@@ -1541,15 +1659,9 @@ function refreshSavedUrlsList() {
 }
 
 function loadMonthUrl(m) {
-  const url = localStorage.getItem(LS_PREFIX + m);
-  if (!url) return;
-  // Switch to that month
   document.querySelectorAll('.mt[data-m]').forEach(t => t.classList.toggle('active', t.dataset.m === m));
   CUR = m;
-  const inputEl = $('sheet-url');
-  if (inputEl) inputEl.value = url;
-  updateSettingsMonthLabel();
-  loadSheet();
+  loadMonthAll(m);
 }
 
 function resetData() {
@@ -1572,8 +1684,7 @@ function goSettings() {
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   $('panel-settings').classList.add('active');
   document.querySelector('[data-panel=settings]').classList.add('active');
-  syncSettingsInputs();
-  updateSettingsMonthLabel();
+  buildMonthCfgUI();
   refreshSavedUrlsList();
 }
 
@@ -1611,19 +1722,19 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
 
 // ── Startup init ──
 (function initDashboard() {
-  // Default URLs — pre-seeded so the dashboard loads real data on first open.
-  // Add more months by copying the sheet URL with the correct ?gid=... parameter.
-  // Default channel sheet URLs (one per month tab)
+  const BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub';
   const DEFAULT_URLS = {
-    jan: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?output=csv',
-    may: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?gid=1237068853&single=true&output=csv',
+    jan: BASE + '?output=csv',
+    feb: BASE + '?gid=1889909742&single=true&output=csv',
+    mar: BASE + '?gid=36092252&single=true&output=csv',
+    apr: BASE + '?gid=383206303&single=true&output=csv',
+    may: BASE + '?gid=1237068853&single=true&output=csv',
   };
-  // Default Live & Affiliate URLs per month
   const DEFAULT_LIVE = {
-    may: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?gid=1108897936&single=true&output=csv',
+    may: BASE + '?gid=1108897936&single=true&output=csv',
   };
   const DEFAULT_AFFI = {
-    may: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?gid=651367032&single=true&output=csv',
+    may: BASE + '?gid=651367032&single=true&output=csv',
   };
 
   Object.entries(DEFAULT_URLS).forEach(([m,url]) => { if(!localStorage.getItem(LS_PREFIX+m)) localStorage.setItem(LS_PREFIX+m,url); });
@@ -1637,53 +1748,21 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
     if (sel) sel.value = String(savedMs);
   }
 
-  // Populate all URL inputs for current month
-  syncSettingsInputs();
-
-  // Load all saved data sources, then re-render
-  const monthsToLoad = MK.filter(m => localStorage.getItem(LS_PREFIX + m));
-  const liveMonths   = MK.filter(m => localStorage.getItem(LS_LIVE_PFX + m));
-  const affiMonths   = MK.filter(m => localStorage.getItem(LS_AFFI_PFX + m));
+  // Load all saved data sources for every month, then re-render
   (async () => {
-    for (const m of monthsToLoad) {
-      try { const rows = await fetchSheetRows(localStorage.getItem(LS_PREFIX+m)); applySheetData(rows,m); } catch(_){}
-    }
-    for (const m of liveMonths) {
-      try {
-        const rows = await fetchSheetRows(localStorage.getItem(LS_LIVE_PFX+m));
-        const d = DB[m]; if(!d) continue;
-        const salesIdx = rows.findIndex(r=>(r[1]||'').trim()==='ยอดรวม');
-        if(salesIdx>=0&&rows[salesIdx+1]){
-          const r=rows[salesIdx+1];
-          const off=pvNum(r[2]),raks=pvNum(r[3]),ceo=pvNum(r[4]),shop=pvNum(r[5]);
-          if(off||raks||ceo||shop){d.live.off=off;d.live.raks=raks;d.live.ceo=ceo;d.live.shop=shop;d.live.total=off+raks+ceo+shop;}
-        }
-        const hrIdx = rows.findIndex(r=>(r[1]||'').trim()==='Live Hour');
-        if(hrIdx>=0&&rows[hrIdx+1]){
-          const r=rows[hrIdx+1];
-          const hO=pvNum(r[2]),hR=pvNum(r[3]),hC=pvNum(r[4]),hS=pvNum(r[5]);
-          if(hO||hR||hC||hS){d.live.hr_off=hO;d.live.hr_raks=hR;d.live.hr_ceo=hC;d.live.hr_shop=hS;}
-        }
-        if(d.empty) d.empty=false;
-      } catch(_){}
-    }
-    for (const m of affiMonths) {
-      try {
-        const rows = await fetchSheetRows(localStorage.getItem(LS_AFFI_PFX+m));
-        const d = DB[m]; if(!d) continue;
-        const totalRow = rows.find(r=>(r[0]||'').trim().toLowerCase()==='total');
-        if(totalRow){
-          const sh_o=pvNum(totalRow[1]),sh_s=pvNum(totalRow[2]),tt_o=pvNum(totalRow[3]),tt_s=pvNum(totalRow[4]),lzd_o=pvNum(totalRow[5]),lzd_s=pvNum(totalRow[6]);
-          if(sh_s||tt_s||lzd_s){d.affi={sh_s,sh_o,tt_s,tt_o,lzd_s,lzd_o};if(d.empty)d.empty=false;}
-        }
-      } catch(_){}
+    for (const m of MK) {
+      const chUrl   = localStorage.getItem(LS_PREFIX   + m);
+      const liveUrl = localStorage.getItem(LS_LIVE_PFX + m);
+      const affiUrl = localStorage.getItem(LS_AFFI_PFX + m);
+      if (chUrl)   { try { const rows = await fetchSheetRows(chUrl);   applySheetData(rows, m); if(DB[m]) DB[m].empty=false; } catch(_){} }
+      if (liveUrl) { try { const rows = await fetchSheetRows(liveUrl); applyLiveData(rows, m); } catch(_){} }
+      if (affiUrl) { try { const rows = await fetchSheetRows(affiUrl); applyAffiData(rows, m); } catch(_){} }
     }
 
-    const anyLoaded = monthsToLoad.length||liveMonths.length||affiMonths.length;
+    const anyLoaded = MK.some(m => localStorage.getItem(LS_PREFIX+m)||localStorage.getItem(LS_LIVE_PFX+m)||localStorage.getItem(LS_AFFI_PFX+m));
     if (anyLoaded) {
       $('syncLbl').textContent = `Live · ${new Date().toLocaleTimeString('th-TH')}`;
       setSyncDot(true);
-      refreshSavedUrlsList();
     }
 
     const ap = document.querySelector('.panel.active');
@@ -1693,8 +1772,8 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
     setupAutoRefresh(!isNaN(ms) && ms > 0 ? ms : 300000);
   })();
 
+  buildMonthCfgUI();
   refreshSavedUrlsList();
-  updateSettingsMonthLabel();
   renderOverview();
 })();
 
