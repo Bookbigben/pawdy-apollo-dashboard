@@ -352,29 +352,44 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
     <!-- SETTINGS -->
     <div class="panel" id="panel-settings">
       <div class="set-card">
-        <h3>🔗 เชื่อมต่อ Google Sheets — เดือน: <span id="sync-month-name" style="color:var(--accent)">พ.ค.</span></h3>
-        <p>วิธีใช้: เปิด Google Sheets → <code>File → Share → Publish to web</code> → เลือก Sheet + Format = <strong>CSV</strong> → Copy URL → วางด้านล่าง</p>
-        <p style="margin-top:5px;font-size:11px;color:var(--text3)">URL จะถูกบันทึกแยกตามเดือน — เปลี่ยนเดือนที่ Tab ด้านบน แล้ววาง URL ของเดือนนั้น</p>
-        <input id="sheet-url" class="url-input" placeholder="https://docs.google.com/spreadsheets/d/.../pub?gid=...&single=true&output=csv"/>
-        <div class="btn-row">
-          <button class="btn btn-pri" onclick="testSheet()">▶ ทดสอบ Connection</button>
-          <button class="btn btn-pri" onclick="loadSheet()">↻ โหลด &amp; บันทึก URL</button>
-          <button class="btn btn-sec" onclick="resetData()">↺ ข้อมูล Default</button>
-          <button class="btn btn-sec" onclick="clearMonthUrl()">✕ ลบ URL เดือนนี้</button>
+        <h3>🔗 Google Sheets — เดือน: <span id="sync-month-name" style="color:var(--accent)">พ.ค.</span></h3>
+        <p>วิธีใช้: เปิด Google Sheets → <code>File → Share → Publish to web</code> → เลือก Tab + Format = <strong>CSV</strong> → Copy URL → วางด้านล่าง</p>
+        <p style="margin-top:5px;font-size:11px;color:var(--text3)">URL บันทึกแยกตามเดือน — เปลี่ยนเดือนที่ Tab ด้านบน แล้ววาง URL ของเดือนนั้น</p>
+
+        <div style="margin-top:12px">
+          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px">📊 ภาพรวมช่องทาง (Channel Overview)</div>
+          <input id="sheet-url" class="url-input" placeholder="...pub?gid=CHANNEL_TAB&single=true&output=csv"/>
+          <div class="btn-row" style="margin-top:6px">
+            <button class="btn btn-pri" onclick="testSheet()">▶ ทดสอบ</button>
+            <button class="btn btn-pri" onclick="loadSheet()">↻ โหลด &amp; บันทึก</button>
+            <button class="btn btn-sec" onclick="clearMonthUrl()">✕ ลบ</button>
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px">🎥 Live Performance (แยก Tab ต่อเดือน)</div>
+          <input id="live-sheet-url" class="url-input" placeholder="...pub?gid=LIVE_TAB&single=true&output=csv"/>
+          <div class="btn-row" style="margin-top:6px">
+            <button class="btn btn-pri" onclick="loadLiveSheet()">↻ โหลด &amp; บันทึก</button>
+            <button class="btn btn-sec" onclick="clearLiveUrl()">✕ ลบ</button>
+          </div>
+        </div>
+
+        <div style="margin-top:14px">
+          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px">🛒 Affiliate (แยก Tab ต่อเดือน)</div>
+          <input id="affi-sheet-url" class="url-input" placeholder="...pub?gid=AFFI_TAB&single=true&output=csv"/>
+          <div class="btn-row" style="margin-top:6px">
+            <button class="btn btn-pri" onclick="loadAffiSheet()">↻ โหลด &amp; บันทึก</button>
+            <button class="btn btn-sec" onclick="clearAffiUrl()">✕ ลบ</button>
+          </div>
+        </div>
+
+        <div style="margin-top:8px">
+          <button class="btn btn-sec" onclick="resetData()" style="font-size:11px">↺ Reset ข้อมูล Default</button>
         </div>
         <div id="sheet-status" class="status"></div>
-      </div>
-
-      <div class="set-card">
-        <h3>🛒 Affiliate Sheet (แยก Tab)</h3>
-        <p>วาง URL ของ Tab Affiliate (publish CSV แยก) — ดึงข้อมูลอัตโนมัติพร้อม Auto-Refresh</p>
-        <p style="margin-top:5px;font-size:11px;color:var(--text3)">Format: คอลัมน์ Shopee orders/sales · TikTok orders/sales · Lazada orders/sales — row "Total" คือยอดรวม</p>
-        <input id="affi-sheet-url" class="url-input" placeholder="https://docs.google.com/spreadsheets/d/.../pub?gid=651367032&single=true&output=csv"/>
-        <div class="btn-row">
-          <button class="btn btn-pri" onclick="loadAffiSheet()">↻ โหลด &amp; บันทึก</button>
-          <button class="btn btn-sec" onclick="clearAffiUrl()">✕ ลบ URL</button>
-        </div>
-        <div id="affi-status" class="status"></div>
+        <div id="affi-status" class="status" style="margin-top:4px"></div>
+        <div id="live-status" class="status" style="margin-top:4px"></div>
       </div>
 
       <div class="set-card">
@@ -1100,7 +1115,8 @@ function renderSuggest(){
 
 // ════ GOOGLE SHEETS SYNC ════
 const LS_PREFIX = 'pawdy_sheet_';
-const LS_AFFI_KEY = 'pawdy_affi_sheet';
+const LS_AFFI_PFX = 'pawdy_affi_';
+const LS_LIVE_PFX = 'pawdy_live_';
 const LS_INTERVAL_KEY = 'pawdy_refresh_ms';
 let autoRefreshTimer = null;
 
@@ -1336,7 +1352,9 @@ function setupAutoRefresh(ms) {
       if (inputEl && !inputEl.value.trim()) inputEl.value = url;
       loadSheet(true);
     }
-    if (localStorage.getItem(LS_AFFI_KEY)) loadAffiSheet(true);
+    const mc = CUR === 'all' ? 'may' : CUR;
+    if (localStorage.getItem(LS_LIVE_PFX + mc)) loadLiveSheet(true);
+    if (localStorage.getItem(LS_AFFI_PFX + mc)) loadAffiSheet(true);
   }, ms);
   localStorage.setItem(LS_INTERVAL_KEY, ms);
   const mins = Math.round(ms / 60000);
@@ -1368,59 +1386,120 @@ function clearMonthUrl() {
   refreshSavedUrlsList();
 }
 
-async function loadAffiSheet(silent = false) {
-  const inputEl = $('affi-sheet-url');
-  const url = (inputEl ? inputEl.value.trim() : '') || localStorage.getItem(LS_AFFI_KEY) || '';
-  if (!url) {
-    if (!silent) { const s=$('affi-status'); if(s){s.textContent='กรุณาใส่ URL ก่อน';s.className='status err';} }
-    return false;
+// detect month from any cell in first ~12 rows (for sheets where date isn't in col[0])
+function autoDetectMonthAny(rows) {
+  const eng = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  for (const row of rows.slice(0,12)) {
+    for (const cell of row) {
+      const c = (cell||'').toLowerCase();
+      for (let i=0;i<eng.length;i++) { if(c.includes(','+eng[i])||c.includes(eng[i]+',')) return MK[i]; }
+    }
   }
+  return null;
+}
+
+async function loadLiveSheet(silent = false) {
+  const inputEl = $('live-sheet-url');
+  const m0 = CUR === 'all' ? 'may' : CUR;
+  const url = (inputEl ? inputEl.value.trim() : '') || localStorage.getItem(LS_LIVE_PFX + m0) || '';
+  const setS = (msg, cls) => { const s=$('live-status'); if(s){s.textContent=msg;s.className='status '+cls;} };
+  if (!url) { if (!silent) setS('กรุณาใส่ URL ก่อน','err'); return false; }
   try {
     const rows = await fetchSheetRows(url);
-    // Detect month from daily rows (same pattern as main sheet)
-    const detected = autoDetectMonth(rows);
-    const m = detected || (CUR === 'all' ? 'may' : CUR);
+    const detected = autoDetectMonthAny(rows);
+    const m = detected || m0;
     const d = DB[m];
     if (!d) return false;
 
-    // Find "Total" row — col[0] === 'Total' (case-insensitive)
-    const totalRow = rows.find(r => (r[0] || '').trim().toLowerCase() === 'total');
+    // Row where col[1] = 'ยอดรวม' → next row = sales (col[2]=Off, col[3]=Raks, col[4]=CEO, col[5]=Shop)
+    const salesIdx = rows.findIndex(r => (r[1]||'').trim() === 'ยอดรวม');
+    if (salesIdx >= 0 && rows[salesIdx+1]) {
+      const r = rows[salesIdx+1];
+      const off  = pvNum(r[2]); const raks = pvNum(r[3]);
+      const ceo  = pvNum(r[4]); const shop = pvNum(r[5]);
+      if (off||raks||ceo||shop) {
+        d.live.off=off; d.live.raks=raks; d.live.ceo=ceo; d.live.shop=shop;
+        d.live.total=off+raks+ceo+shop;
+      }
+    }
+
+    // Row where col[1] = 'Live Hour' → next row = hours
+    const hrIdx = rows.findIndex(r => (r[1]||'').trim() === 'Live Hour');
+    if (hrIdx >= 0 && rows[hrIdx+1]) {
+      const r = rows[hrIdx+1];
+      const hOff=pvNum(r[2]); const hRaks=pvNum(r[3]);
+      const hCeo=pvNum(r[4]); const hShop=pvNum(r[5]);
+      if (hOff||hRaks||hCeo||hShop) {
+        d.live.hr_off=hOff; d.live.hr_raks=hRaks; d.live.hr_ceo=hCeo; d.live.hr_shop=hShop;
+      }
+    }
+
+    if (d.empty) d.empty = false;
+    localStorage.setItem(LS_LIVE_PFX + m, url);
+    if (inputEl && !inputEl.value.trim()) inputEl.value = url;
+    const timeStr = new Date().toLocaleTimeString('th-TH');
+    if (!silent) setS(`✓ โหลด Live Performance สำเร็จ — ${timeStr}`,'ok');
+    const ap = document.querySelector('.panel.active');
+    if (ap) renderActive(ap.id.replace('panel-', ''));
+    return true;
+  } catch (e) {
+    if (!silent) setS('✗ '+e.message,'err');
+    return false;
+  }
+}
+
+function clearLiveUrl() {
+  const m = CUR === 'all' ? 'may' : CUR;
+  localStorage.removeItem(LS_LIVE_PFX + m);
+  const inputEl = $('live-sheet-url');
+  if (inputEl) inputEl.value = '';
+  const s = $('live-status'); if(s){s.textContent='ลบ URL Live แล้ว';s.className='status info';}
+}
+
+async function loadAffiSheet(silent = false) {
+  const inputEl = $('affi-sheet-url');
+  const m0 = CUR === 'all' ? 'may' : CUR;
+  const url = (inputEl ? inputEl.value.trim() : '') || localStorage.getItem(LS_AFFI_PFX + m0) || '';
+  const setS = (msg,cls) => { const s=$('affi-status'); if(s){s.textContent=msg;s.className='status '+cls;} };
+  if (!url) { if (!silent) setS('กรุณาใส่ URL ก่อน','err'); return false; }
+  try {
+    const rows = await fetchSheetRows(url);
+    const detected = autoDetectMonth(rows) || autoDetectMonthAny(rows);
+    const m = detected || m0;
+    const d = DB[m];
+    if (!d) return false;
+
+    // Find "Total" row — col[0] === 'Total'
+    const totalRow = rows.find(r => (r[0]||'').trim().toLowerCase() === 'total');
     if (totalRow) {
-      const pv = v => { const n = parseFloat((v || '').toString().replace(/,/g, '')); return isNaN(n) ? 0 : n; };
-      const sh_o = pv(totalRow[1]);
-      const sh_s = pv(totalRow[2]);
-      const tt_o = pv(totalRow[3]);
-      const tt_s = pv(totalRow[4]);
-      const lzd_o = pv(totalRow[5]);
-      const lzd_s = pv(totalRow[6]);
+      const sh_o=pvNum(totalRow[1]), sh_s=pvNum(totalRow[2]);
+      const tt_o=pvNum(totalRow[3]), tt_s=pvNum(totalRow[4]);
+      const lzd_o=pvNum(totalRow[5]), lzd_s=pvNum(totalRow[6]);
       if (sh_s || tt_s || lzd_s) {
         d.affi = { sh_s, sh_o, tt_s, tt_o, lzd_s, lzd_o };
         if (d.empty) d.empty = false;
       }
     }
 
-    localStorage.setItem(LS_AFFI_KEY, url);
+    localStorage.setItem(LS_AFFI_PFX + m, url);
     if (inputEl && !inputEl.value.trim()) inputEl.value = url;
     const timeStr = new Date().toLocaleTimeString('th-TH');
-    if (!silent) {
-      const s = $('affi-status');
-      if (s) { s.textContent = `✓ โหลด Affiliate สำเร็จ — ${timeStr}`; s.className = 'status ok'; }
-    }
+    if (!silent) setS(`✓ โหลด Affiliate สำเร็จ — ${timeStr}`,'ok');
     const ap = document.querySelector('.panel.active');
     if (ap) renderActive(ap.id.replace('panel-', ''));
     return true;
   } catch (e) {
-    if (!silent) { const s=$('affi-status'); if(s){s.textContent='✗ '+e.message;s.className='status err';} }
+    if (!silent) setS('✗ '+e.message,'err');
     return false;
   }
 }
 
 function clearAffiUrl() {
-  localStorage.removeItem(LS_AFFI_KEY);
+  const m = CUR === 'all' ? 'may' : CUR;
+  localStorage.removeItem(LS_AFFI_PFX + m);
   const inputEl = $('affi-sheet-url');
   if (inputEl) inputEl.value = '';
-  const s = $('affi-status');
-  if (s) { s.textContent = 'ลบ URL Affiliate แล้ว'; s.className = 'status info'; }
+  const s = $('affi-status'); if(s){s.textContent='ลบ URL Affiliate แล้ว';s.className='status info';}
 }
 
 function refreshSavedUrlsList() {
@@ -1459,13 +1538,19 @@ function resetData() {
   if (ap) renderActive(ap.id.replace('panel-', ''));
 }
 
+function syncSettingsInputs() {
+  const m = CUR === 'all' ? 'may' : CUR;
+  const u1 = $('sheet-url');      if (u1) u1.value = localStorage.getItem(LS_PREFIX    + m) || '';
+  const u2 = $('live-sheet-url'); if (u2) u2.value = localStorage.getItem(LS_LIVE_PFX  + m) || '';
+  const u3 = $('affi-sheet-url'); if (u3) u3.value = localStorage.getItem(LS_AFFI_PFX  + m) || '';
+}
+
 function goSettings() {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   $('panel-settings').classList.add('active');
   document.querySelector('[data-panel=settings]').classList.add('active');
-  const savedUrl = localStorage.getItem(LS_PREFIX + CUR);
-  if (savedUrl && $('sheet-url')) $('sheet-url').value = savedUrl;
+  syncSettingsInputs();
   updateSettingsMonthLabel();
   refreshSavedUrlsList();
 }
@@ -1495,10 +1580,7 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
     document.querySelectorAll('.mt[data-m]').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
     CUR = el.dataset.m;
-    // Restore saved URL for this month (show in settings input if open)
-    const savedUrl = localStorage.getItem(LS_PREFIX + CUR);
-    const inputEl = $('sheet-url');
-    if (inputEl) inputEl.value = savedUrl || '';
+    syncSettingsInputs();
     updateSettingsMonthLabel();
     const ap = document.querySelector('.panel.active');
     if (ap) renderActive(ap.id.replace('panel-', ''));
@@ -1509,22 +1591,21 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
 (function initDashboard() {
   // Default URLs — pre-seeded so the dashboard loads real data on first open.
   // Add more months by copying the sheet URL with the correct ?gid=... parameter.
+  // Default channel sheet URLs (one per month tab)
   const DEFAULT_URLS = {
     jan: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?output=csv',
-    // feb: 'https://...pub?gid=XXXXXXX&single=true&output=csv',
-    // mar: 'https://...pub?gid=XXXXXXX&single=true&output=csv',
   };
-  const DEFAULT_AFFI_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?gid=651367032&single=true&output=csv';
-  if (!localStorage.getItem(LS_AFFI_KEY)) {
-    localStorage.setItem(LS_AFFI_KEY, DEFAULT_AFFI_URL);
-  }
+  // Default Live & Affiliate URLs per month
+  const DEFAULT_LIVE = {
+    may: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?gid=1108897936&single=true&output=csv',
+  };
+  const DEFAULT_AFFI = {
+    may: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTI2UceT6u-lFoxTXmusCT_C-Ifzofv2iit_bwOV_Fg4MJ9PPresfJqXn7DfLc7bOyfk57tkiiIn2PR/pub?gid=651367032&single=true&output=csv',
+  };
 
-  // Seed localStorage with defaults only if no URL is saved yet for that month
-  Object.entries(DEFAULT_URLS).forEach(([m, url]) => {
-    if (url && !localStorage.getItem(LS_PREFIX + m)) {
-      localStorage.setItem(LS_PREFIX + m, url);
-    }
-  });
+  Object.entries(DEFAULT_URLS).forEach(([m,url]) => { if(!localStorage.getItem(LS_PREFIX+m)) localStorage.setItem(LS_PREFIX+m,url); });
+  Object.entries(DEFAULT_LIVE).forEach(([m,url]) => { if(!localStorage.getItem(LS_LIVE_PFX+m)) localStorage.setItem(LS_LIVE_PFX+m,url); });
+  Object.entries(DEFAULT_AFFI).forEach(([m,url]) => { if(!localStorage.getItem(LS_AFFI_PFX+m)) localStorage.setItem(LS_AFFI_PFX+m,url); });
 
   // Restore saved interval selector
   const savedMs = parseInt(localStorage.getItem(LS_INTERVAL_KEY));
@@ -1533,39 +1614,58 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
     if (sel) sel.value = String(savedMs);
   }
 
-  // Show saved URL for current month in the input
-  const savedUrl = localStorage.getItem(LS_PREFIX + CUR);
-  if (savedUrl && $('sheet-url')) $('sheet-url').value = savedUrl;
+  // Populate all URL inputs for current month
+  syncSettingsInputs();
 
-  // Show saved affiliate URL in its input
-  const savedAffiUrl = localStorage.getItem(LS_AFFI_KEY);
-  if (savedAffiUrl && $('affi-sheet-url')) $('affi-sheet-url').value = savedAffiUrl;
-
-  // Load ALL months + affiliate sheet, then re-render
+  // Load all saved data sources, then re-render
   const monthsToLoad = MK.filter(m => localStorage.getItem(LS_PREFIX + m));
+  const liveMonths   = MK.filter(m => localStorage.getItem(LS_LIVE_PFX + m));
+  const affiMonths   = MK.filter(m => localStorage.getItem(LS_AFFI_PFX + m));
   (async () => {
     for (const m of monthsToLoad) {
-      const url = localStorage.getItem(LS_PREFIX + m);
-      try {
-        const rows = await fetchSheetRows(url);
-        applySheetData(rows, m);
-      } catch (_) { /* skip */ }
+      try { const rows = await fetchSheetRows(localStorage.getItem(LS_PREFIX+m)); applySheetData(rows,m); } catch(_){}
     }
-    // Load affiliate data
-    if (localStorage.getItem(LS_AFFI_KEY)) await loadAffiSheet(true);
+    for (const m of liveMonths) {
+      try {
+        const rows = await fetchSheetRows(localStorage.getItem(LS_LIVE_PFX+m));
+        const d = DB[m]; if(!d) continue;
+        const salesIdx = rows.findIndex(r=>(r[1]||'').trim()==='ยอดรวม');
+        if(salesIdx>=0&&rows[salesIdx+1]){
+          const r=rows[salesIdx+1];
+          const off=pvNum(r[2]),raks=pvNum(r[3]),ceo=pvNum(r[4]),shop=pvNum(r[5]);
+          if(off||raks||ceo||shop){d.live.off=off;d.live.raks=raks;d.live.ceo=ceo;d.live.shop=shop;d.live.total=off+raks+ceo+shop;}
+        }
+        const hrIdx = rows.findIndex(r=>(r[1]||'').trim()==='Live Hour');
+        if(hrIdx>=0&&rows[hrIdx+1]){
+          const r=rows[hrIdx+1];
+          const hO=pvNum(r[2]),hR=pvNum(r[3]),hC=pvNum(r[4]),hS=pvNum(r[5]);
+          if(hO||hR||hC||hS){d.live.hr_off=hO;d.live.hr_raks=hR;d.live.hr_ceo=hC;d.live.hr_shop=hS;}
+        }
+        if(d.empty) d.empty=false;
+      } catch(_){}
+    }
+    for (const m of affiMonths) {
+      try {
+        const rows = await fetchSheetRows(localStorage.getItem(LS_AFFI_PFX+m));
+        const d = DB[m]; if(!d) continue;
+        const totalRow = rows.find(r=>(r[0]||'').trim().toLowerCase()==='total');
+        if(totalRow){
+          const sh_o=pvNum(totalRow[1]),sh_s=pvNum(totalRow[2]),tt_o=pvNum(totalRow[3]),tt_s=pvNum(totalRow[4]),lzd_o=pvNum(totalRow[5]),lzd_s=pvNum(totalRow[6]);
+          if(sh_s||tt_s||lzd_s){d.affi={sh_s,sh_o,tt_s,tt_o,lzd_s,lzd_o};if(d.empty)d.empty=false;}
+        }
+      } catch(_){}
+    }
 
-    if (monthsToLoad.length > 0 || localStorage.getItem(LS_AFFI_KEY)) {
-      const timeStr = new Date().toLocaleTimeString('th-TH');
-      $('syncLbl').textContent = `Live · ${timeStr}`;
+    const anyLoaded = monthsToLoad.length||liveMonths.length||affiMonths.length;
+    if (anyLoaded) {
+      $('syncLbl').textContent = `Live · ${new Date().toLocaleTimeString('th-TH')}`;
       setSyncDot(true);
       refreshSavedUrlsList();
     }
 
-    // Re-render active panel with fresh data
     const ap = document.querySelector('.panel.active');
     if (ap) renderActive(ap.id.replace('panel-', ''));
 
-    // Start auto-refresh
     const ms = parseInt(localStorage.getItem(LS_INTERVAL_KEY));
     setupAutoRefresh(!isNaN(ms) && ms > 0 ? ms : 300000);
   })();
