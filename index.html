@@ -980,13 +980,39 @@ function renderShopee(){
     const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
     const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
     const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
-    const MAX=31, dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
-    const expand=(days,vals)=>{const r=Array(MAX).fill(null); days.forEach((d,i)=>{if(d>=1&&d<=MAX)r[d-1]=vals[i]??null;}); return r;};
+    /* ── Daily: คำนวณจำนวนวันจริงของเดือน (ไม่ฮาร์ดโค้ด 31) ── */
+    const mNum={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+    const mYear=2026, mIdx=mNum[m]||5;
+    const MAX=new Date(mYear,mIdx,0).getDate(); // วันจริงของเดือน
+    const dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
+    /* expand: map dayNum → slot index พร้อม validate NaN/null */
+    const expand=(days,vals)=>{
+      const r=Array(MAX).fill(null);
+      days.forEach((d,i)=>{
+        if(d>=1&&d<=MAX){
+          const v=vals[i];
+          r[d-1]=(v!==null&&v!==undefined&&!isNaN(Number(v)))?+v:null;
+        }
+      });
+      return r;
+    };
     const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
     const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
-    const calcRoas=(dd,sKey,bKey,ch)=>{const r=Array(MAX).fill(null); if(!dd||!dd.days||!dd.days.length)return r; dd.days.forEach((d,i)=>{if(d<1||d>MAX)return; const s=dd[ch][sKey][i]||0,b=dd[ch][bKey][i]||0; r[d-1]=b>0?+(s/b).toFixed(2):null;}); return r;};
+    /* calcRoas: safe division + optional chaining ไม่มี Infinity */
+    const calcRoas=(dd,sKey,bKey,ch)=>{
+      const r=Array(MAX).fill(null);
+      if(!dd||!dd.days||!dd.days.length)return r;
+      dd.days.forEach((d,i)=>{
+        if(d<1||d>MAX)return;
+        const s=parseFloat(dd[ch]?.[sKey]?.[i])||0;
+        const b=parseFloat(dd[ch]?.[bKey]?.[i])||0;
+        r[d-1]=b>0?Math.min(+(s/b).toFixed(2),999):null;
+      });
+      return r;
+    };
     const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
-    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:false});
+    /* spanGaps:true — เชื่อมเส้นข้ามวันที่ไม่มีข้อมูล (ไม่ขาด) */
+    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:true});
     const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
     const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
     const SH='#ff4820',SH2='#ff9966';
@@ -1010,13 +1036,39 @@ function renderTiktok(){
     const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
     const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
     const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
-    const MAX=31, dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
-    const expand=(days,vals)=>{const r=Array(MAX).fill(null); days.forEach((d,i)=>{if(d>=1&&d<=MAX)r[d-1]=vals[i]??null;}); return r;};
+    /* ── Daily: คำนวณจำนวนวันจริงของเดือน (ไม่ฮาร์ดโค้ด 31) ── */
+    const mNum={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+    const mYear=2026, mIdx=mNum[m]||5;
+    const MAX=new Date(mYear,mIdx,0).getDate(); // วันจริงของเดือน
+    const dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
+    /* expand: map dayNum → slot index พร้อม validate NaN/null */
+    const expand=(days,vals)=>{
+      const r=Array(MAX).fill(null);
+      days.forEach((d,i)=>{
+        if(d>=1&&d<=MAX){
+          const v=vals[i];
+          r[d-1]=(v!==null&&v!==undefined&&!isNaN(Number(v)))?+v:null;
+        }
+      });
+      return r;
+    };
     const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
     const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
-    const calcRoas=(dd,sKey,bKey,ch)=>{const r=Array(MAX).fill(null); if(!dd||!dd.days||!dd.days.length)return r; dd.days.forEach((d,i)=>{if(d<1||d>MAX)return; const s=dd[ch][sKey][i]||0,b=dd[ch][bKey][i]||0; r[d-1]=b>0?+(s/b).toFixed(2):null;}); return r;};
+    /* calcRoas: safe division + optional chaining ไม่มี Infinity */
+    const calcRoas=(dd,sKey,bKey,ch)=>{
+      const r=Array(MAX).fill(null);
+      if(!dd||!dd.days||!dd.days.length)return r;
+      dd.days.forEach((d,i)=>{
+        if(d<1||d>MAX)return;
+        const s=parseFloat(dd[ch]?.[sKey]?.[i])||0;
+        const b=parseFloat(dd[ch]?.[bKey]?.[i])||0;
+        r[d-1]=b>0?Math.min(+(s/b).toFixed(2),999):null;
+      });
+      return r;
+    };
     const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
-    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:false});
+    /* spanGaps:true — เชื่อมเส้นข้ามวันที่ไม่มีข้อมูล (ไม่ขาด) */
+    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:true});
     const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
     const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
     const TT='#44d4d4';
@@ -1038,13 +1090,39 @@ function renderLazada(){
     const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
     const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
     const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
-    const MAX=31, dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
-    const expand=(days,vals)=>{const r=Array(MAX).fill(null); days.forEach((d,i)=>{if(d>=1&&d<=MAX)r[d-1]=vals[i]??null;}); return r;};
+    /* ── Daily: คำนวณจำนวนวันจริงของเดือน (ไม่ฮาร์ดโค้ด 31) ── */
+    const mNum={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+    const mYear=2026, mIdx=mNum[m]||5;
+    const MAX=new Date(mYear,mIdx,0).getDate(); // วันจริงของเดือน
+    const dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
+    /* expand: map dayNum → slot index พร้อม validate NaN/null */
+    const expand=(days,vals)=>{
+      const r=Array(MAX).fill(null);
+      days.forEach((d,i)=>{
+        if(d>=1&&d<=MAX){
+          const v=vals[i];
+          r[d-1]=(v!==null&&v!==undefined&&!isNaN(Number(v)))?+v:null;
+        }
+      });
+      return r;
+    };
     const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
     const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
-    const calcRoas=(dd,sKey,bKey,ch)=>{const r=Array(MAX).fill(null); if(!dd||!dd.days||!dd.days.length)return r; dd.days.forEach((d,i)=>{if(d<1||d>MAX)return; const s=dd[ch][sKey][i]||0,b=dd[ch][bKey][i]||0; r[d-1]=b>0?+(s/b).toFixed(2):null;}); return r;};
+    /* calcRoas: safe division + optional chaining ไม่มี Infinity */
+    const calcRoas=(dd,sKey,bKey,ch)=>{
+      const r=Array(MAX).fill(null);
+      if(!dd||!dd.days||!dd.days.length)return r;
+      dd.days.forEach((d,i)=>{
+        if(d<1||d>MAX)return;
+        const s=parseFloat(dd[ch]?.[sKey]?.[i])||0;
+        const b=parseFloat(dd[ch]?.[bKey]?.[i])||0;
+        r[d-1]=b>0?Math.min(+(s/b).toFixed(2),999):null;
+      });
+      return r;
+    };
     const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
-    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:false});
+    /* spanGaps:true — เชื่อมเส้นข้ามวันที่ไม่มีข้อมูล (ไม่ขาด) */
+    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:true});
     const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
     const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
     const LZ='#6070ff';
@@ -1066,12 +1144,25 @@ function renderLine(){
     const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
     const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
     const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
-    const MAX=31, dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
-    const expand=(days,vals)=>{const r=Array(MAX).fill(null); days.forEach((d,i)=>{if(d>=1&&d<=MAX)r[d-1]=vals[i]??null;}); return r;};
+    /* ── Daily: คำนวณจำนวนวันจริงของเดือน ── */
+    const mNum={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+    const mYear=2026, mIdx=mNum[m]||5;
+    const MAX=new Date(mYear,mIdx,0).getDate();
+    const dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
+    const expand=(days,vals)=>{
+      const r=Array(MAX).fill(null);
+      days.forEach((d,i)=>{
+        if(d>=1&&d<=MAX){
+          const v=vals[i];
+          r[d-1]=(v!==null&&v!==undefined&&!isNaN(Number(v)))?+v:null;
+        }
+      });
+      return r;
+    };
     const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
     const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
     const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
-    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:false});
+    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:true});
     const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
     const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
     const LN='#00b856', LN2='#66ddaa';
@@ -1093,12 +1184,25 @@ function renderFb(){
     const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
     const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
     const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
-    const MAX=31, dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
-    const expand=(days,vals)=>{const r=Array(MAX).fill(null); days.forEach((d,i)=>{if(d>=1&&d<=MAX)r[d-1]=vals[i]??null;}); return r;};
+    /* ── Daily: คำนวณจำนวนวันจริงของเดือน ── */
+    const mNum={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
+    const mYear=2026, mIdx=mNum[m]||5;
+    const MAX=new Date(mYear,mIdx,0).getDate();
+    const dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
+    const expand=(days,vals)=>{
+      const r=Array(MAX).fill(null);
+      days.forEach((d,i)=>{
+        if(d>=1&&d<=MAX){
+          const v=vals[i];
+          r[d-1]=(v!==null&&v!==undefined&&!isNaN(Number(v)))?+v:null;
+        }
+      });
+      return r;
+    };
     const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
     const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
     const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
-    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:false});
+    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:true});
     const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
     const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
     const FB='#4a90e2', FB2='#82b4f0', FB3='#c0d9ff';
@@ -1606,45 +1710,46 @@ function applySheetData(rows, targetMonth) {
       const dayNum = parseInt((row[0] || '').trim().split(',')[0]);
       if (isNaN(dayNum) || dayNum < 1 || dayNum > 31) continue;
       dd.days.push(dayNum);
-      dd.shopee.visitors.push(n(row[cs.sh])   || 0);
-      dd.shopee.orders.push(n(row[cs.sh+1])   || 0);
-      dd.shopee.sales.push(n(row[cs.sh+2])    || 0);
-      dd.shopee.inBudget.push(n(row[cs.sh+6]) || 0);
-      dd.shopee.offSales.push(n(row[cs.sh+8]) || 0);
-      dd.shopee.offBudget.push(n(row[cs.sh+9])|| 0);
-      dd.tiktok.visitors.push(n(row[cs.tt])   || 0);
-      dd.tiktok.orders.push(n(row[cs.tt+1])   || 0);
-      dd.tiktok.sales.push(n(row[cs.tt+2])    || 0);
-      dd.tiktok.budget.push(n(row[cs.tt+6])   || 0);
-      dd.lazada.visitors.push(n(row[cs.lz])   || 0);
-      dd.lazada.orders.push(n(row[cs.lz+1])   || 0);
-      dd.lazada.sales.push(n(row[cs.lz+2])    || 0);
-      dd.lazada.budget.push(n(row[cs.ln-2])   || 0);
-      dd.line.orders.push(n(row[cs.ln+1])     || 0);
-      dd.line.sales.push(n(row[cs.ln+2])      || 0);
-      dd.line.cr.push(p(row[cs.ln+3])         || 0);
-      dd.line.aov.push(n(row[cs.ln+4])        || 0);
+      dd.shopee.visitors.push(n(row[cs.sh])   ?? null);
+      dd.shopee.orders.push(n(row[cs.sh+1])   ?? null);
+      dd.shopee.sales.push(n(row[cs.sh+2])    ?? null);
+      dd.shopee.inBudget.push(n(row[cs.sh+6]) ?? null);
+      dd.shopee.offSales.push(n(row[cs.sh+8]) ?? null);
+      dd.shopee.offBudget.push(n(row[cs.sh+9])?? null);
+      dd.tiktok.visitors.push(n(row[cs.tt])   ?? null);
+      dd.tiktok.orders.push(n(row[cs.tt+1])   ?? null);
+      dd.tiktok.sales.push(n(row[cs.tt+2])    ?? null);
+      dd.tiktok.budget.push(n(row[cs.tt+6])   ?? null);
+      dd.lazada.visitors.push(n(row[cs.lz])   ?? null);
+      dd.lazada.orders.push(n(row[cs.lz+1])   ?? null);
+      dd.lazada.sales.push(n(row[cs.lz+2])    ?? null);
+      dd.lazada.budget.push(n(row[cs.ln-2])   ?? null);
+      dd.line.friends.push(n(row[cs.ln])      ?? null);
+      dd.line.orders.push(n(row[cs.ln+1])     ?? null);
+      dd.line.sales.push(n(row[cs.ln+2])      ?? null);
+      dd.line.cr.push(p(row[cs.ln+3])         ?? null);
+      dd.line.aov.push(n(row[cs.ln+4])        ?? null);
       if (cs.fb !== undefined) {
-        dd.fb.reach.push(n(row[cs.fb])            || 0);
-        dd.fb.orders.push(n(row[cs.fb+1])         || 0);
-        dd.fb.sales.push(n(row[cs.fb+2])          || 0);
-        dd.fb.ibOrders.push(n(row[cs.fb+3])       || 0);
-        dd.fb.ibSales.push(n(row[cs.fb+4])        || 0);
-        dd.fb.budgetIbSales.push(n(row[cs.fb+5])  || 0);
-        dd.fb.budgetAware.push(n(row[cs.fb+6])    || 0);
-        dd.fb.budgetShopee.push(n(row[cs.fb+7])   || 0);
-        dd.fb.budgetWeb.push(n(row[cs.fb+8])      || 0);
-        dd.fb.budgetLine.push(n(row[cs.fb+9])     || 0);
-        dd.fb.roasIb.push(n(row[cs.fb+10])        || 0);
+        dd.fb.reach.push(n(row[cs.fb])            ?? null);
+        dd.fb.orders.push(n(row[cs.fb+1])         ?? null);
+        dd.fb.sales.push(n(row[cs.fb+2])          ?? null);
+        dd.fb.ibOrders.push(n(row[cs.fb+3])       ?? null);
+        dd.fb.ibSales.push(n(row[cs.fb+4])        ?? null);
+        dd.fb.budgetIbSales.push(n(row[cs.fb+5])  ?? null);
+        dd.fb.budgetAware.push(n(row[cs.fb+6])    ?? null);
+        dd.fb.budgetShopee.push(n(row[cs.fb+7])   ?? null);
+        dd.fb.budgetWeb.push(n(row[cs.fb+8])      ?? null);
+        dd.fb.budgetLine.push(n(row[cs.fb+9])     ?? null);
+        dd.fb.roasIb.push(n(row[cs.fb+10])        ?? null);
       }
       if (cs.ig !== undefined) {
-        dd.ig.reach.push(n(row[cs.ig])            || 0);
-        dd.ig.orders.push(n(row[cs.ig+1])         || 0);
-        dd.ig.sales.push(n(row[cs.ig+2])          || 0);
-        dd.ig.visitorShopee.push(n(row[cs.ig+3])  || 0);
-        dd.ig.budgetShopee.push(n(row[cs.ig+4])   || 0);
-        dd.ig.budgetAware.push(n(row[cs.ig+5])    || 0);
-        dd.ig.roas.push(n(row[cs.ig+6])           || 0);
+        dd.ig.reach.push(n(row[cs.ig])            ?? null);
+        dd.ig.orders.push(n(row[cs.ig+1])         ?? null);
+        dd.ig.sales.push(n(row[cs.ig+2])          ?? null);
+        dd.ig.visitorShopee.push(n(row[cs.ig+3])  ?? null);
+        dd.ig.budgetShopee.push(n(row[cs.ig+4])   ?? null);
+        dd.ig.budgetAware.push(n(row[cs.ig+5])    ?? null);
+        dd.ig.roas.push(n(row[cs.ig+6])           ?? null);
       }
     }
   }
