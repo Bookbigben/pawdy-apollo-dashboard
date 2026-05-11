@@ -1648,7 +1648,7 @@ function applySheetData(rows, targetMonth) {
   if (!DB[m]) return;
   const d = DB[m];
 
-  const totalIdx = rows.findIndex(r => (r[0] || '').trim().toLowerCase() === 'total');
+  const totalIdx = (() => { const idx = [...rows].map((r,i)=>[(r[0]||'').trim().toLowerCase(),i]).filter(([v])=>v==='total'); return idx.length ? idx[idx.length-1][1] : -1; })();
   if (totalIdx >= 0) {
     const t  = rows[totalIdx];
     const n  = v => pvNum(v);
