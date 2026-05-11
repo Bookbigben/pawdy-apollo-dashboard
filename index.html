@@ -31,6 +31,13 @@ html.light-mode{
   --amber:#f59e0b; --amber-bg:rgba(245,158,11,0.12);
   --red:#ef4444; --red-bg:rgba(239,68,68,0.12);
 }
+
+html.light-mode .kpi-val,
+html.light-mode .kpi-lbl,
+html.light-mode .score-num,
+html.light-mode .fc-now {
+  color: #000000 !important;
+}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13.5px;line-height:1.6;display:flex;min-height:100vh;}
 
@@ -969,6 +976,25 @@ function renderShopee(){
   setTimeout(()=>{
     mkChart('cv-sh-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].shopee.sales),backgroundColor:'rgba(255,72,32,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].shopee.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
     mkChart('cv-sh-cr',{type:'line',data:{labels:an,datasets:[{label:'CR%',data:ak.map(m=>DB[m].shopee.cr),borderColor:'#b06fff',backgroundColor:'rgba(176,111,255,.1)',tension:.3,fill:true,pointRadius:4,yAxisID:'y'},{label:'AOV',data:ak.map(m=>DB[m].shopee.aov),borderColor:'#ffc14d',tension:.3,fill:false,borderDash:[4,3],pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left',ticks:{...cDef.scales.y.ticks,callback:v=>v+'%'}},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>'฿'+v}}}}});
+    // Daily charts
+    const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
+    const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
+    const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
+    const MAX=31, dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
+    const expand=(days,vals)=>{const r=Array(MAX).fill(null); days.forEach((d,i)=>{if(d>=1&&d<=MAX)r[d-1]=vals[i]??null;}); return r;};
+    const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
+    const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
+    const calcRoas=(dd,sKey,bKey,ch)=>{const r=Array(MAX).fill(null); if(!dd||!dd.days||!dd.days.length)return r; dd.days.forEach((d,i)=>{if(d<1||d>MAX)return; const s=dd[ch][sKey][i]||0,b=dd[ch][bKey][i]||0; r[d-1]=b>0?+(s/b).toFixed(2):null;}); return r;};
+    const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
+    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:false});
+    const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
+    const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
+    const SH='#ff4820',SH2='#ff9966';
+    mkLine('cv-dy-sh-vis',[ln(cL+' Visitors',cur('shopee','visitors'),SH),ln(pL+' Visitors',prev('shopee','visitors'),SH,true)]);
+    mkLine('cv-dy-sh-ord',[ln(cL+' Orders',cur('shopee','orders'),SH),ln(pL+' Orders',prev('shopee','orders'),SH,true)]);
+    mkLine('cv-dy-sh-sales',[ln(cL+' In-Plat',cur('shopee','sales'),SH),ln(pL+' In-Plat',prev('shopee','sales'),SH,true),ln(cL+' Off-Plat',cur('shopee','offSales'),SH2),ln(pL+' Off-Plat',prev('shopee','offSales'),SH2,true)]);
+    mkLine('cv-dy-sh-bud',[ln(cL+' In-Budget',cur('shopee','inBudget'),SH),ln(pL+' In-Budget',prev('shopee','inBudget'),SH,true),ln(cL+' Off-Budget',cur('shopee','offBudget'),SH2),ln(pL+' Off-Budget',prev('shopee','offBudget'),SH2,true)]);
+    mkLine('cv-dy-sh-roas',[ln(cL+' ROAS',calcRoas(curDD,'sales','inBudget','shopee'),SH),ln(pL+' ROAS',calcRoas(prevDD,'sales','inBudget','shopee'),SH,true)],'roas');
   },30);
   $('tbl-shopee').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>Visitors</th><th>CR%</th><th>AOV</th><th>ROI</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].shopee,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${fmt(d2.visitors)}</td><td class="num">${d2.cr}%</td><td class="num">${fmtB(d2.aov)}</td><td class="num">${d2.roi}x</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
 }
@@ -980,6 +1006,25 @@ function renderTiktok(){
   setTimeout(()=>{
     mkChart('cv-tt-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].tiktok.sales),backgroundColor:'rgba(66,212,212,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].tiktok.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4},{label:'ROAS',data:ak.map(m=>DB[m].tiktok.roas),type:'line',borderColor:'#ffc14d',tension:.3,fill:false,pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left'},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>v+'x'}}}}});
     mkChart('cv-tt-reach',{type:'bar',data:{labels:an,datasets:[{label:'Reach',data:ak.map(m=>DB[m].tiktok.reach||0),backgroundColor:'rgba(66,212,212,.4)',borderRadius:4},{label:'Budget',data:ak.map(m=>DB[m].tiktok.budget),backgroundColor:'rgba(255,193,77,.6)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
+    // Daily charts
+    const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
+    const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
+    const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
+    const MAX=31, dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
+    const expand=(days,vals)=>{const r=Array(MAX).fill(null); days.forEach((d,i)=>{if(d>=1&&d<=MAX)r[d-1]=vals[i]??null;}); return r;};
+    const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
+    const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
+    const calcRoas=(dd,sKey,bKey,ch)=>{const r=Array(MAX).fill(null); if(!dd||!dd.days||!dd.days.length)return r; dd.days.forEach((d,i)=>{if(d<1||d>MAX)return; const s=dd[ch][sKey][i]||0,b=dd[ch][bKey][i]||0; r[d-1]=b>0?+(s/b).toFixed(2):null;}); return r;};
+    const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
+    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:false});
+    const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
+    const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
+    const TT='#44d4d4';
+    mkLine('cv-dy-tt-vis',[ln(cL+' Visitors',cur('tiktok','visitors'),TT),ln(pL+' Visitors',prev('tiktok','visitors'),TT,true)]);
+    mkLine('cv-dy-tt-ord',[ln(cL+' Orders',cur('tiktok','orders'),TT),ln(pL+' Orders',prev('tiktok','orders'),TT,true)]);
+    mkLine('cv-dy-tt-sales',[ln(cL+' Sales',cur('tiktok','sales'),TT),ln(pL+' Sales',prev('tiktok','sales'),TT,true)]);
+    mkLine('cv-dy-tt-bud',[ln(cL+' Budget',cur('tiktok','budget'),TT),ln(pL+' Budget',prev('tiktok','budget'),TT,true)]);
+    mkLine('cv-dy-tt-roas',[ln(cL+' ROAS',calcRoas(curDD,'sales','budget','tiktok'),TT),ln(pL+' ROAS',calcRoas(prevDD,'sales','budget','tiktok'),TT,true)],'roas');
   },30);
   $('tbl-tiktok').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>CR%</th><th>AOV</th><th>ROAS</th><th>Reach</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].tiktok,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${d2.cr}%</td><td class="num">${fmtB(d2.aov)}</td><td class="num">${d2.roas}x</td><td class="num">${fmt(d2.reach||0)}</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
 }
@@ -990,6 +1035,24 @@ function renderLazada(){
   $('kpi-lazada').innerHTML=`<div class="kpi" style="--kc:var(--lazada)"><div class="kpi-lbl">GMV</div><div class="kpi-val">${fmtB(d.sales)}</div><div class="kpi-sub"><span class="badge ${bCls(p)}">${p}%</span> vs ${fmtB(d.target)}</div></div><div class="kpi" style="--kc:var(--lazada)"><div class="kpi-lbl">Orders</div><div class="kpi-val">${d.orders.toLocaleString()}</div><div class="kpi-sub">Total orders</div></div><div class="kpi" style="--kc:var(--lazada)"><div class="kpi-lbl">CR%</div><div class="kpi-val">${d.cr}%</div><div class="kpi-sub">Conversion Rate</div></div><div class="kpi" style="--kc:var(--lazada)"><div class="kpi-lbl">AOV</div><div class="kpi-val">${fmtB(d.aov)}</div><div class="kpi-sub">Avg Order Value</div></div><div class="kpi" style="--kc:var(--lazada)"><div class="kpi-lbl">ROAS</div><div class="kpi-val">${d.roas}x</div><div class="kpi-sub">Budget ${fmtB(d.budget)}</div></div>`;
   setTimeout(()=>{
     mkChart('cv-lz-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].lazada.sales),backgroundColor:'rgba(96,112,255,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].lazada.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4},{label:'ROAS',data:ak.map(m=>DB[m].lazada.roas),type:'line',borderColor:'#2de8a0',tension:.3,fill:false,pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left'},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>v+'x'}}}}});
+    const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
+    const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
+    const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
+    const MAX=31, dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
+    const expand=(days,vals)=>{const r=Array(MAX).fill(null); days.forEach((d,i)=>{if(d>=1&&d<=MAX)r[d-1]=vals[i]??null;}); return r;};
+    const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
+    const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
+    const calcRoas=(dd,sKey,bKey,ch)=>{const r=Array(MAX).fill(null); if(!dd||!dd.days||!dd.days.length)return r; dd.days.forEach((d,i)=>{if(d<1||d>MAX)return; const s=dd[ch][sKey][i]||0,b=dd[ch][bKey][i]||0; r[d-1]=b>0?+(s/b).toFixed(2):null;}); return r;};
+    const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
+    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:false});
+    const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
+    const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
+    const LZ='#6070ff';
+    mkLine('cv-dy-lz-vis',[ln(cL+' Visitors',cur('lazada','visitors'),LZ),ln(pL+' Visitors',prev('lazada','visitors'),LZ,true)]);
+    mkLine('cv-dy-lz-ord',[ln(cL+' Orders',cur('lazada','orders'),LZ),ln(pL+' Orders',prev('lazada','orders'),LZ,true)]);
+    mkLine('cv-dy-lz-sales',[ln(cL+' Sales',cur('lazada','sales'),LZ),ln(pL+' Sales',prev('lazada','sales'),LZ,true)]);
+    mkLine('cv-dy-lz-bud',[ln(cL+' Budget',cur('lazada','budget'),LZ),ln(pL+' Budget',prev('lazada','budget'),LZ,true)]);
+    mkLine('cv-dy-lz-roas',[ln(cL+' ROAS',calcRoas(curDD,'sales','budget','lazada'),LZ),ln(pL+' ROAS',calcRoas(prevDD,'sales','budget','lazada'),LZ,true)],'roas');
   },30);
   $('tbl-lazada').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>CR%</th><th>AOV</th><th>ROAS</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].lazada,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${d2.cr}%</td><td class="num">${fmtB(d2.aov)}</td><td class="num">${d2.roas}x</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
 }
@@ -1000,6 +1063,22 @@ function renderLine(){
   $('kpi-line').innerHTML=`<div class="kpi" style="--kc:var(--line)"><div class="kpi-lbl">GMV</div><div class="kpi-val">${fmtB(d.sales)}</div><div class="kpi-sub"><span class="badge ${bCls(p)}">${p}%</span> vs ${fmtB(d.target)}</div></div><div class="kpi" style="--kc:var(--line)"><div class="kpi-lbl">Orders</div><div class="kpi-val">${d.orders.toLocaleString()}</div><div class="kpi-sub">Total orders</div></div><div class="kpi" style="--kc:var(--line)"><div class="kpi-lbl">AOV</div><div class="kpi-val">${fmtB(d.aov)}</div><div class="kpi-sub">Avg Order Value</div></div>`;
   setTimeout(()=>{
     mkChart('cv-ln-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].line.sales),backgroundColor:'rgba(0,184,86,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].line.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
+    const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
+    const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
+    const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
+    const MAX=31, dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
+    const expand=(days,vals)=>{const r=Array(MAX).fill(null); days.forEach((d,i)=>{if(d>=1&&d<=MAX)r[d-1]=vals[i]??null;}); return r;};
+    const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
+    const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
+    const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
+    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:false});
+    const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
+    const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
+    const LN='#00b856', LN2='#66ddaa';
+    mkLine('cv-dy-ln-fri',[ln(cL+' Friends',cur('line','friends'),LN),ln(pL+' Friends',prev('line','friends'),LN,true)]);
+    mkLine('cv-dy-ln-ord',[ln(cL+' Orders',cur('line','orders'),LN),ln(pL+' Orders',prev('line','orders'),LN,true)]);
+    mkLine('cv-dy-ln-sales',[ln(cL+' Sales',cur('line','sales'),LN),ln(pL+' Sales',prev('line','sales'),LN,true)]);
+    mkLine('cv-dy-ln-cr',[ln(cL+' CR%',cur('line','cr'),LN),ln(pL+' CR%',prev('line','cr'),LN,true),ln(cL+' AOV',cur('line','aov'),LN2),ln(pL+' AOV',prev('line','aov'),LN2,true)],'num');
   },30);
   $('tbl-line').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>AOV</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].line,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${fmtB(d2.aov)}</td></tr>`;}).join('')}</tbody>`;
 }
@@ -1011,6 +1090,24 @@ function renderFb(){
   setTimeout(()=>{
     mkChart('cv-fb-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].fb.sales),backgroundColor:'rgba(46,128,255,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].fb.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
     mkChart('cv-fb-reach',{type:'line',data:{labels:an,datasets:[{label:'Reach',data:ak.map(m=>DB[m].fb.reach||0),borderColor:'#2e80ff',backgroundColor:'rgba(46,128,255,.1)',tension:.3,fill:true,pointRadius:4},{label:'Budget',data:ak.map(m=>DB[m].fb.budget),borderColor:'#ffc14d',tension:.3,fill:false,borderDash:[4,3],pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left'},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>'฿'+fmt(v)}}}}});
+    const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
+    const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
+    const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
+    const MAX=31, dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
+    const expand=(days,vals)=>{const r=Array(MAX).fill(null); days.forEach((d,i)=>{if(d>=1&&d<=MAX)r[d-1]=vals[i]??null;}); return r;};
+    const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
+    const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
+    const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
+    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:false});
+    const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
+    const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
+    const FB='#4a90e2', FB2='#82b4f0', FB3='#c0d9ff';
+    mkLine('cv-dy-fb-reach',[ln(cL+' Reach',cur('fb','reach'),FB),ln(pL+' Reach',prev('fb','reach'),FB,true)]);
+    mkLine('cv-dy-fb-ord',[ln(cL+' Orders',cur('fb','orders'),FB),ln(pL+' Orders',prev('fb','orders'),FB,true),ln(cL+' Sales',cur('fb','sales'),FB2),ln(pL+' Sales',prev('fb','sales'),FB2,true)]);
+    mkLine('cv-dy-fb-ibconv',[ln(cL+' IB Orders',cur('fb','ibOrders'),FB),ln(pL+' IB Orders',prev('fb','ibOrders'),FB,true),ln(cL+' IB Sales',cur('fb','ibSales'),FB2),ln(pL+' IB Sales',prev('fb','ibSales'),FB2,true)]);
+    mkLine('cv-dy-fb-bud1',[ln(cL+' Inbox/Sales',cur('fb','budgetIbSales'),FB),ln(pL+' Inbox/Sales',prev('fb','budgetIbSales'),FB,true),ln(cL+' Awareness',cur('fb','budgetAware'),FB2),ln(pL+' Awareness',prev('fb','budgetAware'),FB2,true)]);
+    mkLine('cv-dy-fb-bud2',[ln(cL+' Shopee',cur('fb','budgetShopee'),FB),ln(pL+' Shopee',prev('fb','budgetShopee'),FB,true),ln(cL+' Web',cur('fb','budgetWeb'),FB2),ln(pL+' Web',prev('fb','budgetWeb'),FB2,true),ln(cL+' Line',cur('fb','budgetLine'),FB3),ln(pL+' Line',prev('fb','budgetLine'),FB3,true)]);
+    mkLine('cv-dy-fb-roas',[ln(cL+' ROAS',cur('fb','roasIb'),FB),ln(pL+' ROAS',prev('fb','roasIb'),FB,true)],'roas');
   },30);
   $('tbl-fb').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>Reach</th><th>ROAS</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].fb,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${fmt(d2.reach||0)}</td><td class="num">${d2.roas}x</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
 }
