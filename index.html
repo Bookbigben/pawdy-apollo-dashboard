@@ -362,6 +362,39 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <!-- Daily Charts -->
       <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
         <h3 style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">📊 Shopee — รายวัน เทียบเดือนก่อน</h3>
+        
+        <!-- Date Selector -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>เลือกวันที่เปรียบเทียบ</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 0">
+            <input type="number" id="sh-day-select" min="1" max="31" placeholder="วัน" style="width:60px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font)">
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('shopee',1)">1</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('shopee',7)">7</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('shopee',14)">14</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('shopee',21)">21</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('shopee',28)">28</button>
+            <button class="btn btn-pri" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('shopee','latest')">วันล่าสุด</button>
+          </div>
+        </div>
+        
+        <!-- Summary Stats -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>สรุปยอดรวม</div>
+          <div class="g2" style="margin-bottom:0">
+            <div class="score-box"><div class="score-num" style="color:var(--shopee)">฿<span id="sh-sum-curr">0</span></div><div class="score-info"><div class="score-label">ยอดขายเดือนนี้</div><div style="font-size:11px;color:var(--text2)">จนถึงวัน <span id="sh-day-label">-</span></div></div></div>
+            <div class="score-box"><div class="score-num" style="color:var(--text3)">฿<span id="sh-sum-prev">0</span></div><div class="score-info"><div class="score-label">ยอดขายเดือนที่แล้ว</div><div style="font-size:11px;color:var(--text2)">วันเดียวกัน</div></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Orders</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">เดือนนี้: <span id="sh-ord-curr">0</span> | เดือนที่แล้ว: <span id="sh-ord-prev">0</span></div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px">AOV (ค่าเฉลี่ยต่อออร์เดอร์)</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">เดือนนี้: ฿<span id="sh-aov-curr">0</span> | เดือนที่แล้ว: ฿<span id="sh-aov-prev">0</span></div>
+            </div>
+          </div>
+        </div>
         <div class="g2">
           <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-vis"></canvas></div></div>
           <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-ord"></canvas></div></div>
@@ -386,6 +419,39 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <!-- Daily Charts -->
       <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
         <h3 style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">📊 TikTok — รายวัน เทียบเดือนก่อน</h3>
+        
+        <!-- Date Selector -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>เลือกวันที่เปรียบเทียบ</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 0">
+            <input type="number" id="tiktok-day-select" min="1" max="31" placeholder="วัน" style="width:60px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font)">
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('tiktok',1)">1</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('tiktok',7)">7</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('tiktok',14)">14</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('tiktok',21)">21</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('tiktok',28)">28</button>
+            <button class="btn btn-pri" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('tiktok','latest')">วันล่าสุด</button>
+          </div>
+        </div>
+        
+        <!-- Summary Stats -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>สรุปยอดรวม</div>
+          <div class="g2" style="margin-bottom:0">
+            <div class="score-box"><div class="score-num" style="color:var(--tiktok)">฿<span id="tiktok-sum-curr">0</span></div><div class="score-info"><div class="score-label">ยอดขายเดือนนี้</div><div style="font-size:11px;color:var(--text2)">จนถึงวัน <span id="tiktok-day-label">-</span></div></div></div>
+            <div class="score-box"><div class="score-num" style="color:var(--text3)">฿<span id="tiktok-sum-prev">0</span></div><div class="score-info"><div class="score-label">ยอดขายเดือนที่แล้ว</div><div style="font-size:11px;color:var(--text2)">วันเดียวกัน</div></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Orders</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">เดือนนี้: <span id="tiktok-ord-curr">0</span> | เดือนที่แล้ว: <span id="tiktok-ord-prev">0</span></div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px">AOV (ค่าเฉลี่ยต่อออร์เดอร์)</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">เดือนนี้: ฿<span id="tiktok-aov-curr">0</span> | เดือนที่แล้ว: ฿<span id="tiktok-aov-prev">0</span></div>
+            </div>
+          </div>
+        </div>
         <div class="g2">
           <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-vis"></canvas></div></div>
           <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-ord"></canvas></div></div>
@@ -407,6 +473,39 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <!-- Daily Charts -->
       <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
         <h3 style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">📊 Lazada — รายวัน เทียบเดือนก่อน</h3>
+        
+        <!-- Date Selector -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="cdot" style="background:var(--lazada)"></div>เลือกวันที่เปรียบเทียบ</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 0">
+            <input type="number" id="lazada-day-select" min="1" max="31" placeholder="วัน" style="width:60px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font)">
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('lazada',1)">1</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('lazada',7)">7</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('lazada',14)">14</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('lazada',21)">21</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('lazada',28)">28</button>
+            <button class="btn btn-pri" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('lazada','latest')">วันล่าสุด</button>
+          </div>
+        </div>
+        
+        <!-- Summary Stats -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="cdot" style="background:var(--lazada)"></div>สรุปยอดรวม</div>
+          <div class="g2" style="margin-bottom:0">
+            <div class="score-box"><div class="score-num" style="color:var(--lazada)">฿<span id="lazada-sum-curr">0</span></div><div class="score-info"><div class="score-label">ยอดขายเดือนนี้</div><div style="font-size:11px;color:var(--text2)">จนถึงวัน <span id="lazada-day-label">-</span></div></div></div>
+            <div class="score-box"><div class="score-num" style="color:var(--text3)">฿<span id="lazada-sum-prev">0</span></div><div class="score-info"><div class="score-label">ยอดขายเดือนที่แล้ว</div><div style="font-size:11px;color:var(--text2)">วันเดียวกัน</div></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Orders</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">เดือนนี้: <span id="lazada-ord-curr">0</span> | เดือนที่แล้ว: <span id="lazada-ord-prev">0</span></div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px">AOV (ค่าเฉลี่ยต่อออร์เดอร์)</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">เดือนนี้: ฿<span id="lazada-aov-curr">0</span> | เดือนที่แล้ว: ฿<span id="lazada-aov-prev">0</span></div>
+            </div>
+          </div>
+        </div>
         <div class="g2">
           <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-vis"></canvas></div></div>
           <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-ord"></canvas></div></div>
@@ -428,6 +527,39 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <!-- Daily Charts -->
       <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
         <h3 style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">📊 Line OA — รายวัน เทียบเดือนก่อน</h3>
+        
+        <!-- Date Selector -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="cdot" style="background:var(--line)"></div>เลือกวันที่เปรียบเทียบ</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 0">
+            <input type="number" id="line-day-select" min="1" max="31" placeholder="วัน" style="width:60px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font)">
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('line',1)">1</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('line',7)">7</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('line',14)">14</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('line',21)">21</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('line',28)">28</button>
+            <button class="btn btn-pri" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('line','latest')">วันล่าสุด</button>
+          </div>
+        </div>
+        
+        <!-- Summary Stats -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="cdot" style="background:var(--line)"></div>สรุปยอดรวม</div>
+          <div class="g2" style="margin-bottom:0">
+            <div class="score-box"><div class="score-num" style="color:var(--line)">฿<span id="line-sum-curr">0</span></div><div class="score-info"><div class="score-label">ยอดขายเดือนนี้</div><div style="font-size:11px;color:var(--text2)">จนถึงวัน <span id="line-day-label">-</span></div></div></div>
+            <div class="score-box"><div class="score-num" style="color:var(--text3)">฿<span id="line-sum-prev">0</span></div><div class="score-info"><div class="score-label">ยอดขายเดือนที่แล้ว</div><div style="font-size:11px;color:var(--text2)">วันเดียวกัน</div></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Orders</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">เดือนนี้: <span id="line-ord-curr">0</span> | เดือนที่แล้ว: <span id="line-ord-prev">0</span></div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px">AOV (ค่าเฉลี่ยต่อออร์เดอร์)</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">เดือนนี้: ฿<span id="line-aov-curr">0</span> | เดือนที่แล้ว: ฿<span id="line-aov-prev">0</span></div>
+            </div>
+          </div>
+        </div>
         <div class="g2">
           <div class="card"><div class="card-head">Current Friends</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-fri"></canvas></div></div>
           <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-ord"></canvas></div></div>
@@ -451,6 +583,39 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <!-- Daily Charts -->
       <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
         <h3 style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">📊 Facebook — รายวัน เทียบเดือนก่อน</h3>
+        
+        <!-- Date Selector -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="cdot" style="background:var(--fb)"></div>เลือกวันที่เปรียบเทียบ</div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 0">
+            <input type="number" id="fb-day-select" min="1" max="31" placeholder="วัน" style="width:60px;padding:6px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font)">
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('fb',1)">1</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('fb',7)">7</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('fb',14)">14</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('fb',21)">21</button>
+            <button class="btn btn-sec" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('fb',28)">28</button>
+            <button class="btn btn-pri" style="padding:6px 12px;font-size:11px" onclick="setSummaryDay('fb','latest')">วันล่าสุด</button>
+          </div>
+        </div>
+        
+        <!-- Summary Stats -->
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-head"><div class="cdot" style="background:var(--fb)"></div>สรุปยอดรวม</div>
+          <div class="g2" style="margin-bottom:0">
+            <div class="score-box"><div class="score-num" style="color:var(--fb)">฿<span id="fb-sum-curr">0</span></div><div class="score-info"><div class="score-label">ยอดขายเดือนนี้</div><div style="font-size:11px;color:var(--text2)">จนถึงวัน <span id="fb-day-label">-</span></div></div></div>
+            <div class="score-box"><div class="score-num" style="color:var(--text3)">฿<span id="fb-sum-prev">0</span></div><div class="score-info"><div class="score-label">ยอดขายเดือนที่แล้ว</div><div style="font-size:11px;color:var(--text2)">วันเดียวกัน</div></div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px">
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px">Orders</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">เดือนนี้: <span id="fb-ord-curr">0</span> | เดือนที่แล้ว: <span id="fb-ord-prev">0</span></div>
+            </div>
+            <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+              <div style="font-size:10px;color:var(--text3);margin-bottom:4px">AOV (ค่าเฉลี่ยต่อออร์เดอร์)</div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">เดือนนี้: ฿<span id="fb-aov-curr">0</span> | เดือนที่แล้ว: ฿<span id="fb-aov-prev">0</span></div>
+            </div>
+          </div>
+        </div>
         <div class="g2">
           <div class="card"><div class="card-head">Reach</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-reach"></canvas></div></div>
           <div class="card"><div class="card-head">Orders & Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-ord"></canvas></div></div>
@@ -995,6 +1160,7 @@ function renderShopee(){
     mkLine('cv-dy-sh-sales',[ln(cL+' In-Plat',cur('shopee','sales'),SH),ln(pL+' In-Plat',prev('shopee','sales'),SH,true),ln(cL+' Off-Plat',cur('shopee','offSales'),SH2),ln(pL+' Off-Plat',prev('shopee','offSales'),SH2,true)]);
     mkLine('cv-dy-sh-bud',[ln(cL+' In-Budget',cur('shopee','inBudget'),SH),ln(pL+' In-Budget',prev('shopee','inBudget'),SH,true),ln(cL+' Off-Budget',cur('shopee','offBudget'),SH2),ln(pL+' Off-Budget',prev('shopee','offBudget'),SH2,true)]);
     mkLine('cv-dy-sh-roas',[ln(cL+' ROAS',calcRoas(curDD,'sales','inBudget','shopee'),SH),ln(pL+' ROAS',calcRoas(prevDD,'sales','inBudget','shopee'),SH,true)],'roas');
+    updateDailySummary('shopee');
   },30);
   $('tbl-shopee').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>Visitors</th><th>CR%</th><th>AOV</th><th>ROI</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].shopee,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${fmt(d2.visitors)}</td><td class="num">${d2.cr}%</td><td class="num">${fmtB(d2.aov)}</td><td class="num">${d2.roi}x</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
 }
@@ -2296,6 +2462,72 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
     if (ap) renderActive(ap.id.replace('panel-', ''));
   });
 });
+
+// ════ DAILY SUMMARY CALCULATOR ════
+let SUMMARY_DAY = {};
+function setSummaryDay(channel, day) {
+  SUMMARY_DAY[channel] = day;
+  updateDailySummary(channel);
+}
+
+function updateDailySummary(ch) {
+  const m = CUR === 'all' ? 'may' : CUR;
+  const curDD = DAILY[m] || {};
+  const dayNum = SUMMARY_DAY[ch] || 1;
+  const dayIdx = dayNum === 'latest' ? (curDD.days ? curDD.days.length - 1 : -1) : dayNum - 1;
+  
+  if (!curDD.days || dayIdx < 0 || dayIdx >= curDD.days.length) {
+    $(`${ch}-day-label`).textContent = '-';
+    $(`${ch}-sum-curr`).textContent = '0';
+    $(`${ch}-sum-prev`).textContent = '0';
+    $(`${ch}-ord-curr`).textContent = '0';
+    $(`${ch}-ord-prev`).textContent = '0';
+    $(`${ch}-aov-curr`).textContent = '0';
+    $(`${ch}-aov-prev`).textContent = '0';
+    return;
+  }
+
+  const actualDay = curDD.days[dayIdx];
+  $(`${ch}-day-label`).textContent = actualDay + ' ' + (CUR === 'all' ? 'พ.ค.' : MN[MK.indexOf(m)]);
+
+  // คำนวณยอดรวมจนถึงวันนั้น
+  let curSum = 0, curOrd = 0;
+  curDD.days.forEach((d, i) => {
+    if (d <= actualDay) {
+      if (curDD[ch] && curDD[ch].sales) curSum += curDD[ch].sales[i] || 0;
+      if (curDD[ch] && curDD[ch].orders) curOrd += curDD[ch].orders[i] || 0;
+    }
+  });
+
+  // เดือนที่แล้ว
+  const prevMap = {jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
+  const pM = prevMap[m];
+  const prevDD = pM ? DAILY[pM] : null;
+  let prevSum = 0, prevOrd = 0;
+  
+  if (prevDD && prevDD.days) {
+    prevDD.days.forEach((d, i) => {
+      if (d <= actualDay) {
+        if (prevDD[ch] && prevDD[ch].sales) prevSum += prevDD[ch].sales[i] || 0;
+        if (prevDD[ch] && prevDD[ch].orders) prevOrd += prevDD[ch].orders[i] || 0;
+      }
+    });
+  }
+
+  const curAov = curOrd > 0 ? Math.round(curSum / curOrd) : 0;
+  const prevAov = prevOrd > 0 ? Math.round(prevSum / prevOrd) : 0;
+
+  $(`${ch}-sum-curr`).textContent = fmt(curSum);
+  $(`${ch}-sum-prev`).textContent = fmt(prevSum);
+  $(`${ch}-ord-curr`).textContent = curOrd.toLocaleString();
+  $(`${ch}-ord-prev`).textContent = prevOrd.toLocaleString();
+  $(`${ch}-aov-curr`).textContent = fmt(curAov);
+  $(`${ch}-aov-prev`).textContent = fmt(prevAov);
+  
+  // Update input
+  const inp = $(`${ch}-day-select`);
+  if (inp) inp.value = dayNum === 'latest' ? curDD.days[curDD.days.length - 1] : dayNum;
+}
 
 // ── Startup init ──
 (function initDashboard() {
