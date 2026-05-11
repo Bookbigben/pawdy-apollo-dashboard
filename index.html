@@ -20,24 +20,6 @@
   --font:'Noto Sans Thai','Inter',sans-serif;
   --mono:'JetBrains Mono',monospace;
 }
-
-/* Light Mode */
-html.light-mode{
-  --bg:#f8f9fb; --bg2:#ffffff; --bg3:#f0f1f5; --bg4:#e8e9ed; --bg5:#e0e1e6;
-  --border:rgba(0,0,0,0.08); --border2:rgba(0,0,0,0.12);
-  --text:#1a1d2e; --text2:#525968; --text3:#8891a6;
-  --accent:#4d7cff; --glow:rgba(77,124,255,0.1);
-  --green:#2de8a0; --green-bg:rgba(45,232,160,0.12);
-  --amber:#f59e0b; --amber-bg:rgba(245,158,11,0.12);
-  --red:#ef4444; --red-bg:rgba(239,68,68,0.12);
-}
-
-html.light-mode .kpi-val,
-html.light-mode .kpi-lbl,
-html.light-mode .score-num,
-html.light-mode .fc-now {
-  color: #000000 !important;
-}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:13.5px;line-height:1.6;display:flex;min-height:100vh;}
 
@@ -198,7 +180,6 @@ code{background:var(--bg4);padding:1px 6px;border-radius:4px;font-family:var(--m
 .view-toggle{padding:5px 10px;border-radius:var(--r);border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:11.5px;font-family:var(--font);cursor:pointer;transition:all .12s;white-space:nowrap;flex-shrink:0;}
 .view-toggle:hover{border-color:var(--accent);color:var(--text);}
 .view-toggle.mob-on{background:rgba(77,124,255,.15);border-color:var(--accent);color:var(--accent);}
-.view-toggle.light-mode{background:rgba(77,124,255,.15);border-color:var(--accent);color:var(--accent);}
 
 /* ── MOBILE LAYOUT — auto on real device ── */
 @media (max-width:768px){
@@ -265,6 +246,9 @@ html.mob .score-box{flex-direction:column;gap:8px;}
     <div class="nav-item" data-panel="compare">
       <div class="nav-dot" style="background:var(--green)"></div>เปรียบเทียบรายเดือน
     </div>
+    <div class="nav-item" data-panel="weekly">
+      <div class="nav-dot" style="background:#a78bfa"></div>Weekly
+    </div>
     <div class="nav-group">Channel</div>
     <div class="nav-item" data-panel="shopee">
       <div class="nav-dot" style="background:var(--shopee)"></div>Shopee
@@ -308,7 +292,6 @@ html.mob .score-box{flex-direction:column;gap:8px;}
   <div class="topbar">
     <button class="ham-btn" id="hamBtn" onclick="openSidebar()" aria-label="เมนู"><span></span><span></span><span></span></button>
     <div><span class="topbar-title">Team Apollo</span>&nbsp;<span class="topbar-sub">Sales Performance Report</span></div>
-    <button class="view-toggle" id="themeToggle" onclick="toggleTheme()" title="สลับ Dark/Light Mode">🌙 Dark</button>
     <button class="view-toggle" id="viewToggle" onclick="toggleMobileView()" title="สลับ Mobile / Desktop">📱 Mobile</button>
     <div class="mtabs">
       <button class="mt" data-m="jan">ม.ค.</button>
@@ -358,20 +341,6 @@ html.mob .score-box{flex-direction:column;gap:8px;}
         <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>CR% & AOV</div><div class="chart-wrap" style="height:200px"><canvas id="cv-sh-cr"></canvas></div></div>
       </div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-shopee"></table></div>
-      
-      <!-- Daily Charts -->
-      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
-        <h3 style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">📊 Shopee — รายวัน เทียบเดือนก่อน</h3>
-        <div class="g2">
-          <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-vis"></canvas></div></div>
-          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-ord"></canvas></div></div>
-        </div>
-        <div class="g2">
-          <div class="card"><div class="card-head">Sales (In-Plat vs Off-Plat)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-sales"></canvas></div></div>
-          <div class="card"><div class="card-head">Budget (In-Plat vs Off-Plat)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-bud"></canvas></div></div>
-        </div>
-        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-sh-roas"></canvas></div></div>
-      </div>
     </div>
 
     <!-- TIKTOK -->
@@ -382,20 +351,6 @@ html.mob .score-box{flex-direction:column;gap:8px;}
         <div class="card"><div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>Reach & Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-tt-reach"></canvas></div></div>
       </div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-tiktok"></table></div>
-      
-      <!-- Daily Charts -->
-      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
-        <h3 style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">📊 TikTok — รายวัน เทียบเดือนก่อน</h3>
-        <div class="g2">
-          <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-vis"></canvas></div></div>
-          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-ord"></canvas></div></div>
-        </div>
-        <div class="g2">
-          <div class="card"><div class="card-head">Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-sales"></canvas></div></div>
-          <div class="card"><div class="card-head">Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-bud"></canvas></div></div>
-        </div>
-        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-tt-roas"></canvas></div></div>
-      </div>
     </div>
 
     <!-- LAZADA -->
@@ -403,20 +358,6 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <div class="kpi-grid" id="kpi-lazada"></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--lazada)"></div>GMV vs Target & ROAS</div><div class="chart-wrap" style="height:210px"><canvas id="cv-lz-gmv"></canvas></div></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--lazada)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-lazada"></table></div>
-      
-      <!-- Daily Charts -->
-      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
-        <h3 style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">📊 Lazada — รายวัน เทียบเดือนก่อน</h3>
-        <div class="g2">
-          <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-vis"></canvas></div></div>
-          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-ord"></canvas></div></div>
-        </div>
-        <div class="g2">
-          <div class="card"><div class="card-head">Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-sales"></canvas></div></div>
-          <div class="card"><div class="card-head">Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-bud"></canvas></div></div>
-        </div>
-        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-lz-roas"></canvas></div></div>
-      </div>
     </div>
 
     <!-- LINE -->
@@ -424,19 +365,6 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <div class="kpi3" id="kpi-line"></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--line)"></div>GMV vs Target</div><div class="chart-wrap" style="height:210px"><canvas id="cv-ln-gmv"></canvas></div></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--line)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-line"></table></div>
-      
-      <!-- Daily Charts -->
-      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
-        <h3 style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">📊 Line OA — รายวัน เทียบเดือนก่อน</h3>
-        <div class="g2">
-          <div class="card"><div class="card-head">Current Friends</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-fri"></canvas></div></div>
-          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-ord"></canvas></div></div>
-        </div>
-        <div class="g2">
-          <div class="card"><div class="card-head">Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-sales"></canvas></div></div>
-          <div class="card"><div class="card-head">CR% & AOV</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-cr"></canvas></div></div>
-        </div>
-      </div>
     </div>
 
     <!-- FB -->
@@ -447,23 +375,6 @@ html.mob .score-box{flex-direction:column;gap:8px;}
         <div class="card"><div class="card-head"><div class="cdot" style="background:var(--fb)"></div>Reach & Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-fb-reach"></canvas></div></div>
       </div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--fb)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-fb"></table></div>
-      
-      <!-- Daily Charts -->
-      <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:14px">
-        <h3 style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:14px">📊 Facebook — รายวัน เทียบเดือนก่อน</h3>
-        <div class="g2">
-          <div class="card"><div class="card-head">Reach</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-reach"></canvas></div></div>
-          <div class="card"><div class="card-head">Orders & Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-ord"></canvas></div></div>
-        </div>
-        <div class="g2">
-          <div class="card"><div class="card-head">Inbox FB→ปิดไลน์ (Orders & Sales)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-ibconv"></canvas></div></div>
-          <div class="card"><div class="card-head">Budget (Inbox/Sales vs Awareness)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-bud1"></canvas></div></div>
-        </div>
-        <div class="g2">
-          <div class="card"><div class="card-head">Budget (Traffic: Shopee / Web / Line)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-bud2"></canvas></div></div>
-          <div class="card"><div class="card-head">ROAS (Inbox/Sales)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-roas"></canvas></div></div>
-        </div>
-      </div>
     </div>
 
     <!-- LIVE -->
@@ -496,6 +407,97 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--amber)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-affi"></table></div>
     </div>
 
+
+    <!-- WEEKLY -->
+    <div class="panel" id="panel-weekly">
+      <div id="wk-empty-msg" style="display:none;text-align:center;padding:60px 20px;color:var(--text3);font-size:13px">⏳ ยังไม่มีข้อมูลรายวัน — ไปที่ ⚙ Settings เพื่อซิงค์ข้อมูล</div>
+
+      <!-- Shopee -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:var(--shopee)">🛒 Shopee — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-vis"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-ord"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Sales (In-Plat vs Off-Plat)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-sales"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget (In-Plat vs Off-Plat)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-sh-bud"></canvas></div></div>
+        </div>
+        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-sh-roas"></canvas></div></div>
+      </div>
+
+      <!-- TikTok -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:var(--tiktok)">🎵 TikTok — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-vis"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-ord"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-sales"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-tt-bud"></canvas></div></div>
+        </div>
+        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-tt-roas"></canvas></div></div>
+      </div>
+
+      <!-- Lazada -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:var(--lazada)">🟠 Lazada — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Visitors</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-vis"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-ord"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-sales"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-lz-bud"></canvas></div></div>
+        </div>
+        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-lz-roas"></canvas></div></div>
+      </div>
+
+      <!-- Line OA -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:var(--line)">💬 Line OA — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Current Friends</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-fri"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-ord"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-sales"></canvas></div></div>
+          <div class="card"><div class="card-head">CR% &amp; AOV</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ln-cr"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Facebook -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:#4a90e2">📘 Facebook — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Reach</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-reach"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders &amp; Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-ord"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Inbox FB→ปิดไลน์ (Orders &amp; Sales)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-ibconv"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget (Inbox/Sales vs Awareness)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-bud1"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Budget (Traffic: Shopee / Web / Line)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-bud2"></canvas></div></div>
+          <div class="card"><div class="card-head">ROAS (Inbox/Sales)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-fb-roas"></canvas></div></div>
+        </div>
+      </div>
+
+      <!-- Instagram -->
+      <div class="wk-section">
+        <div class="wk-sec-hd" style="--sc:#e1306c">📸 Instagram — รายวัน เทียบเดือนก่อน</div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Reach</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-reach"></canvas></div></div>
+          <div class="card"><div class="card-head">Orders &amp; Sales</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-ordsales"></canvas></div></div>
+        </div>
+        <div class="g2">
+          <div class="card"><div class="card-head">Visitor</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-vis"></canvas></div></div>
+          <div class="card"><div class="card-head">Budget (Traffic vs Awareness)</div><div class="chart-wrap" style="height:200px"><canvas id="cv-dy-ig-bud"></canvas></div></div>
+        </div>
+        <div class="card"><div class="card-head">ROAS</div><div class="chart-wrap" style="height:180px"><canvas id="cv-dy-ig-roas"></canvas></div></div>
+      </div>
+    </div>
 
     <!-- SUGGEST -->
     <div class="panel" id="panel-suggest">
@@ -969,6 +971,151 @@ function renderCompare(){
 }
 
 // ════ WEEKLY ════
+function renderWeekly(){
+  const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
+  const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
+  const m = CUR==='all' ? 'may' : CUR;
+  const pM = prevMap[m];
+  const curDD  = DAILY[m]  || {};
+  const prevDD = pM ? DAILY[pM] : null;
+
+  const MAX = 31;
+  const dayLabels = Array.from({length:MAX}, (_,i) => String(i+1));
+  const allIds = [
+    'cv-dy-sh-vis','cv-dy-sh-ord','cv-dy-sh-sales','cv-dy-sh-bud','cv-dy-sh-roas',
+    'cv-dy-tt-vis','cv-dy-tt-ord','cv-dy-tt-sales','cv-dy-tt-bud','cv-dy-tt-roas',
+    'cv-dy-lz-vis','cv-dy-lz-ord','cv-dy-lz-sales','cv-dy-lz-bud','cv-dy-lz-roas',
+    'cv-dy-ln-fri','cv-dy-ln-ord','cv-dy-ln-sales','cv-dy-ln-cr',
+    'cv-dy-fb-reach','cv-dy-fb-ord','cv-dy-fb-ibconv','cv-dy-fb-bud1','cv-dy-fb-bud2','cv-dy-fb-roas',
+    'cv-dy-ig-reach','cv-dy-ig-ordsales','cv-dy-ig-vis','cv-dy-ig-bud','cv-dy-ig-roas',
+  ];
+
+  const emptyEl = $('wk-empty-msg');
+  const hasDays = curDD.days && curDD.days.length > 0;
+
+  if (!hasDays) {
+    allIds.forEach(killChart);
+    if (emptyEl) emptyEl.style.display = '';
+    return;
+  }
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  // Expand sparse day array into fixed 31-slot array (null = no data)
+  const expand = (days, vals) => {
+    const r = Array(MAX).fill(null);
+    days.forEach((d, i) => { if (d >= 1 && d <= MAX) r[d-1] = vals[i] ?? null; });
+    return r;
+  };
+  const cur  = (ch, k) => expand(curDD.days, curDD[ch][k]);
+  const prev = (ch, k) => prevDD && prevDD.days && prevDD.days.length
+    ? expand(prevDD.days, prevDD[ch][k])
+    : Array(MAX).fill(null);
+  const calcRoas = (dd, sKey, bKey, ch) => {
+    const r = Array(MAX).fill(null);
+    if (!dd || !dd.days || !dd.days.length) return r;
+    dd.days.forEach((d, i) => {
+      if (d < 1 || d > MAX) return;
+      const s = dd[ch][sKey][i] || 0, b = dd[ch][bKey][i] || 0;
+      r[d-1] = b > 0 ? +(s / b).toFixed(2) : null;
+    });
+    return r;
+  };
+
+  const cL = mLbl[m] || m;
+  const pL = pM ? (mLbl[pM] || pM) : '';
+
+  // Dataset builder
+  const ln = (label, data, color, dashed=false) => ({
+    label, data,
+    borderColor: color, backgroundColor: color+'20',
+    borderWidth: dashed ? 1.5 : 2,
+    borderDash: dashed ? [5,4] : [],
+    tension: .25, pointRadius: 1.5, pointHoverRadius: 5,
+    fill: false, spanGaps: false,
+  });
+
+  const optLine = (yFmt='num') => ({
+    ...cDef,
+    plugins: { ...cDef.plugins, legend: legOpts },
+    scales: {
+      x: { ...cDef.scales.x, ticks: { ...cDef.scales.x.ticks, maxTicksLimit: 16 } },
+      y: { ...cDef.scales.y, ticks: { ...cDef.scales.y.ticks,
+        callback: yFmt==='pct' ? v=>v+'%' : yFmt==='roas' ? v=>v+'x' : v=>fmtB(v) } },
+    },
+  });
+  const mkLine = (id, datasets, yFmt='num') =>
+    mkChart(id, {type:'line', data:{labels:dayLabels, datasets}, options:optLine(yFmt)});
+
+  setTimeout(() => {
+    // ── Shopee ──
+    const SH='#ff4820', SH2='#ff9966';
+    mkLine('cv-dy-sh-vis',  [ln(cL+' Visitors', cur('shopee','visitors'), SH), ln(pL+' Visitors', prev('shopee','visitors'), SH, true)]);
+    mkLine('cv-dy-sh-ord',  [ln(cL+' Orders',   cur('shopee','orders'),   SH), ln(pL+' Orders',   prev('shopee','orders'),   SH, true)]);
+    mkLine('cv-dy-sh-sales',[ln(cL+' In-Plat',  cur('shopee','sales'),    SH), ln(pL+' In-Plat',  prev('shopee','sales'),    SH, true),
+                              ln(cL+' Off-Plat', cur('shopee','offSales'), SH2),ln(pL+' Off-Plat', prev('shopee','offSales'), SH2,true)]);
+    mkLine('cv-dy-sh-bud',  [ln(cL+' In-Budget',cur('shopee','inBudget'), SH), ln(pL+' In-Budget',prev('shopee','inBudget'), SH, true),
+                              ln(cL+' Off-Budget',cur('shopee','offBudget'),SH2),ln(pL+' Off-Budget',prev('shopee','offBudget'),SH2,true)]);
+    mkLine('cv-dy-sh-roas', [
+      ln(cL+' ROAS', calcRoas(curDD,  'sales','inBudget','shopee'), SH),
+      ln(pL+' ROAS', calcRoas(prevDD, 'sales','inBudget','shopee'), SH, true),
+    ], 'roas');
+
+    // ── TikTok ──
+    const TT='#44d4d4';
+    mkLine('cv-dy-tt-vis',  [ln(cL+' Visitors', cur('tiktok','visitors'), TT), ln(pL+' Visitors', prev('tiktok','visitors'), TT, true)]);
+    mkLine('cv-dy-tt-ord',  [ln(cL+' Orders',   cur('tiktok','orders'),   TT), ln(pL+' Orders',   prev('tiktok','orders'),   TT, true)]);
+    mkLine('cv-dy-tt-sales',[ln(cL+' Sales',    cur('tiktok','sales'),    TT), ln(pL+' Sales',    prev('tiktok','sales'),    TT, true)]);
+    mkLine('cv-dy-tt-bud',  [ln(cL+' Budget',   cur('tiktok','budget'),   TT), ln(pL+' Budget',   prev('tiktok','budget'),   TT, true)]);
+    mkLine('cv-dy-tt-roas', [
+      ln(cL+' ROAS', calcRoas(curDD,  'sales','budget','tiktok'), TT),
+      ln(pL+' ROAS', calcRoas(prevDD, 'sales','budget','tiktok'), TT, true),
+    ], 'roas');
+
+    // ── Lazada ──
+    const LZ='#6070ff';
+    mkLine('cv-dy-lz-vis',  [ln(cL+' Visitors', cur('lazada','visitors'), LZ), ln(pL+' Visitors', prev('lazada','visitors'), LZ, true)]);
+    mkLine('cv-dy-lz-ord',  [ln(cL+' Orders',   cur('lazada','orders'),   LZ), ln(pL+' Orders',   prev('lazada','orders'),   LZ, true)]);
+    mkLine('cv-dy-lz-sales',[ln(cL+' Sales',    cur('lazada','sales'),    LZ), ln(pL+' Sales',    prev('lazada','sales'),    LZ, true)]);
+    mkLine('cv-dy-lz-bud',  [ln(cL+' Budget',   cur('lazada','budget'),   LZ), ln(pL+' Budget',   prev('lazada','budget'),   LZ, true)]);
+    mkLine('cv-dy-lz-roas', [
+      ln(cL+' ROAS', calcRoas(curDD,  'sales','budget','lazada'), LZ),
+      ln(pL+' ROAS', calcRoas(prevDD, 'sales','budget','lazada'), LZ, true),
+    ], 'roas');
+
+    // ── Line OA ──
+    const LN='#00b856', LN2='#66ddaa';
+    mkLine('cv-dy-ln-fri',  [ln(cL+' Friends',  cur('line','friends'),    LN), ln(pL+' Friends',  prev('line','friends'),    LN, true)]);
+    mkLine('cv-dy-ln-ord',  [ln(cL+' Orders',   cur('line','orders'),     LN), ln(pL+' Orders',   prev('line','orders'),     LN, true)]);
+    mkLine('cv-dy-ln-sales',[ln(cL+' Sales',    cur('line','sales'),      LN), ln(pL+' Sales',    prev('line','sales'),      LN, true)]);
+    mkLine('cv-dy-ln-cr',   [ln(cL+' CR%',      cur('line','cr'),         LN), ln(pL+' CR%',      prev('line','cr'),         LN, true),
+                              ln(cL+' AOV',      cur('line','aov'),        LN2),ln(pL+' AOV',      prev('line','aov'),        LN2,true)], 'num');
+
+    // ── Facebook ──
+    const FB='#4a90e2', FB2='#82b4f0', FB3='#c0d9ff';
+    mkLine('cv-dy-fb-reach', [ln(cL+' Reach',  cur('fb','reach'),   FB), ln(pL+' Reach',  prev('fb','reach'),   FB, true)]);
+    mkLine('cv-dy-fb-ord',   [ln(cL+' Orders', cur('fb','orders'),  FB), ln(pL+' Orders', prev('fb','orders'),  FB, true),
+                               ln(cL+' Sales',  cur('fb','sales'),   FB2),ln(pL+' Sales',  prev('fb','sales'),  FB2,true)]);
+    mkLine('cv-dy-fb-ibconv',[ln(cL+' IB Orders', cur('fb','ibOrders'), FB), ln(pL+' IB Orders', prev('fb','ibOrders'), FB, true),
+                               ln(cL+' IB Sales',  cur('fb','ibSales'),  FB2),ln(pL+' IB Sales',  prev('fb','ibSales'),  FB2,true)]);
+    mkLine('cv-dy-fb-bud1',  [ln(cL+' Inbox/Sales',  cur('fb','budgetIbSales'), FB),  ln(pL+' Inbox/Sales',  prev('fb','budgetIbSales'), FB, true),
+                               ln(cL+' Awareness',    cur('fb','budgetAware'),   FB2), ln(pL+' Awareness',    prev('fb','budgetAware'),   FB2,true)]);
+    mkLine('cv-dy-fb-bud2',  [ln(cL+' Shopee',  cur('fb','budgetShopee'), FB),  ln(pL+' Shopee',  prev('fb','budgetShopee'), FB, true),
+                               ln(cL+' Web',     cur('fb','budgetWeb'),    FB2), ln(pL+' Web',     prev('fb','budgetWeb'),    FB2,true),
+                               ln(cL+' Line',    cur('fb','budgetLine'),   FB3), ln(pL+' Line',    prev('fb','budgetLine'),   FB3,true)]);
+    mkLine('cv-dy-fb-roas',  [ln(cL+' ROAS', cur('fb','roasIb'), FB), ln(pL+' ROAS', prev('fb','roasIb'), FB, true)], 'roas');
+
+    // ── Instagram ──
+    const IG='#e1306c', IG2='#f77fb0';
+    mkLine('cv-dy-ig-reach',   [ln(cL+' Reach',  cur('ig','reach'),         IG), ln(pL+' Reach',  prev('ig','reach'),         IG, true)]);
+    mkLine('cv-dy-ig-ordsales',[ln(cL+' Orders', cur('ig','orders'),        IG), ln(pL+' Orders', prev('ig','orders'),        IG, true),
+                                 ln(cL+' Sales',  cur('ig','sales'),         IG2),ln(pL+' Sales',  prev('ig','sales'),         IG2,true)]);
+    mkLine('cv-dy-ig-vis',     [ln(cL+' Visitor', cur('ig','visitorShopee'), IG), ln(pL+' Visitor', prev('ig','visitorShopee'), IG, true)]);
+    mkLine('cv-dy-ig-bud',     [ln(cL+' Traffic', cur('ig','budgetShopee'), IG),  ln(pL+' Traffic', prev('ig','budgetShopee'), IG, true),
+                                 ln(cL+' Awareness',      cur('ig','budgetAware'),  IG2), ln(pL+' Awareness',      prev('ig','budgetAware'),  IG2,true)]);
+    mkLine('cv-dy-ig-roas',    [ln(cL+' ROAS', cur('ig','roas'), IG), ln(pL+' ROAS', prev('ig','roas'), IG, true)], 'roas');
+  }, 30);
+}
+
 // ════ SHOPEE ════
 function renderShopee(){
   const d=getData().shopee,p=pctN(d.sales,d.target),ak=aMK(),an=aMN();
@@ -976,51 +1123,6 @@ function renderShopee(){
   setTimeout(()=>{
     mkChart('cv-sh-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].shopee.sales),backgroundColor:'rgba(255,72,32,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].shopee.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
     mkChart('cv-sh-cr',{type:'line',data:{labels:an,datasets:[{label:'CR%',data:ak.map(m=>DB[m].shopee.cr),borderColor:'#b06fff',backgroundColor:'rgba(176,111,255,.1)',tension:.3,fill:true,pointRadius:4,yAxisID:'y'},{label:'AOV',data:ak.map(m=>DB[m].shopee.aov),borderColor:'#ffc14d',tension:.3,fill:false,borderDash:[4,3],pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left',ticks:{...cDef.scales.y.ticks,callback:v=>v+'%'}},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>'฿'+v}}}}});
-    // Daily charts
-    const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
-    const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
-    const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
-    /* ── Daily: คำนวณจำนวนวันจริงของเดือน (ไม่ฮาร์ดโค้ด 31) ── */
-    const mNum={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-    const mYear=2026, mIdx=mNum[m]||5;
-    const MAX=new Date(mYear,mIdx,0).getDate(); // วันจริงของเดือน
-    const dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
-    /* expand: map dayNum → slot index พร้อม validate NaN/null */
-    const expand=(days,vals)=>{
-      const r=Array(MAX).fill(null);
-      days.forEach((d,i)=>{
-        if(d>=1&&d<=MAX){
-          const v=vals[i];
-          r[d-1]=(v!==null&&v!==undefined&&!isNaN(Number(v)))?+v:null;
-        }
-      });
-      return r;
-    };
-    const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
-    const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
-    /* calcRoas: safe division + optional chaining ไม่มี Infinity */
-    const calcRoas=(dd,sKey,bKey,ch)=>{
-      const r=Array(MAX).fill(null);
-      if(!dd||!dd.days||!dd.days.length)return r;
-      dd.days.forEach((d,i)=>{
-        if(d<1||d>MAX)return;
-        const s=parseFloat(dd[ch]?.[sKey]?.[i])||0;
-        const b=parseFloat(dd[ch]?.[bKey]?.[i])||0;
-        r[d-1]=b>0?Math.min(+(s/b).toFixed(2),999):null;
-      });
-      return r;
-    };
-    const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
-    /* spanGaps:true — เชื่อมเส้นข้ามวันที่ไม่มีข้อมูล (ไม่ขาด) */
-    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:true});
-    const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
-    const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
-    const SH='#ff4820',SH2='#ff9966';
-    mkLine('cv-dy-sh-vis',[ln(cL+' Visitors',cur('shopee','visitors'),SH),ln(pL+' Visitors',prev('shopee','visitors'),SH,true)]);
-    mkLine('cv-dy-sh-ord',[ln(cL+' Orders',cur('shopee','orders'),SH),ln(pL+' Orders',prev('shopee','orders'),SH,true)]);
-    mkLine('cv-dy-sh-sales',[ln(cL+' In-Plat',cur('shopee','sales'),SH),ln(pL+' In-Plat',prev('shopee','sales'),SH,true),ln(cL+' Off-Plat',cur('shopee','offSales'),SH2),ln(pL+' Off-Plat',prev('shopee','offSales'),SH2,true)]);
-    mkLine('cv-dy-sh-bud',[ln(cL+' In-Budget',cur('shopee','inBudget'),SH),ln(pL+' In-Budget',prev('shopee','inBudget'),SH,true),ln(cL+' Off-Budget',cur('shopee','offBudget'),SH2),ln(pL+' Off-Budget',prev('shopee','offBudget'),SH2,true)]);
-    mkLine('cv-dy-sh-roas',[ln(cL+' ROAS',calcRoas(curDD,'sales','inBudget','shopee'),SH),ln(pL+' ROAS',calcRoas(prevDD,'sales','inBudget','shopee'),SH,true)],'roas');
   },30);
   $('tbl-shopee').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>Visitors</th><th>CR%</th><th>AOV</th><th>ROI</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].shopee,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${fmt(d2.visitors)}</td><td class="num">${d2.cr}%</td><td class="num">${fmtB(d2.aov)}</td><td class="num">${d2.roi}x</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
 }
@@ -1032,51 +1134,6 @@ function renderTiktok(){
   setTimeout(()=>{
     mkChart('cv-tt-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].tiktok.sales),backgroundColor:'rgba(66,212,212,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].tiktok.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4},{label:'ROAS',data:ak.map(m=>DB[m].tiktok.roas),type:'line',borderColor:'#ffc14d',tension:.3,fill:false,pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left'},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>v+'x'}}}}});
     mkChart('cv-tt-reach',{type:'bar',data:{labels:an,datasets:[{label:'Reach',data:ak.map(m=>DB[m].tiktok.reach||0),backgroundColor:'rgba(66,212,212,.4)',borderRadius:4},{label:'Budget',data:ak.map(m=>DB[m].tiktok.budget),backgroundColor:'rgba(255,193,77,.6)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
-    // Daily charts
-    const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
-    const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
-    const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
-    /* ── Daily: คำนวณจำนวนวันจริงของเดือน (ไม่ฮาร์ดโค้ด 31) ── */
-    const mNum={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-    const mYear=2026, mIdx=mNum[m]||5;
-    const MAX=new Date(mYear,mIdx,0).getDate(); // วันจริงของเดือน
-    const dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
-    /* expand: map dayNum → slot index พร้อม validate NaN/null */
-    const expand=(days,vals)=>{
-      const r=Array(MAX).fill(null);
-      days.forEach((d,i)=>{
-        if(d>=1&&d<=MAX){
-          const v=vals[i];
-          r[d-1]=(v!==null&&v!==undefined&&!isNaN(Number(v)))?+v:null;
-        }
-      });
-      return r;
-    };
-    const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
-    const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
-    /* calcRoas: safe division + optional chaining ไม่มี Infinity */
-    const calcRoas=(dd,sKey,bKey,ch)=>{
-      const r=Array(MAX).fill(null);
-      if(!dd||!dd.days||!dd.days.length)return r;
-      dd.days.forEach((d,i)=>{
-        if(d<1||d>MAX)return;
-        const s=parseFloat(dd[ch]?.[sKey]?.[i])||0;
-        const b=parseFloat(dd[ch]?.[bKey]?.[i])||0;
-        r[d-1]=b>0?Math.min(+(s/b).toFixed(2),999):null;
-      });
-      return r;
-    };
-    const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
-    /* spanGaps:true — เชื่อมเส้นข้ามวันที่ไม่มีข้อมูล (ไม่ขาด) */
-    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:true});
-    const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
-    const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
-    const TT='#44d4d4';
-    mkLine('cv-dy-tt-vis',[ln(cL+' Visitors',cur('tiktok','visitors'),TT),ln(pL+' Visitors',prev('tiktok','visitors'),TT,true)]);
-    mkLine('cv-dy-tt-ord',[ln(cL+' Orders',cur('tiktok','orders'),TT),ln(pL+' Orders',prev('tiktok','orders'),TT,true)]);
-    mkLine('cv-dy-tt-sales',[ln(cL+' Sales',cur('tiktok','sales'),TT),ln(pL+' Sales',prev('tiktok','sales'),TT,true)]);
-    mkLine('cv-dy-tt-bud',[ln(cL+' Budget',cur('tiktok','budget'),TT),ln(pL+' Budget',prev('tiktok','budget'),TT,true)]);
-    mkLine('cv-dy-tt-roas',[ln(cL+' ROAS',calcRoas(curDD,'sales','budget','tiktok'),TT),ln(pL+' ROAS',calcRoas(prevDD,'sales','budget','tiktok'),TT,true)],'roas');
   },30);
   $('tbl-tiktok').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>CR%</th><th>AOV</th><th>ROAS</th><th>Reach</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].tiktok,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${d2.cr}%</td><td class="num">${fmtB(d2.aov)}</td><td class="num">${d2.roas}x</td><td class="num">${fmt(d2.reach||0)}</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
 }
@@ -1087,50 +1144,6 @@ function renderLazada(){
   $('kpi-lazada').innerHTML=`<div class="kpi" style="--kc:var(--lazada)"><div class="kpi-lbl">GMV</div><div class="kpi-val">${fmtB(d.sales)}</div><div class="kpi-sub"><span class="badge ${bCls(p)}">${p}%</span> vs ${fmtB(d.target)}</div></div><div class="kpi" style="--kc:var(--lazada)"><div class="kpi-lbl">Orders</div><div class="kpi-val">${d.orders.toLocaleString()}</div><div class="kpi-sub">Total orders</div></div><div class="kpi" style="--kc:var(--lazada)"><div class="kpi-lbl">CR%</div><div class="kpi-val">${d.cr}%</div><div class="kpi-sub">Conversion Rate</div></div><div class="kpi" style="--kc:var(--lazada)"><div class="kpi-lbl">AOV</div><div class="kpi-val">${fmtB(d.aov)}</div><div class="kpi-sub">Avg Order Value</div></div><div class="kpi" style="--kc:var(--lazada)"><div class="kpi-lbl">ROAS</div><div class="kpi-val">${d.roas}x</div><div class="kpi-sub">Budget ${fmtB(d.budget)}</div></div>`;
   setTimeout(()=>{
     mkChart('cv-lz-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].lazada.sales),backgroundColor:'rgba(96,112,255,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].lazada.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4},{label:'ROAS',data:ak.map(m=>DB[m].lazada.roas),type:'line',borderColor:'#2de8a0',tension:.3,fill:false,pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left'},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>v+'x'}}}}});
-    const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
-    const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
-    const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
-    /* ── Daily: คำนวณจำนวนวันจริงของเดือน (ไม่ฮาร์ดโค้ด 31) ── */
-    const mNum={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-    const mYear=2026, mIdx=mNum[m]||5;
-    const MAX=new Date(mYear,mIdx,0).getDate(); // วันจริงของเดือน
-    const dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
-    /* expand: map dayNum → slot index พร้อม validate NaN/null */
-    const expand=(days,vals)=>{
-      const r=Array(MAX).fill(null);
-      days.forEach((d,i)=>{
-        if(d>=1&&d<=MAX){
-          const v=vals[i];
-          r[d-1]=(v!==null&&v!==undefined&&!isNaN(Number(v)))?+v:null;
-        }
-      });
-      return r;
-    };
-    const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
-    const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
-    /* calcRoas: safe division + optional chaining ไม่มี Infinity */
-    const calcRoas=(dd,sKey,bKey,ch)=>{
-      const r=Array(MAX).fill(null);
-      if(!dd||!dd.days||!dd.days.length)return r;
-      dd.days.forEach((d,i)=>{
-        if(d<1||d>MAX)return;
-        const s=parseFloat(dd[ch]?.[sKey]?.[i])||0;
-        const b=parseFloat(dd[ch]?.[bKey]?.[i])||0;
-        r[d-1]=b>0?Math.min(+(s/b).toFixed(2),999):null;
-      });
-      return r;
-    };
-    const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
-    /* spanGaps:true — เชื่อมเส้นข้ามวันที่ไม่มีข้อมูล (ไม่ขาด) */
-    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:true});
-    const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
-    const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
-    const LZ='#6070ff';
-    mkLine('cv-dy-lz-vis',[ln(cL+' Visitors',cur('lazada','visitors'),LZ),ln(pL+' Visitors',prev('lazada','visitors'),LZ,true)]);
-    mkLine('cv-dy-lz-ord',[ln(cL+' Orders',cur('lazada','orders'),LZ),ln(pL+' Orders',prev('lazada','orders'),LZ,true)]);
-    mkLine('cv-dy-lz-sales',[ln(cL+' Sales',cur('lazada','sales'),LZ),ln(pL+' Sales',prev('lazada','sales'),LZ,true)]);
-    mkLine('cv-dy-lz-bud',[ln(cL+' Budget',cur('lazada','budget'),LZ),ln(pL+' Budget',prev('lazada','budget'),LZ,true)]);
-    mkLine('cv-dy-lz-roas',[ln(cL+' ROAS',calcRoas(curDD,'sales','budget','lazada'),LZ),ln(pL+' ROAS',calcRoas(prevDD,'sales','budget','lazada'),LZ,true)],'roas');
   },30);
   $('tbl-lazada').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>CR%</th><th>AOV</th><th>ROAS</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].lazada,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${d2.cr}%</td><td class="num">${fmtB(d2.aov)}</td><td class="num">${d2.roas}x</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
 }
@@ -1141,35 +1154,6 @@ function renderLine(){
   $('kpi-line').innerHTML=`<div class="kpi" style="--kc:var(--line)"><div class="kpi-lbl">GMV</div><div class="kpi-val">${fmtB(d.sales)}</div><div class="kpi-sub"><span class="badge ${bCls(p)}">${p}%</span> vs ${fmtB(d.target)}</div></div><div class="kpi" style="--kc:var(--line)"><div class="kpi-lbl">Orders</div><div class="kpi-val">${d.orders.toLocaleString()}</div><div class="kpi-sub">Total orders</div></div><div class="kpi" style="--kc:var(--line)"><div class="kpi-lbl">AOV</div><div class="kpi-val">${fmtB(d.aov)}</div><div class="kpi-sub">Avg Order Value</div></div>`;
   setTimeout(()=>{
     mkChart('cv-ln-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].line.sales),backgroundColor:'rgba(0,184,86,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].line.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
-    const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
-    const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
-    const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
-    /* ── Daily: คำนวณจำนวนวันจริงของเดือน ── */
-    const mNum={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-    const mYear=2026, mIdx=mNum[m]||5;
-    const MAX=new Date(mYear,mIdx,0).getDate();
-    const dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
-    const expand=(days,vals)=>{
-      const r=Array(MAX).fill(null);
-      days.forEach((d,i)=>{
-        if(d>=1&&d<=MAX){
-          const v=vals[i];
-          r[d-1]=(v!==null&&v!==undefined&&!isNaN(Number(v)))?+v:null;
-        }
-      });
-      return r;
-    };
-    const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
-    const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
-    const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
-    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:true});
-    const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
-    const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
-    const LN='#00b856', LN2='#66ddaa';
-    mkLine('cv-dy-ln-fri',[ln(cL+' Friends',cur('line','friends'),LN),ln(pL+' Friends',prev('line','friends'),LN,true)]);
-    mkLine('cv-dy-ln-ord',[ln(cL+' Orders',cur('line','orders'),LN),ln(pL+' Orders',prev('line','orders'),LN,true)]);
-    mkLine('cv-dy-ln-sales',[ln(cL+' Sales',cur('line','sales'),LN),ln(pL+' Sales',prev('line','sales'),LN,true)]);
-    mkLine('cv-dy-ln-cr',[ln(cL+' CR%',cur('line','cr'),LN),ln(pL+' CR%',prev('line','cr'),LN,true),ln(cL+' AOV',cur('line','aov'),LN2),ln(pL+' AOV',prev('line','aov'),LN2,true)],'num');
   },30);
   $('tbl-line').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>AOV</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].line,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${fmtB(d2.aov)}</td></tr>`;}).join('')}</tbody>`;
 }
@@ -1181,37 +1165,6 @@ function renderFb(){
   setTimeout(()=>{
     mkChart('cv-fb-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].fb.sales),backgroundColor:'rgba(46,128,255,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].fb.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
     mkChart('cv-fb-reach',{type:'line',data:{labels:an,datasets:[{label:'Reach',data:ak.map(m=>DB[m].fb.reach||0),borderColor:'#2e80ff',backgroundColor:'rgba(46,128,255,.1)',tension:.3,fill:true,pointRadius:4},{label:'Budget',data:ak.map(m=>DB[m].fb.budget),borderColor:'#ffc14d',tension:.3,fill:false,borderDash:[4,3],pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left'},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>'฿'+fmt(v)}}}}});
-    const prevMap={jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
-    const mLbl={jan:'ม.ค.',feb:'ก.พ.',mar:'มี.ค.',apr:'เม.ย.',may:'พ.ค.',jun:'มิ.ย.',jul:'ก.ค.',aug:'ส.ค.',sep:'ก.ย.',oct:'ต.ค.',nov:'พ.ย.',dec:'ธ.ค.'};
-    const m=CUR==='all'?'may':CUR, pM=prevMap[m], curDD=DAILY[m]||{}, prevDD=pM?DAILY[pM]:null;
-    /* ── Daily: คำนวณจำนวนวันจริงของเดือน ── */
-    const mNum={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};
-    const mYear=2026, mIdx=mNum[m]||5;
-    const MAX=new Date(mYear,mIdx,0).getDate();
-    const dayLabels=Array.from({length:MAX},(_,i)=>String(i+1));
-    const expand=(days,vals)=>{
-      const r=Array(MAX).fill(null);
-      days.forEach((d,i)=>{
-        if(d>=1&&d<=MAX){
-          const v=vals[i];
-          r[d-1]=(v!==null&&v!==undefined&&!isNaN(Number(v)))?+v:null;
-        }
-      });
-      return r;
-    };
-    const cur=(ch,k)=>expand(curDD.days||[],curDD[ch]?.[k]||[]);
-    const prev=(ch,k)=>prevDD&&prevDD.days&&prevDD.days.length?expand(prevDD.days,prevDD[ch]?.[k]||[]):Array(MAX).fill(null);
-    const cL=mLbl[m]||m, pL=pM?mLbl[pM]||pM:'';
-    const ln=(label,data,color,dashed=false)=>({label,data,borderColor:color,backgroundColor:color+'20',borderWidth:dashed?1.5:2,borderDash:dashed?[5,4]:[],tension:.25,pointRadius:1.5,pointHoverRadius:5,fill:false,spanGaps:true});
-    const optLine=(yFmt='num')=>({...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}}}});
-    const mkLine=(id,datasets,yFmt='num')=>mkChart(id,{type:'line',data:{labels:dayLabels,datasets},options:optLine(yFmt)});
-    const FB='#4a90e2', FB2='#82b4f0', FB3='#c0d9ff';
-    mkLine('cv-dy-fb-reach',[ln(cL+' Reach',cur('fb','reach'),FB),ln(pL+' Reach',prev('fb','reach'),FB,true)]);
-    mkLine('cv-dy-fb-ord',[ln(cL+' Orders',cur('fb','orders'),FB),ln(pL+' Orders',prev('fb','orders'),FB,true),ln(cL+' Sales',cur('fb','sales'),FB2),ln(pL+' Sales',prev('fb','sales'),FB2,true)]);
-    mkLine('cv-dy-fb-ibconv',[ln(cL+' IB Orders',cur('fb','ibOrders'),FB),ln(pL+' IB Orders',prev('fb','ibOrders'),FB,true),ln(cL+' IB Sales',cur('fb','ibSales'),FB2),ln(pL+' IB Sales',prev('fb','ibSales'),FB2,true)]);
-    mkLine('cv-dy-fb-bud1',[ln(cL+' Inbox/Sales',cur('fb','budgetIbSales'),FB),ln(pL+' Inbox/Sales',prev('fb','budgetIbSales'),FB,true),ln(cL+' Awareness',cur('fb','budgetAware'),FB2),ln(pL+' Awareness',prev('fb','budgetAware'),FB2,true)]);
-    mkLine('cv-dy-fb-bud2',[ln(cL+' Shopee',cur('fb','budgetShopee'),FB),ln(pL+' Shopee',prev('fb','budgetShopee'),FB,true),ln(cL+' Web',cur('fb','budgetWeb'),FB2),ln(pL+' Web',prev('fb','budgetWeb'),FB2,true),ln(cL+' Line',cur('fb','budgetLine'),FB3),ln(pL+' Line',prev('fb','budgetLine'),FB3,true)]);
-    mkLine('cv-dy-fb-roas',[ln(cL+' ROAS',cur('fb','roasIb'),FB),ln(pL+' ROAS',prev('fb','roasIb'),FB,true)],'roas');
   },30);
   $('tbl-fb').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>Reach</th><th>ROAS</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].fb,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${fmt(d2.reach||0)}</td><td class="num">${d2.roas}x</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
 }
@@ -1446,12 +1399,12 @@ function renderSuggest(){
       <div class="card" style="margin-bottom:14px">
         <div class="card-head"><div class="cdot" style="background:#f472b6"></div>Priority Actions — มิ.ย. 2026 (เรียงตามผลกระทบ)</div>
         <div style="padding:4px 0">
-          <div class="pr-row"><div class="pr-num" style="background:rgba(255,72,32,.15);color:var(--shopee)">1</div><div class="pr-text"><strong>Shopee — รักษา ROI &amp; ดัน CR ให้ผ่าน 15%</strong><br><span style="color:var(--red);font-size:11px">❌ ปัญหา:</span> ROI เฉลี่ย 4 เดือน = ${avgROI.toFixed(1)}x แต่ เม.ย. ลดเหลือ ${DB.apr.shopee.roi}x จาก ${DB.mar.shopee.roi}x (มี.ค.) — CR เม.ย. ${DB.apr.shopee.cr}% ต่ำกว่าเป้า 15%<br><span style="color:var(--green);font-size:11px">✅ แนวทาง:</span> เพิ่ม Flash Sale วันที่ 6, 15, 25 มิ.ย. ตรง Double Digit, optimize คูปองร้านค้า + เพิ่ม Bundle SKU เพื่อดัน AOV<div class="sug-kpis"><span class="nu">Target ฿9.2M</span><span class="dn">ROI เม.ย. ${DB.apr.shopee.roi}x ↓</span><span class="up">เป้า ROI ≥ 16x</span></div></div></div>
-          <div class="pr-row"><div class="pr-num" style="background:rgba(66,212,212,.15);color:var(--tiktok)">2</div><div class="pr-text"><strong>TikTok — Shift Budget จาก Awareness → GMV Max</strong><br><span style="color:var(--red);font-size:11px">❌ ปัญหา:</span> ROAS เม.ย. = ${DB.apr.tiktok.roas}x ลดจาก ${DB.mar.tiktok.roas}x ใน มี.ค. ขณะที่ Budget เพิ่ม ฿${fmt(DB.apr.tiktok.budget)} (อาจมี ad fatigue หรือ creative tired out)<br><span style="color:var(--green);font-size:11px">✅ แนวทาง:</span> ย้าย ฿200K จาก Consideration ไป GMV Max แมว, ทดสอบ TikTok Basket campaign, ดู ROAS รายสัปดาห์แรก<div class="sug-kpis"><span class="dn">ROAS ${DB.apr.tiktok.roas}x ↓</span><span class="nu">Budget ฿${fmt(DB.apr.tiktok.budget)}</span><span class="up">เป้า ROAS ≥ 4.5x</span></div></div></div>
-          <div class="pr-row"><div class="pr-num" style="background:rgba(255,122,176,.15);color:#ff7ab0">3</div><div class="pr-text"><strong>Live — ดัน SPH Official กลับมา ≥ ฿5,000/ชม.</strong><br><span style="color:var(--red);font-size:11px">❌ ปัญหา:</span> SPH Official เม.ย. = ฿${sph('apr').toFixed(0)}/ชม. (ลดจาก ฿${sph('mar').toFixed(0)}/ชม. มี.ค.) — อาจเพราะ MC หรือ product mix เบา<br><span style="color:var(--green);font-size:11px">✅ แนวทาง:</span> ตั้ง Tier Voucher Live 3 ระดับ (499/1100/2000 บาท) ทุกรอบ, เพิ่ม Hero SKU สัดส่วน 40%, ทุก MC ต้องมี Upsell script<div class="sug-kpis"><span class="dn">SPH ${fmtB(Math.round(sph('apr')))}/hr ↓</span><span class="up">เป้า ≥ ฿5,000/hr</span><span>${DB.apr.live.hr_off} hr/เดือน</span></div></div></div>
-          <div class="pr-row"><div class="pr-num" style="background:rgba(0,184,86,.15);color:var(--line)">4</div><div class="pr-text"><strong>Line OA — ฟื้น GMV + Broadcast Campaign</strong><br><span style="color:var(--red);font-size:11px">❌ ปัญหา:</span> Line ลดจาก ฿1.87M (มี.ค.) → ฿1.51M (เม.ย.) แต่ AOV สูงสุด (฿${DB.apr.line.aov.toLocaleString()}) — ฟันธง: ผู้ใช้ลดน้อยลง หรือไม่มี campaign motivator<br><span style="color:var(--green);font-size:11px">✅ แนวทาง:</span> Broadcast สัปดาห์ที่ 2 + Set Deal exclusive Line เท่านั้น + Push ระบบสมาชิก retention<div class="sug-kpis"><span class="dn">GMV ฿${fmt(DB.apr.line.sales)} ↓</span><span class="up">AOV สูงสุด ฿${DB.apr.line.aov.toLocaleString()}</span><span class="nu">เป้า ≥ ฿1.8M</span></div></div></div>
-          <div class="pr-row"><div class="pr-num" style="background:rgba(46,128,255,.15);color:var(--fb)">5</div><div class="pr-text"><strong>Facebook — Optimize Creative + ลด CPM</strong><br><span style="color:var(--red);font-size:11px">❌ ปัญหา:</span> ROAS FB ลดต่อเนื่อง 3 เดือน (${DB.feb.fb.roas}x → ${DB.mar.fb.roas}x → ${DB.apr.fb.roas}x) — Creative อาจ saturate, audience overlap มาก<br><span style="color:var(--green);font-size:11px">✅ แนวทาง:</span> A/B test creative UGC vs Product demo, ลด Awareness 15% shift ไป Traffic Shopee + IG retargeting<div class="sug-kpis"><span class="dn">ROAS ${DB.apr.fb.roas}x ↓ 3 เดือนติด</span><span>Reach ${fmt(DB.apr.fb.reach)}</span><span class="nu">CPM เป้า &lt; 70 บาท</span></div></div></div>
-          <div class="pr-row"><div class="pr-num" style="background:rgba(255,193,77,.15);color:var(--amber)">6</div><div class="pr-text"><strong>Affiliate — คุม Contribution ≤ 25% GMV</strong><br><span style="color:var(--red);font-size:11px">❌ ปัญหา:</span> Affi เฉลี่ย 4 เดือน = ${avgAffi.toFixed(1)}% of GMV — commission สูง, margin กดลง<br><span style="color:var(--green);font-size:11px">✅ แนวทาง:</span> ปิด GMV Affi ตะกร้าเหลือง 10%, เปิดเฉพาะ creator CR ≥ 0.5% + สินค้า margin ≥ 35%<div class="sug-kpis"><span>Affi เม.ย. ${affiPct('apr').toFixed(1)}% of GMV</span><span class="nu">Commission ≤ 10%</span><span class="up">Focus: High-margin SKU</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(255,72,32,.15);color:var(--shopee)">1</div><div class="pr-text"><strong>Shopee — รักษา ROI &amp; ดัน CR ให้ผ่าน 15%</strong><br>ROI เฉลี่ย 4 เดือน = ${avgROI.toFixed(1)}x แต่ เม.ย. ลดเหลือ ${DB.apr.shopee.roi}x จาก ${DB.mar.shopee.roi}x (มี.ค.) — เพิ่ม Flash Sale วันที่ 6, 15, 25 มิ.ย. ตรง Double Digit, optimize คูปองร้านค้า + เพิ่ม Bundle SKU เพื่อดัน AOV<div class="sug-kpis"><span class="nu">Target ฿9.2M</span><span class="dn">ROI เม.ย. ${DB.apr.shopee.roi}x ↓</span><span class="up">เป้า ROI ≥ 16x</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(66,212,212,.15);color:var(--tiktok)">2</div><div class="pr-text"><strong>TikTok — Shift Budget จาก Awareness → GMV Max</strong><br>ROAS เม.ย. = ${DB.apr.tiktok.roas}x ลดจาก ${DB.mar.tiktok.roas}x ใน มี.ค. ขณะที่ Budget เพิ่ม — แนะนำ: ย้าย ฿200K จาก Consideration ไป GMV Max แมว, ทดสอบ TikTok Basket campaign, ดู ROAS รายสัปดาห์แรก<div class="sug-kpis"><span class="dn">ROAS ${DB.apr.tiktok.roas}x ↓</span><span class="nu">Budget ฿${fmt(DB.apr.tiktok.budget)}</span><span class="up">เป้า ROAS ≥ 4.5x</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(255,122,176,.15);color:#ff7ab0">3</div><div class="pr-text"><strong>Live — ดัน SPH Official กลับมา ≥ ฿5,000/ชม.</strong><br>SPH Official เม.ย. = ฿${sph('apr').toFixed(0)} (ลดจาก ฿${sph('mar').toFixed(0)} มี.ค.) — ตั้ง Tier Voucher Live 3 ระดับ (499/1100/2000 บาท) ทุกรอบ, เพิ่ม Hero SKU สัดส่วน 40%, ทุก MC ต้องมี Upsell script<div class="sug-kpis"><span class="dn">SPH ${fmtB(Math.round(sph('apr')))}/hr ↓</span><span class="up">เป้า ≥ ฿5,000/hr</span><span>${DB.apr.live.hr_off} hr/เดือน</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(0,184,86,.15);color:var(--line)">4</div><div class="pr-text"><strong>Line OA — ฟื้น GMV + Broadcast Campaign</strong><br>Line ลดจาก ฿1.87M (มี.ค.) → ฿1.51M (เม.ย.) แต่ AOV สูงสุด (฿${DB.apr.line.aov.toLocaleString()}) — Broadcast สัปดาห์ที่ 2 + Set Deal exclusive Line เท่านั้น + Push ระบบสมาชิก retention<div class="sug-kpis"><span class="dn">GMV ฿${fmt(DB.apr.line.sales)} ↓</span><span class="up">AOV สูงสุด ฿${DB.apr.line.aov.toLocaleString()}</span><span class="nu">เป้า ≥ ฿1.8M</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(46,128,255,.15);color:var(--fb)">5</div><div class="pr-text"><strong>Facebook — Optimize Creative + ลด CPM</strong><br>ROAS FB ลดต่อเนื่อง 3 เดือน (${DB.feb.fb.roas}x → ${DB.mar.fb.roas}x → ${DB.apr.fb.roas}x) — A/B test creative UGC vs Product demo, ลด Awareness 15% shift ไป Traffic Shopee + IG retargeting<div class="sug-kpis"><span class="dn">ROAS ${DB.apr.fb.roas}x ↓ 3 เดือนติด</span><span>Reach ${fmt(DB.apr.fb.reach)}</span><span class="nu">CPM เป้า &lt; 70 บาท</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(255,193,77,.15);color:var(--amber)">6</div><div class="pr-text"><strong>Affiliate — คุม Contribution ≤ 25% GMV</strong><br>Affi เฉลี่ย 4 เดือน = ${avgAffi.toFixed(1)}% of GMV — ปิด GMV Affi ตะกร้าเหลือง 10%, เปิดเฉพาะ creator CR ≥ 0.5% + สินค้า margin ≥ 35%<div class="sug-kpis"><span>Affi เม.ย. ${affiPct('apr').toFixed(1)}% of GMV</span><span class="nu">Commission ≤ 10%</span><span class="up">Focus: High-margin SKU</span></div></div></div>
         </div>
       </div>
       <div class="g2">
@@ -1648,7 +1601,7 @@ function applySheetData(rows, targetMonth) {
   if (!DB[m]) return;
   const d = DB[m];
 
-  const totalIdx = (() => { const idx = [...rows].map((r,i)=>[(r[0]||'').trim().toLowerCase(),i]).filter(([v])=>v==='total'); return idx.length ? idx[idx.length-1][1] : -1; })();
+  const totalIdx = rows.findIndex(r => (r[0] || '').trim().toLowerCase() === 'total');
   if (totalIdx >= 0) {
     const t  = rows[totalIdx];
     const n  = v => pvNum(v);
@@ -1710,46 +1663,45 @@ function applySheetData(rows, targetMonth) {
       const dayNum = parseInt((row[0] || '').trim().split(',')[0]);
       if (isNaN(dayNum) || dayNum < 1 || dayNum > 31) continue;
       dd.days.push(dayNum);
-      dd.shopee.visitors.push(n(row[cs.sh])   ?? null);
-      dd.shopee.orders.push(n(row[cs.sh+1])   ?? null);
-      dd.shopee.sales.push(n(row[cs.sh+2])    ?? null);
-      dd.shopee.inBudget.push(n(row[cs.sh+6]) ?? null);
-      dd.shopee.offSales.push(n(row[cs.sh+8]) ?? null);
-      dd.shopee.offBudget.push(n(row[cs.sh+9])?? null);
-      dd.tiktok.visitors.push(n(row[cs.tt])   ?? null);
-      dd.tiktok.orders.push(n(row[cs.tt+1])   ?? null);
-      dd.tiktok.sales.push(n(row[cs.tt+2])    ?? null);
-      dd.tiktok.budget.push(n(row[cs.tt+6])   ?? null);
-      dd.lazada.visitors.push(n(row[cs.lz])   ?? null);
-      dd.lazada.orders.push(n(row[cs.lz+1])   ?? null);
-      dd.lazada.sales.push(n(row[cs.lz+2])    ?? null);
-      dd.lazada.budget.push(n(row[cs.ln-2])   ?? null);
-      dd.line.friends.push(n(row[cs.ln])      ?? null);
-      dd.line.orders.push(n(row[cs.ln+1])     ?? null);
-      dd.line.sales.push(n(row[cs.ln+2])      ?? null);
-      dd.line.cr.push(p(row[cs.ln+3])         ?? null);
-      dd.line.aov.push(n(row[cs.ln+4])        ?? null);
+      dd.shopee.visitors.push(n(row[cs.sh])   || 0);
+      dd.shopee.orders.push(n(row[cs.sh+1])   || 0);
+      dd.shopee.sales.push(n(row[cs.sh+2])    || 0);
+      dd.shopee.inBudget.push(n(row[cs.sh+6]) || 0);
+      dd.shopee.offSales.push(n(row[cs.sh+8]) || 0);
+      dd.shopee.offBudget.push(n(row[cs.sh+9])|| 0);
+      dd.tiktok.visitors.push(n(row[cs.tt])   || 0);
+      dd.tiktok.orders.push(n(row[cs.tt+1])   || 0);
+      dd.tiktok.sales.push(n(row[cs.tt+2])    || 0);
+      dd.tiktok.budget.push(n(row[cs.tt+6])   || 0);
+      dd.lazada.visitors.push(n(row[cs.lz])   || 0);
+      dd.lazada.orders.push(n(row[cs.lz+1])   || 0);
+      dd.lazada.sales.push(n(row[cs.lz+2])    || 0);
+      dd.lazada.budget.push(n(row[cs.ln-2])   || 0);
+      dd.line.orders.push(n(row[cs.ln+1])     || 0);
+      dd.line.sales.push(n(row[cs.ln+2])      || 0);
+      dd.line.cr.push(p(row[cs.ln+3])         || 0);
+      dd.line.aov.push(n(row[cs.ln+4])        || 0);
       if (cs.fb !== undefined) {
-        dd.fb.reach.push(n(row[cs.fb])            ?? null);
-        dd.fb.orders.push(n(row[cs.fb+1])         ?? null);
-        dd.fb.sales.push(n(row[cs.fb+2])          ?? null);
-        dd.fb.ibOrders.push(n(row[cs.fb+3])       ?? null);
-        dd.fb.ibSales.push(n(row[cs.fb+4])        ?? null);
-        dd.fb.budgetIbSales.push(n(row[cs.fb+5])  ?? null);
-        dd.fb.budgetAware.push(n(row[cs.fb+6])    ?? null);
-        dd.fb.budgetShopee.push(n(row[cs.fb+7])   ?? null);
-        dd.fb.budgetWeb.push(n(row[cs.fb+8])      ?? null);
-        dd.fb.budgetLine.push(n(row[cs.fb+9])     ?? null);
-        dd.fb.roasIb.push(n(row[cs.fb+10])        ?? null);
+        dd.fb.reach.push(n(row[cs.fb])            || 0);
+        dd.fb.orders.push(n(row[cs.fb+1])         || 0);
+        dd.fb.sales.push(n(row[cs.fb+2])          || 0);
+        dd.fb.ibOrders.push(n(row[cs.fb+3])       || 0);
+        dd.fb.ibSales.push(n(row[cs.fb+4])        || 0);
+        dd.fb.budgetIbSales.push(n(row[cs.fb+5])  || 0);
+        dd.fb.budgetAware.push(n(row[cs.fb+6])    || 0);
+        dd.fb.budgetShopee.push(n(row[cs.fb+7])   || 0);
+        dd.fb.budgetWeb.push(n(row[cs.fb+8])      || 0);
+        dd.fb.budgetLine.push(n(row[cs.fb+9])     || 0);
+        dd.fb.roasIb.push(n(row[cs.fb+10])        || 0);
       }
       if (cs.ig !== undefined) {
-        dd.ig.reach.push(n(row[cs.ig])            ?? null);
-        dd.ig.orders.push(n(row[cs.ig+1])         ?? null);
-        dd.ig.sales.push(n(row[cs.ig+2])          ?? null);
-        dd.ig.visitorShopee.push(n(row[cs.ig+3])  ?? null);
-        dd.ig.budgetShopee.push(n(row[cs.ig+4])   ?? null);
-        dd.ig.budgetAware.push(n(row[cs.ig+5])    ?? null);
-        dd.ig.roas.push(n(row[cs.ig+6])           ?? null);
+        dd.ig.reach.push(n(row[cs.ig])            || 0);
+        dd.ig.orders.push(n(row[cs.ig+1])         || 0);
+        dd.ig.sales.push(n(row[cs.ig+2])          || 0);
+        dd.ig.visitorShopee.push(n(row[cs.ig+3])  || 0);
+        dd.ig.budgetShopee.push(n(row[cs.ig+4])   || 0);
+        dd.ig.budgetAware.push(n(row[cs.ig+5])    || 0);
+        dd.ig.roas.push(n(row[cs.ig+6])           || 0);
       }
     }
   }
@@ -2328,7 +2280,7 @@ function updateSettingsMonthLabel() {
 }
 
 // ════ ROUTER ════
-const RENDERERS={overview:renderOverview,compare:renderCompare,suggest:renderSuggest,shopee:renderShopee,tiktok:renderTiktok,lazada:renderLazada,line:renderLine,fb:renderFb,live:renderLive,affiliate:renderAffiliate,settings:()=>{}};
+const RENDERERS={overview:renderOverview,compare:renderCompare,weekly:renderWeekly,suggest:renderSuggest,shopee:renderShopee,tiktok:renderTiktok,lazada:renderLazada,line:renderLine,fb:renderFb,live:renderLive,affiliate:renderAffiliate,settings:()=>{}};
 function renderActive(id){if(RENDERERS[id])RENDERERS[id]();}
 
 // ── Mobile view helpers ──
@@ -2340,28 +2292,6 @@ function closeSidebar() {
   document.querySelector('nav.sidebar').classList.remove('sb-open');
   $('mobOverlay').classList.remove('show');
 }
-
-// ── Theme Toggle ──
-function toggleTheme() {
-  const isLight = document.documentElement.classList.toggle('light-mode');
-  const btn = $('themeToggle');
-  if (btn) {
-    btn.textContent = isLight ? '☀️ Light' : '🌙 Dark';
-    btn.classList.toggle('light-mode', isLight);
-  }
-  localStorage.setItem('pawdy_theme', isLight ? 'light' : 'dark');
-}
-
-// Restore saved theme preference
-(function(){
-  const saved = localStorage.getItem('pawdy_theme') || 'dark';
-  if (saved === 'light') {
-    document.documentElement.classList.add('light-mode');
-    const btn = $('themeToggle');
-    if (btn) { btn.textContent = '☀️ Light'; btn.classList.add('light-mode'); }
-  }
-})();
-
 function toggleMobileView() {
   const on = document.documentElement.classList.toggle('mob');
   const btn = $('viewToggle');
