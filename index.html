@@ -228,6 +228,51 @@ html.mob .card table{display:block;overflow-x:auto;-webkit-overflow-scrolling:to
 html.mob .btn-row{flex-wrap:wrap;}
 html.mob .mc-row{padding:8px 10px;}
 html.mob .score-box{flex-direction:column;gap:8px;}
+
+/* ── LIGHT MODE ── */
+html.light{
+  --bg:#f0f2f7;--bg2:#ffffff;--bg3:#f8f9fc;--bg4:#eef0f5;--bg5:#dde0e9;
+  --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.15);
+  --text:#1a1f2e;--text2:#4a5568;--text3:#6b7280;
+  --accent:#2563eb;--glow:rgba(37,99,235,.12);
+  --green:#059669;--green-bg:rgba(5,150,105,.1);
+  --amber:#d97706;--amber-bg:rgba(217,119,6,.1);
+  --red:#dc2626;--red-bg:rgba(220,38,38,.1);
+}
+html.light .sidebar{box-shadow:2px 0 8px rgba(0,0,0,.08);}
+html.light .topbar{box-shadow:0 1px 4px rgba(0,0,0,.08);}
+html.light .url-input{background:var(--bg2);}
+html.light code{background:var(--bg4);color:var(--text);}
+/* fix typo + force dark text on table */
+html.light .tbl td,html.light .tbl th{color:var(--text2);}
+html.light .tbl td.hl{color:var(--text);}
+html.light .set-card{background:var(--bg2);}
+html.light .mc-row{background:var(--bg3);}
+/* ── TEXT OVERRIDES: replace hardcoded #fff with dark in light mode ── */
+html.light .logo{color:var(--text);}
+html.light .topbar-title{color:var(--text);}
+html.light .kpi-val{color:var(--text);}
+html.light .card-head{color:var(--text2);}
+html.light .kpi-lbl{color:var(--text3);}
+html.light .kpi-sub{color:var(--text2);}
+html.light .nav-item{color:var(--text2);}
+html.light .nav-item.active{color:var(--accent);background:rgba(37,99,235,.1);border-left-color:var(--accent);}
+html.light .nav-group{color:var(--text3);}
+html.light .logo-tag{color:var(--text3);}
+html.light .topbar-sub{color:var(--text3);}
+html.light .topbar-title{color:var(--text);}
+html.light .mt{color:var(--text2);border-color:var(--border2);}
+html.light .mt.active{color:#fff;}
+html.light .sync-row{color:var(--text3);}
+html.light .prog-pct{color:var(--text2);}
+html.light .sug-head{color:var(--text);}
+html.light .sug-body{color:var(--text2);}
+html.light .fc-now{color:var(--text);}
+html.light .score-label{color:var(--text2);}
+html.light .pr-desc{color:var(--text2);}
+html.light .badge.ok{background:var(--green-bg);color:var(--green);}
+html.light .badge.warn{background:var(--amber-bg);color:var(--amber);}
+html.light .badge.bad{background:var(--red-bg);color:var(--red);}
 </style>
 </head>
 <body>
@@ -293,6 +338,7 @@ html.mob .score-box{flex-direction:column;gap:8px;}
     <button class="ham-btn" id="hamBtn" onclick="openSidebar()" aria-label="เมนู"><span></span><span></span><span></span></button>
     <div><span class="topbar-title">Team Apollo</span>&nbsp;<span class="topbar-sub">Sales Performance Report</span></div>
     <button class="view-toggle" id="viewToggle" onclick="toggleMobileView()" title="สลับ Mobile / Desktop">📱 Mobile</button>
+    <button class="view-toggle" id="themeToggle" onclick="toggleTheme()" title="Dark / Light Mode">☀️</button>
     <div class="mtabs">
       <button class="mt" data-m="jan">ม.ค.</button>
       <button class="mt" data-m="feb">ก.พ.</button>
@@ -338,26 +384,60 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <div class="kpi-grid" id="kpi-shopee"></div>
       <div class="g2">
         <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>GMV vs Target</div><div class="chart-wrap" style="height:200px"><canvas id="cv-sh-gmv"></canvas></div></div>
-        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>CR% & AOV</div><div class="chart-wrap" style="height:200px"><canvas id="cv-sh-cr"></canvas></div></div>
+        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>CR% &amp; AOV</div><div class="chart-wrap" style="height:200px"><canvas id="cv-sh-cr"></canvas></div></div>
       </div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-shopee"></table></div>
+      <!-- Daily section -->
+      <div class="wk-sec-hd" style="--sc:var(--shopee);margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD)</div>
+      <div class="kpi-grid" id="mtd-sh" style="display:none"></div>
+      <div class="g2">
+        <div class="card"><div class="card-head">Visitors รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-sh-dy-vis"></canvas></div></div>
+        <div class="card"><div class="card-head">Orders รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-sh-dy-ord"></canvas></div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="card-head">Sales (In-Plat vs Off-Plat) รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-sh-dy-sales"></canvas></div></div>
+        <div class="card"><div class="card-head">Budget (In-Plat vs Off-Plat) รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-sh-dy-bud"></canvas></div></div>
+      </div>
+      <div class="card"><div class="card-head">ROAS รายวัน</div><div class="chart-wrap" style="height:175px"><canvas id="cv-sh-dy-roas"></canvas></div></div>
     </div>
 
     <!-- TIKTOK -->
     <div class="panel" id="panel-tiktok">
       <div class="kpi-grid" id="kpi-tiktok"></div>
       <div class="g2">
-        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>GMV vs Target & ROAS</div><div class="chart-wrap" style="height:200px"><canvas id="cv-tt-gmv"></canvas></div></div>
-        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>Reach & Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-tt-reach"></canvas></div></div>
+        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>GMV vs Target &amp; ROAS</div><div class="chart-wrap" style="height:200px"><canvas id="cv-tt-gmv"></canvas></div></div>
+        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>Reach &amp; Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-tt-reach"></canvas></div></div>
       </div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-tiktok"></table></div>
+      <div class="wk-sec-hd" style="--sc:var(--tiktok);margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD)</div>
+      <div class="kpi-grid" id="mtd-tt" style="display:none"></div>
+      <div class="g2">
+        <div class="card"><div class="card-head">Visitors รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-tt-dy-vis"></canvas></div></div>
+        <div class="card"><div class="card-head">Orders รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-tt-dy-ord"></canvas></div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="card-head">Sales รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-tt-dy-sales"></canvas></div></div>
+        <div class="card"><div class="card-head">Budget รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-tt-dy-bud"></canvas></div></div>
+      </div>
+      <div class="card"><div class="card-head">ROAS รายวัน</div><div class="chart-wrap" style="height:175px"><canvas id="cv-tt-dy-roas"></canvas></div></div>
     </div>
 
     <!-- LAZADA -->
     <div class="panel" id="panel-lazada">
       <div class="kpi-grid" id="kpi-lazada"></div>
-      <div class="card"><div class="card-head"><div class="cdot" style="background:var(--lazada)"></div>GMV vs Target & ROAS</div><div class="chart-wrap" style="height:210px"><canvas id="cv-lz-gmv"></canvas></div></div>
+      <div class="card"><div class="card-head"><div class="cdot" style="background:var(--lazada)"></div>GMV vs Target &amp; ROAS</div><div class="chart-wrap" style="height:210px"><canvas id="cv-lz-gmv"></canvas></div></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--lazada)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-lazada"></table></div>
+      <div class="wk-sec-hd" style="--sc:var(--lazada);margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD)</div>
+      <div class="kpi-grid" id="mtd-lz" style="display:none"></div>
+      <div class="g2">
+        <div class="card"><div class="card-head">Visitors รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-lz-dy-vis"></canvas></div></div>
+        <div class="card"><div class="card-head">Orders รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-lz-dy-ord"></canvas></div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="card-head">Sales รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-lz-dy-sales"></canvas></div></div>
+        <div class="card"><div class="card-head">Budget รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-lz-dy-bud"></canvas></div></div>
+      </div>
+      <div class="card"><div class="card-head">ROAS รายวัน</div><div class="chart-wrap" style="height:175px"><canvas id="cv-lz-dy-roas"></canvas></div></div>
     </div>
 
     <!-- LINE -->
@@ -365,6 +445,12 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <div class="kpi3" id="kpi-line"></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--line)"></div>GMV vs Target</div><div class="chart-wrap" style="height:210px"><canvas id="cv-ln-gmv"></canvas></div></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--line)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-line"></table></div>
+      <div class="wk-sec-hd" style="--sc:var(--line);margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD)</div>
+      <div class="kpi-grid" id="mtd-ln" style="display:none"></div>
+      <div class="g2">
+        <div class="card"><div class="card-head">Orders รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-ln-dy-ord"></canvas></div></div>
+        <div class="card"><div class="card-head">Sales รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-ln-dy-sales"></canvas></div></div>
+      </div>
     </div>
 
     <!-- FB -->
@@ -372,30 +458,55 @@ html.mob .score-box{flex-direction:column;gap:8px;}
       <div class="kpi-grid" id="kpi-fb"></div>
       <div class="g2">
         <div class="card"><div class="card-head"><div class="cdot" style="background:var(--fb)"></div>GMV vs Target</div><div class="chart-wrap" style="height:200px"><canvas id="cv-fb-gmv"></canvas></div></div>
-        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--fb)"></div>Reach & Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-fb-reach"></canvas></div></div>
+        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--fb)"></div>Reach &amp; Budget</div><div class="chart-wrap" style="height:200px"><canvas id="cv-fb-reach"></canvas></div></div>
       </div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--fb)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-fb"></table></div>
+      <div class="wk-sec-hd" style="--sc:#4a90e2;margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD)</div>
+      <div class="kpi-grid" id="mtd-fb" style="display:none"></div>
+      <div class="g2">
+        <div class="card"><div class="card-head">Reach รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-fb-dy-reach"></canvas></div></div>
+        <div class="card"><div class="card-head">Orders &amp; Sales รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-fb-dy-ord"></canvas></div></div>
+      </div>
+      <div class="g2">
+        <div class="card"><div class="card-head">Budget (Inbox/Sales vs Awareness) รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-fb-dy-bud1"></canvas></div></div>
+        <div class="card"><div class="card-head">ROAS (Inbox/Sales) รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-fb-dy-roas"></canvas></div></div>
+      </div>
     </div>
 
     <!-- LIVE -->
     <div class="panel" id="panel-live">
       <div class="kpi-grid" id="kpi-live"></div>
+
       <div class="g2">
+        <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>Total GMV ทุกช่อง รายเดือน</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-total-gmv"></canvas></div></div>
         <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>Live Sales รายเดือน (แยกช่อง)</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-sales"></canvas></div></div>
-        <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>SPH รายช่อง (฿/ชม.)</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-sph-ch"></canvas></div></div>
       </div>
+      <div class="g2">
+        <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>SPH รายช่อง (฿/ชม.)</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-sph-ch"></canvas></div></div>
+        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--amber)"></div>Average ROI รายเดือน</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-roi-avg"></canvas></div></div>
+      </div>
+
       <div class="card"><div class="card-head"><div class="cdot" style="background:#a78bfa"></div>SPH รายMC — TikTok Official</div><div class="chart-wrap" style="height:230px"><canvas id="cv-lv-mc-off"></canvas></div></div>
       <div class="g2">
         <div class="card"><div class="card-head"><div class="cdot" style="background:#b06fff"></div>SPH รายMC — TikTok Raksus</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-mc-raks"></canvas></div></div>
         <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>SPH รายMC — Shopee Live</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-mc-shop"></canvas></div></div>
       </div>
-      <div class="card"><div class="card-head"><div class="cdot" style="background:#a78bfa"></div>📈 SPH Trend รายMC — TikTok Official (฿/ชม. รายเดือน)</div><div class="chart-wrap" style="height:260px"><canvas id="cv-lv-trend-off"></canvas></div></div>
+      <div class="card"><div class="card-head"><div class="cdot" style="background:#a78bfa"></div>📈 SPH Trend รายMC — TikTok Official</div><div class="chart-wrap" style="height:260px"><canvas id="cv-lv-trend-off"></canvas></div></div>
       <div class="g2">
         <div class="card"><div class="card-head"><div class="cdot" style="background:#b06fff"></div>📈 SPH Trend รายMC — TikTok Raksus</div><div class="chart-wrap" style="height:240px"><canvas id="cv-lv-trend-raks"></canvas></div></div>
         <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>📈 SPH Trend รายMC — Shopee Live</div><div class="chart-wrap" style="height:240px"><canvas id="cv-lv-trend-shop"></canvas></div></div>
       </div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--amber)"></div>📈 SPH Trend รายMC — CEO Live</div><div class="chart-wrap" style="height:200px"><canvas id="cv-lv-trend-ceo"></canvas></div></div>
-      <div class="card"><div class="card-head"><div class="cdot" style="background:#a78bfa"></div>📈 SPH Trend รายMC — ทุกช่อง รวมกัน (฿/ชม. รายเดือน)</div><div class="chart-wrap" style="height:300px"><canvas id="cv-lv-mc-trend"></canvas></div></div>
+
+      <!-- Daily charts + MTD -->
+      <div class="wk-sec-hd" style="--sc:#ff7ab0;margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD) — ทุกช่อง รวมกัน</div>
+      <div class="kpi-grid" id="mtd-lv" style="display:none"></div>
+      <div class="g2">
+        <div class="card"><div class="card-head">Orders รายวัน (ทุกช่อง)</div><div class="chart-wrap" style="height:190px"><canvas id="cv-lv-dy-ord"></canvas></div></div>
+        <div class="card"><div class="card-head">Visitors รายวัน (Shopee+TikTok+Lazada)</div><div class="chart-wrap" style="height:190px"><canvas id="cv-lv-dy-vis"></canvas></div></div>
+      </div>
+      <div class="card"><div class="card-head">Ads Spend รายวัน (ทุกช่อง)</div><div class="chart-wrap" style="height:190px"><canvas id="cv-lv-dy-spend"></canvas></div></div>
+
       <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>Live Performance รายเดือน</div><table class="tbl" id="tbl-live"></table></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:#a78bfa"></div>SPH รายMC × รายเดือน (ทุกช่อง รวมกัน)</div><table class="tbl" id="tbl-mc-sph"></table></div>
     </div>
@@ -506,6 +617,7 @@ html.mob .score-box{flex-direction:column;gap:8px;}
         <button class="mt" onclick="setSugTab('q3')">📊 ไตรมาส 3 (ก.ค.–ก.ย.)</button>
       </div>
       <div id="sug-content"></div>
+      <div id="sug-insights"></div>
     </div>
 
     <!-- SETTINGS -->
@@ -1116,6 +1228,60 @@ function renderWeekly(){
   }, 30);
 }
 
+// ── Daily section helpers ──
+const prevMapD = {jan:null,feb:'jan',mar:'feb',apr:'mar',may:'apr',jun:'may',jul:'jun',aug:'jul',sep:'aug',oct:'sep',nov:'oct',dec:'nov'};
+const MAX_DAY = 31;
+const dayLabels31 = Array.from({length:MAX_DAY},(_,i)=>String(i+1));
+
+function expandD(days, vals) {
+  const r = Array(MAX_DAY).fill(null);
+  (days||[]).forEach((d,i) => { if(d>=1&&d<=MAX_DAY) r[d-1] = vals[i]??null; });
+  return r;
+}
+function lnD(label, data, color, dashed=false) {
+  return {label, data, borderColor:color, backgroundColor:color+'20', borderWidth:dashed?1.5:2,
+    borderDash:dashed?[5,4]:[], tension:.25, pointRadius:1.5, pointHoverRadius:5, fill:false, spanGaps:false};
+}
+function optLineD(yFmt='num') {
+  return {...cDef, plugins:{...cDef.plugins,legend:legOpts}, scales:{
+    x:{...cDef.scales.x,ticks:{...cDef.scales.x.ticks,maxTicksLimit:16}},
+    y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,
+      callback: yFmt==='pct'?v=>v+'%':yFmt==='roas'?v=>v+'x':v=>fmtB(v)}},
+  }};
+}
+function mkLineD(id, datasets, yFmt='num') {
+  mkChart(id, {type:'line', data:{labels:dayLabels31, datasets}, options:optLineD(yFmt)});
+}
+
+// Compute MTD sum + MoM delta for an array
+function mtdStats(curArr, prevArr) {
+  const curSum = (curArr||[]).reduce((s,v)=>s+(v||0),0);
+  const prevSum = (prevArr||[]).reduce((s,v)=>s+(v||0),0);
+  const mom = prevSum>0 ? ((curSum-prevSum)/prevSum*100).toFixed(1) : null;
+  return {cur:curSum, prev:prevSum, mom};
+}
+function mtdKpiHtml(label, stats, fmt_='B', color='var(--accent)') {
+  const val = fmt_==='B' ? fmtB(stats.cur) : fmt_==='pct' ? stats.cur.toFixed(1)+'%' : fmt(stats.cur);
+  const badge = stats.mom!==null ? `<span class="badge ${+stats.mom>=0?'ok':'bad'}">${+stats.mom>=0?'+':''}${stats.mom}% MoM</span>` : '';
+  const prev = stats.prev>0 ? `<span style="font-size:10px;color:var(--text3)">เดือนก่อน: ${fmt_==='B'?fmtB(stats.prev):fmt_==='pct'?stats.prev.toFixed(1)+'%':fmt(stats.prev)}</span>` : '';
+  return `<div class="kpi" style="--kc:${color}"><div class="kpi-lbl">${label} (MTD)</div><div class="kpi-val">${val}</div><div class="kpi-sub">${badge} ${prev}</div></div>`;
+}
+function renderDailyKpis(containerId, m, pM, ch, metrics, color) {
+  const el = $(containerId); if(!el) return;
+  const curDD = DAILY[m]||{}; const prevDD = pM ? DAILY[pM] : null;
+  if(!curDD.days||!curDD.days.length){el.style.display='none';return;}
+  el.style.display='';
+  const curData = curDD[ch]||{}; const prevData = prevDD ? (prevDD[ch]||{}) : {};
+  let html = '';
+  metrics.forEach(({key,label,fmt:f,color:c})=>{
+    const cArr = expandD(curDD.days, curData[key]||[]);
+    const pArr = prevDD ? expandD(prevDD.days, prevData[key]||[]) : Array(MAX_DAY).fill(null);
+    const stats = mtdStats(cArr.filter(v=>v!==null), pArr.filter(v=>v!==null));
+    html += mtdKpiHtml(label, stats, f||'B', c||color);
+  });
+  el.innerHTML = html;
+}
+
 // ════ SHOPEE ════
 function renderShopee(){
   const d=getData().shopee,p=pctN(d.sales,d.target),ak=aMK(),an=aMN();
@@ -1125,6 +1291,34 @@ function renderShopee(){
     mkChart('cv-sh-cr',{type:'line',data:{labels:an,datasets:[{label:'CR%',data:ak.map(m=>DB[m].shopee.cr),borderColor:'#b06fff',backgroundColor:'rgba(176,111,255,.1)',tension:.3,fill:true,pointRadius:4,yAxisID:'y'},{label:'AOV',data:ak.map(m=>DB[m].shopee.aov),borderColor:'#ffc14d',tension:.3,fill:false,borderDash:[4,3],pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left',ticks:{...cDef.scales.y.ticks,callback:v=>v+'%'}},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>'฿'+v}}}}});
   },30);
   $('tbl-shopee').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>Visitors</th><th>CR%</th><th>AOV</th><th>ROI</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].shopee,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${fmt(d2.visitors)}</td><td class="num">${d2.cr}%</td><td class="num">${fmtB(d2.aov)}</td><td class="num">${d2.roi}x</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
+  // Daily charts
+  const _m = CUR==='all'?'may':CUR;
+  const _pM = prevMapD[_m];
+  const curDD_sh = DAILY[_m]||{}, prevDD_sh = _pM?DAILY[_pM]:null;
+  renderDailyKpis('mtd-sh', _m, _pM, 'shopee', [
+    {key:'visitors',label:'Visitors',fmt:'N',color:'var(--shopee)'},
+    {key:'orders',label:'Orders',fmt:'N',color:'var(--shopee)'},
+    {key:'sales',label:'Sales (In)',fmt:'B',color:'var(--shopee)'},
+    {key:'offSales',label:'Sales (Off)',fmt:'B',color:'#ff9966'},
+    {key:'inBudget',label:'Budget (In)',fmt:'B',color:'var(--shopee)'},
+  ], 'var(--shopee)');
+  if(curDD_sh.days&&curDD_sh.days.length) setTimeout(()=>{
+    const SH='#ff4820', SH2='#ff9966';
+    const cV=expandD(curDD_sh.days,curDD_sh.shopee.visitors), pV=prevDD_sh?expandD(prevDD_sh.days,prevDD_sh.shopee.visitors):Array(31).fill(null);
+    mkLineD('cv-sh-dy-vis',[lnD(MN[MK.indexOf(_m)]+' Visitors',cV,SH),lnD((MN[MK.indexOf(_pM)]||'')+' Visitors',pV,SH,true)]);
+    const cO=expandD(curDD_sh.days,curDD_sh.shopee.orders), pO=prevDD_sh?expandD(prevDD_sh.days,prevDD_sh.shopee.orders):Array(31).fill(null);
+    mkLineD('cv-sh-dy-ord',[lnD(MN[MK.indexOf(_m)]+' Orders',cO,SH),lnD((MN[MK.indexOf(_pM)]||'')+' Orders',pO,SH,true)]);
+    const cS=expandD(curDD_sh.days,curDD_sh.shopee.sales),pS=prevDD_sh?expandD(prevDD_sh.days,prevDD_sh.shopee.sales):Array(31).fill(null);
+    const cOS=expandD(curDD_sh.days,curDD_sh.shopee.offSales),pOS=prevDD_sh?expandD(prevDD_sh.days,prevDD_sh.shopee.offSales):Array(31).fill(null);
+    mkLineD('cv-sh-dy-sales',[lnD(MN[MK.indexOf(_m)]+' In-Plat',cS,SH),lnD((MN[MK.indexOf(_pM)]||'')+' In-Plat',pS,SH,true),lnD(MN[MK.indexOf(_m)]+' Off-Plat',cOS,SH2),lnD((MN[MK.indexOf(_pM)]||'')+' Off-Plat',pOS,SH2,true)]);
+    const cB=expandD(curDD_sh.days,curDD_sh.shopee.inBudget),pB=prevDD_sh?expandD(prevDD_sh.days,prevDD_sh.shopee.inBudget):Array(31).fill(null);
+    const cOB=expandD(curDD_sh.days,curDD_sh.shopee.offBudget),pOB=prevDD_sh?expandD(prevDD_sh.days,prevDD_sh.shopee.offBudget):Array(31).fill(null);
+    mkLineD('cv-sh-dy-bud',[lnD(MN[MK.indexOf(_m)]+' In-Bud',cB,SH),lnD((MN[MK.indexOf(_pM)]||'')+' In-Bud',pB,SH,true),lnD(MN[MK.indexOf(_m)]+' Off-Bud',cOB,SH2),lnD((MN[MK.indexOf(_pM)]||'')+' Off-Bud',pOB,SH2,true)]);
+    // ROAS daily
+    const roasC=Array(31).fill(null); curDD_sh.days.forEach((d,i)=>{if(d>=1&&d<=31){const s=curDD_sh.shopee.sales[i]||0,b=curDD_sh.shopee.inBudget[i]||0;roasC[d-1]=b>0?+(s/b).toFixed(2):null;}});
+    const roasP=Array(31).fill(null); if(prevDD_sh)prevDD_sh.days.forEach((d,i)=>{if(d>=1&&d<=31){const s=prevDD_sh.shopee.sales[i]||0,b=prevDD_sh.shopee.inBudget[i]||0;roasP[d-1]=b>0?+(s/b).toFixed(2):null;}});
+    mkLineD('cv-sh-dy-roas',[lnD(MN[MK.indexOf(_m)]+' ROAS',roasC,SH),lnD((MN[MK.indexOf(_pM)]||'')+' ROAS',roasP,SH,true)],'roas');
+  },30);
 }
 
 // ════ TIKTOK ════
@@ -1136,6 +1330,26 @@ function renderTiktok(){
     mkChart('cv-tt-reach',{type:'bar',data:{labels:an,datasets:[{label:'Reach',data:ak.map(m=>DB[m].tiktok.reach||0),backgroundColor:'rgba(66,212,212,.4)',borderRadius:4},{label:'Budget',data:ak.map(m=>DB[m].tiktok.budget),backgroundColor:'rgba(255,193,77,.6)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
   },30);
   $('tbl-tiktok').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>CR%</th><th>AOV</th><th>ROAS</th><th>Reach</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].tiktok,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${d2.cr}%</td><td class="num">${fmtB(d2.aov)}</td><td class="num">${d2.roas}x</td><td class="num">${fmt(d2.reach||0)}</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
+  const _m=CUR==='all'?'may':CUR, _pM=prevMapD[_m];
+  const curDD_tt=DAILY[_m]||{}, prevDD_tt=_pM?DAILY[_pM]:null;
+  renderDailyKpis('mtd-tt',_m,_pM,'tiktok',[
+    {key:'visitors',label:'Visitors',fmt:'N'},{key:'orders',label:'Orders',fmt:'N'},
+    {key:'sales',label:'Sales',fmt:'B'},{key:'budget',label:'Budget',fmt:'B'},
+  ],'var(--tiktok)');
+  if(curDD_tt.days&&curDD_tt.days.length) setTimeout(()=>{
+    const TT='#44d4d4', cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
+    const cV=expandD(curDD_tt.days,curDD_tt.tiktok.visitors),pV=prevDD_tt?expandD(prevDD_tt.days,prevDD_tt.tiktok.visitors):Array(31).fill(null);
+    mkLineD('cv-tt-dy-vis',[lnD(cL+' Visitors',cV,TT),lnD(pL+' Visitors',pV,TT,true)]);
+    const cO=expandD(curDD_tt.days,curDD_tt.tiktok.orders),pO=prevDD_tt?expandD(prevDD_tt.days,prevDD_tt.tiktok.orders):Array(31).fill(null);
+    mkLineD('cv-tt-dy-ord',[lnD(cL+' Orders',cO,TT),lnD(pL+' Orders',pO,TT,true)]);
+    const cS=expandD(curDD_tt.days,curDD_tt.tiktok.sales),pS=prevDD_tt?expandD(prevDD_tt.days,prevDD_tt.tiktok.sales):Array(31).fill(null);
+    mkLineD('cv-tt-dy-sales',[lnD(cL+' Sales',cS,TT),lnD(pL+' Sales',pS,TT,true)]);
+    const cB=expandD(curDD_tt.days,curDD_tt.tiktok.budget),pB=prevDD_tt?expandD(prevDD_tt.days,prevDD_tt.tiktok.budget):Array(31).fill(null);
+    mkLineD('cv-tt-dy-bud',[lnD(cL+' Budget',cB,TT),lnD(pL+' Budget',pB,TT,true)]);
+    const roasC=Array(31).fill(null); curDD_tt.days.forEach((d,i)=>{if(d>=1&&d<=31){const s=curDD_tt.tiktok.sales[i]||0,b=curDD_tt.tiktok.budget[i]||0;roasC[d-1]=b>0?+(s/b).toFixed(2):null;}});
+    const roasP=Array(31).fill(null); if(prevDD_tt)prevDD_tt.days.forEach((d,i)=>{if(d>=1&&d<=31){const s=prevDD_tt.tiktok.sales[i]||0,b=prevDD_tt.tiktok.budget[i]||0;roasP[d-1]=b>0?+(s/b).toFixed(2):null;}});
+    mkLineD('cv-tt-dy-roas',[lnD(cL+' ROAS',roasC,TT),lnD(pL+' ROAS',roasP,TT,true)],'roas');
+  },30);
 }
 
 // ════ LAZADA ════
@@ -1146,6 +1360,22 @@ function renderLazada(){
     mkChart('cv-lz-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].lazada.sales),backgroundColor:'rgba(96,112,255,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].lazada.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4},{label:'ROAS',data:ak.map(m=>DB[m].lazada.roas),type:'line',borderColor:'#2de8a0',tension:.3,fill:false,pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left'},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>v+'x'}}}}});
   },30);
   $('tbl-lazada').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>CR%</th><th>AOV</th><th>ROAS</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].lazada,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${d2.cr}%</td><td class="num">${fmtB(d2.aov)}</td><td class="num">${d2.roas}x</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
+  const _m=CUR==='all'?'may':CUR, _pM=prevMapD[_m];
+  const curDD_lz=DAILY[_m]||{}, prevDD_lz=_pM?DAILY[_pM]:null;
+  renderDailyKpis('mtd-lz',_m,_pM,'lazada',[
+    {key:'visitors',label:'Visitors',fmt:'N'},{key:'orders',label:'Orders',fmt:'N'},
+    {key:'sales',label:'Sales',fmt:'B'},{key:'budget',label:'Budget',fmt:'B'},
+  ],'var(--lazada)');
+  if(curDD_lz.days&&curDD_lz.days.length) setTimeout(()=>{
+    const LZ='#6070ff', cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
+    mkLineD('cv-lz-dy-vis',[lnD(cL+' Visitors',expandD(curDD_lz.days,curDD_lz.lazada.visitors),LZ),lnD(pL+' Visitors',prevDD_lz?expandD(prevDD_lz.days,prevDD_lz.lazada.visitors):Array(31).fill(null),LZ,true)]);
+    mkLineD('cv-lz-dy-ord',[lnD(cL+' Orders',expandD(curDD_lz.days,curDD_lz.lazada.orders),LZ),lnD(pL+' Orders',prevDD_lz?expandD(prevDD_lz.days,prevDD_lz.lazada.orders):Array(31).fill(null),LZ,true)]);
+    mkLineD('cv-lz-dy-sales',[lnD(cL+' Sales',expandD(curDD_lz.days,curDD_lz.lazada.sales),LZ),lnD(pL+' Sales',prevDD_lz?expandD(prevDD_lz.days,prevDD_lz.lazada.sales):Array(31).fill(null),LZ,true)]);
+    mkLineD('cv-lz-dy-bud',[lnD(cL+' Budget',expandD(curDD_lz.days,curDD_lz.lazada.budget),LZ),lnD(pL+' Budget',prevDD_lz?expandD(prevDD_lz.days,prevDD_lz.lazada.budget):Array(31).fill(null),LZ,true)]);
+    const roasC=Array(31).fill(null); curDD_lz.days.forEach((d,i)=>{if(d>=1&&d<=31){const s=curDD_lz.lazada.sales[i]||0,b=curDD_lz.lazada.budget[i]||0;roasC[d-1]=b>0?+(s/b).toFixed(2):null;}});
+    const roasP=Array(31).fill(null); if(prevDD_lz)prevDD_lz.days.forEach((d,i)=>{if(d>=1&&d<=31){const s=prevDD_lz.lazada.sales[i]||0,b=prevDD_lz.lazada.budget[i]||0;roasP[d-1]=b>0?+(s/b).toFixed(2):null;}});
+    mkLineD('cv-lz-dy-roas',[lnD(cL+' ROAS',roasC,LZ),lnD(pL+' ROAS',roasP,LZ,true)],'roas');
+  },30);
 }
 
 // ════ LINE OA ════
@@ -1156,6 +1386,16 @@ function renderLine(){
     mkChart('cv-ln-gmv',{type:'bar',data:{labels:an,datasets:[{label:'Actual',data:ak.map(m=>DB[m].line.sales),backgroundColor:'rgba(0,184,86,.75)',borderRadius:4},{label:'Target',data:ak.map(m=>DB[m].line.target),backgroundColor:'rgba(255,255,255,.07)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
   },30);
   $('tbl-line').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>AOV</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].line,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${fmtB(d2.aov)}</td></tr>`;}).join('')}</tbody>`;
+  const _m=CUR==='all'?'may':CUR, _pM=prevMapD[_m];
+  const curDD_ln=DAILY[_m]||{}, prevDD_ln=_pM?DAILY[_pM]:null;
+  renderDailyKpis('mtd-ln',_m,_pM,'line',[
+    {key:'orders',label:'Orders',fmt:'N'},{key:'sales',label:'Sales',fmt:'B'},
+  ],'var(--line)');
+  if(curDD_ln.days&&curDD_ln.days.length) setTimeout(()=>{
+    const LN='#00b856', cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
+    mkLineD('cv-ln-dy-ord',[lnD(cL+' Orders',expandD(curDD_ln.days,curDD_ln.line.orders),LN),lnD(pL+' Orders',prevDD_ln?expandD(prevDD_ln.days,prevDD_ln.line.orders):Array(31).fill(null),LN,true)]);
+    mkLineD('cv-ln-dy-sales',[lnD(cL+' Sales',expandD(curDD_ln.days,curDD_ln.line.sales),LN),lnD(pL+' Sales',prevDD_ln?expandD(prevDD_ln.days,prevDD_ln.line.sales):Array(31).fill(null),LN,true)]);
+  },30);
 }
 
 // ════ FACEBOOK ════
@@ -1167,6 +1407,21 @@ function renderFb(){
     mkChart('cv-fb-reach',{type:'line',data:{labels:an,datasets:[{label:'Reach',data:ak.map(m=>DB[m].fb.reach||0),borderColor:'#2e80ff',backgroundColor:'rgba(46,128,255,.1)',tension:.3,fill:true,pointRadius:4},{label:'Budget',data:ak.map(m=>DB[m].fb.budget),borderColor:'#ffc14d',tension:.3,fill:false,borderDash:[4,3],pointRadius:4,yAxisID:'y2'}]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,position:'left'},y2:{position:'right',grid:{display:false},ticks:{color:'#404868',font:{size:10,family:'Inter'},callback:v=>'฿'+fmt(v)}}}}});
   },30);
   $('tbl-fb').innerHTML=`<thead><tr><th>เดือน</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>Reach</th><th>ROAS</th><th>Budget</th></tr></thead><tbody>${ak.map((m,i)=>{const d2=DB[m].fb,p2=pctN(d2.sales,d2.target);return`<tr><td class="hl">${an[i]}</td><td class="num">${fmtB(d2.target)}</td><td class="num">${fmtB(d2.sales)}</td><td class="num"><span class="badge ${bCls(p2)}">${p2}%</span></td><td class="num">${d2.orders.toLocaleString()}</td><td class="num">${fmt(d2.reach||0)}</td><td class="num">${d2.roas}x</td><td class="num">${fmtB(d2.budget)}</td></tr>`;}).join('')}</tbody>`;
+  const _m=CUR==='all'?'may':CUR, _pM=prevMapD[_m];
+  const curDD_fb=DAILY[_m]||{}, prevDD_fb=_pM?DAILY[_pM]:null;
+  renderDailyKpis('mtd-fb',_m,_pM,'fb',[
+    {key:'reach',label:'Reach',fmt:'N',color:'#4a90e2'},{key:'orders',label:'Orders',fmt:'N',color:'#4a90e2'},
+    {key:'sales',label:'Sales',fmt:'B',color:'#4a90e2'},{key:'budgetIbSales',label:'Budget IB/Sales',fmt:'B',color:'#4a90e2'},
+  ],'#4a90e2');
+  if(curDD_fb.days&&curDD_fb.days.length) setTimeout(()=>{
+    const FB='#4a90e2', FB2='#82b4f0', cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
+    mkLineD('cv-fb-dy-reach',[lnD(cL+' Reach',expandD(curDD_fb.days,curDD_fb.fb.reach),FB),lnD(pL+' Reach',prevDD_fb?expandD(prevDD_fb.days,prevDD_fb.fb.reach):Array(31).fill(null),FB,true)]);
+    mkLineD('cv-fb-dy-ord',[lnD(cL+' Orders',expandD(curDD_fb.days,curDD_fb.fb.orders),FB),lnD(pL+' Orders',prevDD_fb?expandD(prevDD_fb.days,prevDD_fb.fb.orders):Array(31).fill(null),FB,true),lnD(cL+' Sales',expandD(curDD_fb.days,curDD_fb.fb.sales),FB2),lnD(pL+' Sales',prevDD_fb?expandD(prevDD_fb.days,prevDD_fb.fb.sales):Array(31).fill(null),FB2,true)]);
+    mkLineD('cv-fb-dy-bud1',[lnD(cL+' IB/Sales',expandD(curDD_fb.days,curDD_fb.fb.budgetIbSales),FB),lnD(pL+' IB/Sales',prevDD_fb?expandD(prevDD_fb.days,prevDD_fb.fb.budgetIbSales):Array(31).fill(null),FB,true),lnD(cL+' Aware',expandD(curDD_fb.days,curDD_fb.fb.budgetAware),FB2),lnD(pL+' Aware',prevDD_fb?expandD(prevDD_fb.days,prevDD_fb.fb.budgetAware):Array(31).fill(null),FB2,true)]);
+    const roasC=Array(31).fill(null); curDD_fb.days.forEach((d,i)=>{if(d>=1&&d<=31)roasC[d-1]=curDD_fb.fb.roasIb[i]||null;});
+    const roasP=Array(31).fill(null); if(prevDD_fb)prevDD_fb.days.forEach((d,i)=>{if(d>=1&&d<=31)roasP[d-1]=prevDD_fb.fb.roasIb[i]||null;});
+    mkLineD('cv-fb-dy-roas',[lnD(cL+' ROAS',roasC,FB),lnD(pL+' ROAS',roasP,FB,true)],'roas');
+  },30);
 }
 
 // ════ LIVE ════
@@ -1202,7 +1457,16 @@ function renderLive(){
   function getMCSales(m,ch,mc){ const d2=MC_SPH[m]?.[ch]?.[mc]; return d2?d2.sales:0; }
 
   setTimeout(()=>{
-    // Chart 1: Live Sales by channel per month
+    // Total GMV all channels by month
+    mkChart('cv-lv-total-gmv',{type:'bar',data:{labels:an,datasets:[
+      {label:'Shopee',data:ak.map(m=>DB[m].shopee.sales),backgroundColor:'rgba(255,72,32,.8)',borderRadius:3},
+      {label:'TikTok',data:ak.map(m=>DB[m].tiktok.sales),backgroundColor:'rgba(66,212,212,.8)',borderRadius:3},
+      {label:'Lazada',data:ak.map(m=>DB[m].lazada.sales),backgroundColor:'rgba(96,112,255,.8)',borderRadius:3},
+      {label:'Line OA',data:ak.map(m=>DB[m].line.sales),backgroundColor:'rgba(0,184,86,.8)',borderRadius:3},
+      {label:'Facebook',data:ak.map(m=>DB[m].fb.sales),backgroundColor:'rgba(46,128,255,.8)',borderRadius:3},
+    ]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
+
+    // Live Sales by channel per month
     mkChart('cv-lv-sales',{type:'bar',data:{labels:an,datasets:[
       {label:'TikTok Official',data:ak.map(m=>DB[m].live.off),backgroundColor:'rgba(255,122,176,.8)',borderRadius:3},
       {label:'TikTok Raksus',data:ak.map(m=>DB[m].live.raks),backgroundColor:'rgba(176,111,255,.8)',borderRadius:3},
@@ -1210,89 +1474,78 @@ function renderLive(){
       {label:'CEO',data:ak.map(m=>DB[m].live.ceo),backgroundColor:'rgba(255,193,77,.8)',borderRadius:3},
     ]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
 
-    // Chart 2: SPH by channel per month (line chart)
-    const sphOff_arr=ak.map(m=>DB[m].live.hr_off>0?Math.round(DB[m].live.off/DB[m].live.hr_off):0);
-    const sphRaks_arr=ak.map(m=>DB[m].live.hr_raks>0?Math.round(DB[m].live.raks/DB[m].live.hr_raks):0);
-    const sphShop_arr=ak.map(m=>DB[m].live.hr_shop>0?Math.round(DB[m].live.shop/DB[m].live.hr_shop):0);
-    const sphCeo_arr=ak.map(m=>DB[m].live.hr_ceo>0?Math.round(DB[m].live.ceo/DB[m].live.hr_ceo):0);
+    // SPH by channel line chart
+    const sphOff_arr=ak.map(m=>DB[m].live.hr_off>0?Math.round(DB[m].live.off/DB[m].live.hr_off):null);
+    const sphRaks_arr=ak.map(m=>DB[m].live.hr_raks>0?Math.round(DB[m].live.raks/DB[m].live.hr_raks):null);
+    const sphShop_arr=ak.map(m=>DB[m].live.hr_shop>0?Math.round(DB[m].live.shop/DB[m].live.hr_shop):null);
+    const sphCeo_arr=ak.map(m=>DB[m].live.hr_ceo>0?Math.round(DB[m].live.ceo/DB[m].live.hr_ceo):null);
     mkChart('cv-lv-sph-ch',{type:'line',data:{labels:an,datasets:[
-      {label:'TikTok Official',data:sphOff_arr,borderColor:'#ff7ab0',backgroundColor:'rgba(255,122,176,.1)',tension:.3,pointRadius:5,fill:false,borderWidth:2},
-      {label:'TikTok Raksus',data:sphRaks_arr,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,.1)',tension:.3,pointRadius:5,fill:false,borderWidth:2},
-      {label:'Shopee Live',data:sphShop_arr,borderColor:'#ff4820',backgroundColor:'rgba(255,72,32,.1)',tension:.3,pointRadius:5,fill:false,borderWidth:2},
-      {label:'CEO',data:sphCeo_arr,borderColor:'#fbbf24',backgroundColor:'rgba(251,191,36,.1)',tension:.3,pointRadius:5,fill:false,borderWidth:2,borderDash:[5,3]},
+      {label:'TikTok Official',data:sphOff_arr,borderColor:'#ff7ab0',backgroundColor:'rgba(255,122,176,.1)',tension:.3,pointRadius:5,fill:false,borderWidth:2,spanGaps:false},
+      {label:'TikTok Raksus',data:sphRaks_arr,borderColor:'#a78bfa',backgroundColor:'rgba(167,139,250,.1)',tension:.3,pointRadius:5,fill:false,borderWidth:2,spanGaps:false},
+      {label:'Shopee Live',data:sphShop_arr,borderColor:'#ff4820',backgroundColor:'rgba(255,72,32,.1)',tension:.3,pointRadius:5,fill:false,borderWidth:2,spanGaps:false},
+      {label:'CEO',data:sphCeo_arr,borderColor:'#fbbf24',backgroundColor:'rgba(251,191,36,.1)',tension:.3,pointRadius:5,fill:false,borderWidth:2,borderDash:[5,3],spanGaps:false},
     ]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
 
-    // Chart 3: SPH per MC — TikTok Official (grouped bar per month)
-    mkChart('cv-lv-mc-off',{type:'bar',data:{labels:an,datasets:allMCs_off.map(mc=>({
-      label:mc, data:ak.map(m=>getMCSPH(m,'tt_off',mc)),
-      backgroundColor:mcClr(mc)+'cc', borderRadius:3,
-    }))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
+    // Average ROI per month (avg of shopee ROI, tiktok ROAS, lazada ROAS, fb ROAS)
+    const avgROI_arr=ak.map(m=>{
+      const vals=[DB[m].shopee.roi,DB[m].tiktok.roas,DB[m].lazada.roas,DB[m].fb.roas].filter(v=>v>0);
+      return vals.length?+(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2):null;
+    });
+    mkChart('cv-lv-roi-avg',{type:'line',data:{labels:an,datasets:[
+      {label:'Avg ROI/ROAS',data:avgROI_arr,borderColor:'#fbbf24',backgroundColor:'rgba(251,191,36,.15)',tension:.35,pointRadius:6,fill:true,borderWidth:2.5,spanGaps:false},
+      {label:'Shopee ROI',data:ak.map(m=>DB[m].shopee.roi||null),borderColor:'#ff4820',tension:.3,pointRadius:4,fill:false,borderWidth:1.5,borderDash:[4,3],spanGaps:false},
+      {label:'TikTok ROAS',data:ak.map(m=>DB[m].tiktok.roas||null),borderColor:'#44d4d4',tension:.3,pointRadius:4,fill:false,borderWidth:1.5,borderDash:[4,3],spanGaps:false},
+      {label:'FB ROAS',data:ak.map(m=>DB[m].fb.roas||null),borderColor:'#4a90e2',tension:.3,pointRadius:4,fill:false,borderWidth:1.5,borderDash:[4,3],spanGaps:false},
+    ]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>v+'x'}}}}});
 
-    // Chart 4: SPH per MC — TikTok Raksus
-    mkChart('cv-lv-mc-raks',{type:'bar',data:{labels:an,datasets:allMCs_raks.map(mc=>({
-      label:mc, data:ak.map(m=>getMCSPH(m,'tt_raks',mc)),
-      backgroundColor:mcClr(mc)+'cc', borderRadius:3,
-    }))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
+    // MC SPH charts (unchanged)
+    mkChart('cv-lv-mc-off',{type:'bar',data:{labels:an,datasets:allMCs_off.map(mc=>({label:mc,data:ak.map(m=>getMCSPH(m,'tt_off',mc)),backgroundColor:mcClr(mc)+'cc',borderRadius:3}))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
+    mkChart('cv-lv-mc-raks',{type:'bar',data:{labels:an,datasets:allMCs_raks.map(mc=>({label:mc,data:ak.map(m=>getMCSPH(m,'tt_raks',mc)),backgroundColor:mcClr(mc)+'cc',borderRadius:3}))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
+    mkChart('cv-lv-mc-shop',{type:'bar',data:{labels:an,datasets:allMCs_shop.map(mc=>({label:mc,data:ak.map(m=>getMCSPH(m,'shopee',mc)),backgroundColor:mcClr(mc)+'cc',borderRadius:3}))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
+    const mkTrendCh=(id,chKey,mcs)=>{const ds=mcs.map(mc=>({label:mc,data:ak.map(m=>{const e=MC_SPH[m]?.[chKey]?.[mc];return e&&e.hr>0?Math.round(e.sales/e.hr):null;}),borderColor:mcClr(mc),backgroundColor:mcClr(mc)+'33',tension:.35,pointRadius:5,pointHoverRadius:8,pointBorderWidth:2,pointBorderColor:'#0a0c12',fill:false,borderWidth:2.5,spanGaps:false})).filter(ds=>ds.data.some(v=>v!==null));if(!ds.length){killChart(id);return;}mkChart(id,{type:'line',data:{labels:an,datasets:ds},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});};
+    mkTrendCh('cv-lv-trend-off','tt_off',allMCs_off);
+    mkTrendCh('cv-lv-trend-raks','tt_raks',allMCs_raks);
+    mkTrendCh('cv-lv-trend-shop','shopee',allMCs_shop);
+    mkTrendCh('cv-lv-trend-ceo','ceo',allMCs_ceo);
 
-    // Chart 5: SPH per MC — Shopee Live
-    mkChart('cv-lv-mc-shop',{type:'bar',data:{labels:an,datasets:allMCs_shop.map(mc=>({
-      label:mc, data:ak.map(m=>getMCSPH(m,'shopee',mc)),
-      backgroundColor:mcClr(mc)+'cc', borderRadius:3,
-    }))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
-
-    // Charts 6–9: SPH Trend per MC — per channel line charts
-    const mkTrendCh = (id, chKey, mcs) => {
-      const ds = mcs.map(mc => ({
-        label: mc,
-        data: ak.map(m => { const e=MC_SPH[m]?.[chKey]?.[mc]; return e&&e.hr>0?Math.round(e.sales/e.hr):null; }),
-        borderColor: mcClr(mc), backgroundColor: mcClr(mc)+'33',
-        tension:.35, pointRadius:5, pointHoverRadius:8,
-        pointBorderWidth:2, pointBorderColor:'#0a0c12',
-        fill:false, borderWidth:2.5, spanGaps:false,
-      })).filter(ds=>ds.data.some(v=>v!==null));
-      if(!ds.length){killChart(id);return;}
-      mkChart(id,{type:'line',data:{labels:an,datasets:ds},options:{
-        ...cDef,
-        plugins:{...cDef.plugins,legend:legOpts},
-        scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}},
-      }});
-    };
-    mkTrendCh('cv-lv-trend-off',  'tt_off',  allMCs_off);
-    mkTrendCh('cv-lv-trend-raks', 'tt_raks', allMCs_raks);
-    mkTrendCh('cv-lv-trend-shop', 'shopee',  allMCs_shop);
-    mkTrendCh('cv-lv-trend-ceo',  'ceo',     allMCs_ceo);
-
-    // Chart 10: SPH Trend per MC — line chart across months (all channels combined)
-    const trendDatasets = allMCs_all.map(mc=>({
-      label: mc,
-      data: ak.map(m => {
-        let sales=0, hrs=0;
-        ['tt_off','tt_raks','shopee','ceo'].forEach(ch=>{
-          const e=MC_SPH[m]?.[ch]?.[mc];
-          if(e&&e.hr>0){sales+=e.sales;hrs+=e.hr;}
+    // Daily charts (all channels combined)
+    const _m=CUR==='all'?'may':CUR, _pM=prevMapD[_m];
+    const cDD=DAILY[_m]||{}, pDD=_pM?DAILY[_pM]:null;
+    const mtdEl=$('mtd-lv');
+    if(cDD.days&&cDD.days.length&&mtdEl){
+      mtdEl.style.display='';
+      // Compute combined daily arrays
+      const combineChannels=(dd,ch_keys,metric)=>{
+        if(!dd||!dd.days||!dd.days.length)return Array(31).fill(null);
+        const r=Array(31).fill(null);
+        dd.days.forEach((d,i)=>{
+          if(d<1||d>31)return;
+          const sum=ch_keys.reduce((s,ch)=>s+(dd[ch]?.[metric]?.[i]||0),0);
+          r[d-1]=(r[d-1]||0)+sum;
         });
-        return hrs>0 ? Math.round(sales/hrs) : null;
-      }),
-      borderColor: mcClr(mc),
-      backgroundColor: mcClr(mc)+'33',
-      tension: 0.35,
-      pointRadius: 6,
-      pointHoverRadius: 9,
-      pointBorderWidth: 2,
-      pointBorderColor: '#0a0c12',
-      fill: false,
-      borderWidth: 2.5,
-      spanGaps: false,
-    })).filter(ds => ds.data.some(v=>v!==null));
-    mkChart('cv-lv-mc-trend',{type:'line',data:{labels:an,datasets:trendDatasets},options:{
-      ...cDef,
-      plugins:{...cDef.plugins,legend:legOpts,
-        annotation:{annotations:{
-          target:{type:'line',yMin:4000,yMax:4000,borderColor:'rgba(255,193,77,.4)',borderWidth:1.5,borderDash:[6,4],label:{display:true,content:'Target ฿4,000',color:'#ffc14d',font:{size:10}}},
-        }}
-      },
-      scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}},
-    }});
+        return r;
+      };
+      const ordCur=combineChannels(cDD,['shopee','tiktok','lazada','line','fb'],'orders');
+      const ordPrev=combineChannels(pDD,['shopee','tiktok','lazada','line','fb'],'orders');
+      const visCur=combineChannels(cDD,['shopee','tiktok','lazada'],'visitors');
+      const visPrev=combineChannels(pDD,['shopee','tiktok','lazada'],'visitors');
+      // shopee budget key is inBudget not budget — fix:
+      const spendCurFixed=Array(31).fill(null);
+      cDD.days&&cDD.days.forEach((d,i)=>{if(d<1||d>31)return;spendCurFixed[d-1]=(cDD.shopee?.inBudget?.[i]||0)+(cDD.tiktok?.budget?.[i]||0)+(cDD.lazada?.budget?.[i]||0)+(cDD.fb?.budgetIbSales?.[i]||0)+(cDD.fb?.budgetAware?.[i]||0);});
+      const spendPrevFixed=Array(31).fill(null);
+      pDD&&pDD.days&&pDD.days.forEach((d,i)=>{if(d<1||d>31)return;spendPrevFixed[d-1]=(pDD.shopee?.inBudget?.[i]||0)+(pDD.tiktok?.budget?.[i]||0)+(pDD.lazada?.budget?.[i]||0)+(pDD.fb?.budgetIbSales?.[i]||0)+(pDD.fb?.budgetAware?.[i]||0);});
+
+      const cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
+      mkLineD('cv-lv-dy-ord',[lnD(cL+' Orders',ordCur,'#ff7ab0'),lnD(pL+' Orders',ordPrev,'#ff7ab0',true)]);
+      mkLineD('cv-lv-dy-vis',[lnD(cL+' Visitors',visCur,'#a78bfa'),lnD(pL+' Visitors',visPrev,'#a78bfa',true)]);
+      mkLineD('cv-lv-dy-spend',[lnD(cL+' Spend',spendCurFixed,'#fbbf24'),lnD(pL+' Spend',spendPrevFixed,'#fbbf24',true)]);
+
+      // MTD KPI boxes
+      const ordStats=mtdStats(ordCur.filter(v=>v!==null),ordPrev.filter(v=>v!==null));
+      const visStats=mtdStats(visCur.filter(v=>v!==null),visPrev.filter(v=>v!==null));
+      const spStats=mtdStats(spendCurFixed.filter(v=>v!==null),spendPrevFixed.filter(v=>v!==null));
+      mtdEl.innerHTML=mtdKpiHtml('Orders รวม',ordStats,'N','#ff7ab0')+mtdKpiHtml('Visitors รวม',visStats,'N','#a78bfa')+mtdKpiHtml('Ads Spend รวม',spStats,'B','#fbbf24');
+    }
   },30);
 
   // Table 1: Monthly Live Performance
@@ -1364,14 +1617,15 @@ function setSugTab(t){
 
 function renderSuggest(){
   const el=$('sug-content'); if(!el)return;
-  const ak=['jan','feb','mar','apr'];
+  const ak = aMK().length ? aMK() : ['jan'];
+  const lastM = ak[ak.length-1];
   const gmv=m=>CH_CFG.reduce((s,c)=>s+DB[m][c.k].sales,0);
   const sph=m=>DB[m].live.hr_off>0?DB[m].live.off/DB[m].live.hr_off:0;
   const affiPct=m=>{const g=gmv(m);return g?(DB[m].affi.sh_s+DB[m].affi.tt_s+DB[m].affi.lzd_s)/g*100:0;};
-  const aprG=gmv('apr');
-  const avgROI=ak.reduce((s,m)=>s+DB[m].shopee.roi,0)/4;
-  const avgSPH=ak.reduce((s,m)=>s+sph(m),0)/4;
-  const avgAffi=ak.reduce((s,m)=>s+affiPct(m),0)/4;
+  const aprG=gmv(lastM);
+  const avgROI=ak.reduce((s,m)=>s+DB[m].shopee.roi,0)/ak.length;
+  const avgSPH=ak.reduce((s,m)=>s+sph(m),0)/ak.length;
+  const avgAffi=ak.reduce((s,m)=>s+affiPct(m),0)/ak.length;
 
   if(SUG_TAB==='month'){
     // Jun forecast: Apr × seasonal factor
@@ -1399,12 +1653,12 @@ function renderSuggest(){
       <div class="card" style="margin-bottom:14px">
         <div class="card-head"><div class="cdot" style="background:#f472b6"></div>Priority Actions — มิ.ย. 2026 (เรียงตามผลกระทบ)</div>
         <div style="padding:4px 0">
-          <div class="pr-row"><div class="pr-num" style="background:rgba(255,72,32,.15);color:var(--shopee)">1</div><div class="pr-text"><strong>Shopee — รักษา ROI &amp; ดัน CR ให้ผ่าน 15%</strong><br>ROI เฉลี่ย 4 เดือน = ${avgROI.toFixed(1)}x แต่ เม.ย. ลดเหลือ ${DB.apr.shopee.roi}x จาก ${DB.mar.shopee.roi}x (มี.ค.) — เพิ่ม Flash Sale วันที่ 6, 15, 25 มิ.ย. ตรง Double Digit, optimize คูปองร้านค้า + เพิ่ม Bundle SKU เพื่อดัน AOV<div class="sug-kpis"><span class="nu">Target ฿9.2M</span><span class="dn">ROI เม.ย. ${DB.apr.shopee.roi}x ↓</span><span class="up">เป้า ROI ≥ 16x</span></div></div></div>
-          <div class="pr-row"><div class="pr-num" style="background:rgba(66,212,212,.15);color:var(--tiktok)">2</div><div class="pr-text"><strong>TikTok — Shift Budget จาก Awareness → GMV Max</strong><br>ROAS เม.ย. = ${DB.apr.tiktok.roas}x ลดจาก ${DB.mar.tiktok.roas}x ใน มี.ค. ขณะที่ Budget เพิ่ม — แนะนำ: ย้าย ฿200K จาก Consideration ไป GMV Max แมว, ทดสอบ TikTok Basket campaign, ดู ROAS รายสัปดาห์แรก<div class="sug-kpis"><span class="dn">ROAS ${DB.apr.tiktok.roas}x ↓</span><span class="nu">Budget ฿${fmt(DB.apr.tiktok.budget)}</span><span class="up">เป้า ROAS ≥ 4.5x</span></div></div></div>
-          <div class="pr-row"><div class="pr-num" style="background:rgba(255,122,176,.15);color:#ff7ab0">3</div><div class="pr-text"><strong>Live — ดัน SPH Official กลับมา ≥ ฿5,000/ชม.</strong><br>SPH Official เม.ย. = ฿${sph('apr').toFixed(0)} (ลดจาก ฿${sph('mar').toFixed(0)} มี.ค.) — ตั้ง Tier Voucher Live 3 ระดับ (499/1100/2000 บาท) ทุกรอบ, เพิ่ม Hero SKU สัดส่วน 40%, ทุก MC ต้องมี Upsell script<div class="sug-kpis"><span class="dn">SPH ${fmtB(Math.round(sph('apr')))}/hr ↓</span><span class="up">เป้า ≥ ฿5,000/hr</span><span>${DB.apr.live.hr_off} hr/เดือน</span></div></div></div>
-          <div class="pr-row"><div class="pr-num" style="background:rgba(0,184,86,.15);color:var(--line)">4</div><div class="pr-text"><strong>Line OA — ฟื้น GMV + Broadcast Campaign</strong><br>Line ลดจาก ฿1.87M (มี.ค.) → ฿1.51M (เม.ย.) แต่ AOV สูงสุด (฿${DB.apr.line.aov.toLocaleString()}) — Broadcast สัปดาห์ที่ 2 + Set Deal exclusive Line เท่านั้น + Push ระบบสมาชิก retention<div class="sug-kpis"><span class="dn">GMV ฿${fmt(DB.apr.line.sales)} ↓</span><span class="up">AOV สูงสุด ฿${DB.apr.line.aov.toLocaleString()}</span><span class="nu">เป้า ≥ ฿1.8M</span></div></div></div>
-          <div class="pr-row"><div class="pr-num" style="background:rgba(46,128,255,.15);color:var(--fb)">5</div><div class="pr-text"><strong>Facebook — Optimize Creative + ลด CPM</strong><br>ROAS FB ลดต่อเนื่อง 3 เดือน (${DB.feb.fb.roas}x → ${DB.mar.fb.roas}x → ${DB.apr.fb.roas}x) — A/B test creative UGC vs Product demo, ลด Awareness 15% shift ไป Traffic Shopee + IG retargeting<div class="sug-kpis"><span class="dn">ROAS ${DB.apr.fb.roas}x ↓ 3 เดือนติด</span><span>Reach ${fmt(DB.apr.fb.reach)}</span><span class="nu">CPM เป้า &lt; 70 บาท</span></div></div></div>
-          <div class="pr-row"><div class="pr-num" style="background:rgba(255,193,77,.15);color:var(--amber)">6</div><div class="pr-text"><strong>Affiliate — คุม Contribution ≤ 25% GMV</strong><br>Affi เฉลี่ย 4 เดือน = ${avgAffi.toFixed(1)}% of GMV — ปิด GMV Affi ตะกร้าเหลือง 10%, เปิดเฉพาะ creator CR ≥ 0.5% + สินค้า margin ≥ 35%<div class="sug-kpis"><span>Affi เม.ย. ${affiPct('apr').toFixed(1)}% of GMV</span><span class="nu">Commission ≤ 10%</span><span class="up">Focus: High-margin SKU</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(255,72,32,.15);color:var(--shopee)">1</div><div class="pr-text"><strong>Shopee — รักษา ROI &amp; ดัน CR ให้ผ่าน 15%</strong><br>ROI เฉลี่ย ${ak.length} เดือน = ${avgROI.toFixed(1)}x — ${MN[MK.indexOf(lastM)]} ROI = ${DB[lastM].shopee.roi}x — เพิ่ม Flash Sale ตรง Double Digit, optimize คูปองร้านค้า + เพิ่ม Bundle SKU เพื่อดัน AOV<div class="sug-kpis"><span class="nu">Target ${fmtB(DB[lastM].shopee.target)}</span><span class="dn">ROI ${MN[MK.indexOf(lastM)]} ${DB[lastM].shopee.roi}x</span><span class="up">เป้า ROI ≥ 16x</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(66,212,212,.15);color:var(--tiktok)">2</div><div class="pr-text"><strong>TikTok — Shift Budget จาก Awareness → GMV Max</strong><br>ROAS ${MN[MK.indexOf(lastM)]} = ${DB[lastM].tiktok.roas}x — แนะนำ: ย้าย ฿200K จาก Consideration ไป GMV Max แมว, ทดสอบ TikTok Basket campaign, ดู ROAS รายสัปดาห์แรก<div class="sug-kpis"><span class="dn">ROAS ${DB[lastM].tiktok.roas}x</span><span class="nu">Budget ฿${fmt(DB[lastM].tiktok.budget)}</span><span class="up">เป้า ROAS ≥ 4.5x</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(255,122,176,.15);color:#ff7ab0">3</div><div class="pr-text"><strong>Live — ดัน SPH Official กลับมา ≥ ฿5,000/ชม.</strong><br>SPH Official ${MN[MK.indexOf(lastM)]} = ฿${sph(lastM).toFixed(0)} — ตั้ง Tier Voucher Live 3 ระดับ (499/1100/2000 บาท) ทุกรอบ, เพิ่ม Hero SKU สัดส่วน 40%, ทุก MC ต้องมี Upsell script<div class="sug-kpis"><span class="dn">SPH ${fmtB(Math.round(sph(lastM)))}/hr</span><span class="up">เป้า ≥ ฿5,000/hr</span><span>${DB[lastM].live.hr_off} hr/เดือน</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(0,184,86,.15);color:var(--line)">4</div><div class="pr-text"><strong>Line OA — ฟื้น GMV + Broadcast Campaign</strong><br>Line ${MN[MK.indexOf(lastM)]} AOV สูงสุด (฿${DB[lastM].line.aov.toLocaleString()}) — Broadcast สัปดาห์ที่ 2 + Set Deal exclusive Line เท่านั้น + Push ระบบสมาชิก retention<div class="sug-kpis"><span class="dn">GMV ฿${fmt(DB[lastM].line.sales)}</span><span class="up">AOV สูงสุด ฿${DB[lastM].line.aov.toLocaleString()}</span><span class="nu">เป้า ≥ ฿1.8M</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(46,128,255,.15);color:var(--fb)">5</div><div class="pr-text"><strong>Facebook — Optimize Creative + ลด CPM</strong><br>ROAS FB ${MN[MK.indexOf(lastM)]} = ${DB[lastM].fb.roas}x — A/B test creative UGC vs Product demo, ลด Awareness 15% shift ไป Traffic Shopee + IG retargeting<div class="sug-kpis"><span class="dn">ROAS ${DB[lastM].fb.roas}x</span><span>Reach ${fmt(DB[lastM].fb.reach)}</span><span class="nu">CPM เป้า &lt; 70 บาท</span></div></div></div>
+          <div class="pr-row"><div class="pr-num" style="background:rgba(255,193,77,.15);color:var(--amber)">6</div><div class="pr-text"><strong>Affiliate — คุม Contribution ≤ 25% GMV</strong><br>Affi เฉลี่ย ${ak.length} เดือน = ${avgAffi.toFixed(1)}% of GMV — ปิด GMV Affi ตะกร้าเหลือง 10%, เปิดเฉพาะ creator CR ≥ 0.5% + สินค้า margin ≥ 35%<div class="sug-kpis"><span>Affi ${MN[MK.indexOf(lastM)]} ${affiPct(lastM).toFixed(1)}% of GMV</span><span class="nu">Commission ≤ 10%</span><span class="up">Focus: High-margin SKU</span></div></div></div>
         </div>
       </div>
       <div class="g2">
@@ -1441,11 +1695,11 @@ function renderSuggest(){
       <div class="sug-cards">
         ${[
           {tag:'GROWTH',sc:'var(--tiktok)',h:'TikTok — รุก Dog Segment + GMV Max',b:`Q3 เน้น push Dog SKU เพราะ Cat segment อิ่มตัว — ทดสอบ GMV Max อาหารสุนัข เม็ดใหญ่ + Puppy, ดู ROAS 2 สัปดาห์แรก เป้า ROAS ≥ 4.5x`,kpis:['เป้า ROAS ≥ 4.5x','Dog SKU ≥ 30% mix','Budget +20%']},
-          {tag:'RETENTION',sc:'var(--line)',h:'Line OA — Loyalty Loop + Auto Reminder',b:`AOV Line สูงสุด (฿${DB.apr.line.aov.toLocaleString()}) — สร้าง subscription mechanism: แจ้งเตือนสั่งซื้อทุก 30 วัน, member-only price สำหรับ repeat buyer`,kpis:['AOV เป้า ≥ ฿1,700','Repeat rate > 40%','Broadcast 3×/เดือน']},
+          {tag:'RETENTION',sc:'var(--line)',h:'Line OA — Loyalty Loop + Auto Reminder',b:`AOV Line สูงสุด (฿${DB[lastM].line.aov.toLocaleString()}) — สร้าง subscription mechanism: แจ้งเตือนสั่งซื้อทุก 30 วัน, member-only price สำหรับ repeat buyer`,kpis:['AOV เป้า ≥ ฿1,700','Repeat rate > 40%','Broadcast 3×/เดือน']},
           {tag:'CAMPAIGN',sc:'var(--shopee)',h:'Shopee — เตรียม 7.7 / 8.8 / 9.9',b:'วาง campaign ล่วงหน้า 3 สัปดาห์: Affiliate brief, Hero SKU bundle, banner set และ Budget plan สำหรับแต่ละ campaign',kpis:['Target ≥ ฿9M/เดือน','Brief 3 wk ahead','Flash Sale every campaign']},
           {tag:'AWARENESS',sc:'var(--fb)',h:'Facebook + IG — Full-Funnel Tracking',b:'Q3 ทดสอบ Full-funnel: IG Reels → FB retarget → Shopee/TikTok — วัด Assisted Conversion แทน Last-click ROAS',kpis:['CPM เป้า < 70 บาท','IG Reach ≥ 500K/เดือน','Assisted tracking']},
           {tag:'LIVE SCALE',sc:'#ff7ab0',h:`Live — SPH ≥ ฿5,500 + CEO Scale`,b:`SPH Official เฉลี่ย 4 เดือน = ฿${avgSPH.toFixed(0)}/hr — Q3 target SPH ≥ ฿5,500 โดยเพิ่ม CEO live 2×/เดือน, ขยาย Shopee Live กลางวัน, ทุก MC มี upsell script`,kpis:['SPH เป้า ≥ ฿5,500/hr','CEO live 2×/เดือน','Live ≥ 650 hr/เดือน']},
-          {tag:'SCALE',sc:'var(--lazada)',h:'Lazada — Bundle + LazAds Scale',b:`ROAS Lazada ดีสุด (${DB.apr.lazada.roas}x) แต่ volume ต่ำ — Q3 เพิ่ม Bundle กระสอบ + อุปกรณ์, LazAds +30%, target ฿1.2M/เดือน`,kpis:['ROAS เป้า ≥ 8x','Target ฿1.2M/เดือน','Bundle AOV ≥ ฿1,200']},
+          {tag:'SCALE',sc:'var(--lazada)',h:'Lazada — Bundle + LazAds Scale',b:`ROAS Lazada ดีสุด (${DB[lastM].lazada.roas}x) แต่ volume ต่ำ — Q3 เพิ่ม Bundle กระสอบ + อุปกรณ์, LazAds +30%, target ฿1.2M/เดือน`,kpis:['ROAS เป้า ≥ 8x','Target ฿1.2M/เดือน','Bundle AOV ≥ ฿1,200']},
         ].map(({tag,sc,h,b,kpis})=>`<div class="sug-card" style="--sc:${sc}"><div class="sug-tag">${tag}</div><div class="sug-head">${h}</div><div class="sug-body">${b}</div><div class="sug-kpis">${kpis.map(k=>`<span class="nu">${k}</span>`).join('')}</div></div>`).join('')}
       </div>
       <div class="card">
@@ -1459,6 +1713,32 @@ function renderSuggest(){
           ].map(([m,c,t])=>`<div class="tl-row"><div class="tl-month" style="color:${c}">${m}</div><div class="tl-text">${t}</div></div>`).join('')}
         </div>
       </div>`;
+  }
+  // Dynamic actionable insights
+  const insightsEl = $('sug-insights');
+  if(insightsEl && ak.length) {
+    const insights = [];
+    const lm = ak[ak.length-1], lmLabel = MN[MK.indexOf(lm)];
+    // Check ROAS trends
+    if(ak.length>=2){
+      const prev2=ak[ak.length-2];
+      if(DB[lm].fb.roas < DB[prev2].fb.roas) insights.push(`📉 <strong>Facebook ROAS ลดลง</strong> ${DB[prev2].fb.roas}x → ${DB[lm].fb.roas}x — ควรทบทวน creative และ audience targeting`);
+      if(DB[lm].tiktok.roas < DB[prev2].tiktok.roas) insights.push(`📉 <strong>TikTok ROAS ลดลง</strong> ${DB[prev2].tiktok.roas}x → ${DB[lm].tiktok.roas}x — ตรวจสอบ GMV spend campaign`);
+      const lmGMV=gmv(lm), prevGMV=gmv(prev2);
+      if(lmGMV>prevGMV) insights.push(`✅ <strong>GMV รวม${lmLabel}</strong> เติบโต ${((lmGMV-prevGMV)/prevGMV*100).toFixed(1)}% MoM — ดีมาก! ควรขยาย budget ช่องที่ ROAS ดี`);
+      else insights.push(`⚠️ <strong>GMV รวม${lmLabel}</strong> ลดลง ${((lmGMV-prevGMV)/prevGMV*100).toFixed(1)}% MoM — ตรวจสอบ channel ที่ drop`);
+    }
+    // Check vs target
+    ['shopee','tiktok','lazada','fb'].forEach(ch=>{
+      const d2=DB[lm][ch]; if(!d2||!d2.target||!d2.sales)return;
+      const p2=pctN(d2.sales,d2.target);
+      if(p2<80) insights.push(`🎯 <strong>${ch.charAt(0).toUpperCase()+ch.slice(1)} ${lmLabel}</strong> อยู่ที่ ${p2}% of Target — ต้องเร่ง ${fmtB(d2.target-d2.sales)} บาท`);
+    });
+    // Live SPH check
+    const curSPH=DB[lm].live.hr_off>0?Math.round(DB[lm].live.off/DB[lm].live.hr_off):0;
+    if(curSPH>0&&curSPH<3500) insights.push(`⚡ <strong>SPH TT Official ${lmLabel}</strong> อยู่ที่ ฿${fmtB(curSPH)}/hr — ต่ำกว่า Target ฿3,500 ควรเพิ่มช่วงเวลา prime time`);
+    if(!insights.length) insights.push(`✅ ทุก KPI อยู่ในเกณฑ์ปกติ — ติดตาม trend เดือนถัดไป`);
+    insightsEl.innerHTML = `<div style="margin-top:14px"><div class="wk-sec-hd" style="--sc:var(--accent)">🔍 สิ่งที่ต้องดำเนินการ — จากข้อมูลล่าสุด (${lmLabel})</div>${insights.map(i=>`<div style="padding:8px 12px;border-bottom:1px solid var(--border);font-size:12.5px;color:var(--text2);line-height:1.7">${i}</div>`).join('')}</div>`;
   }
 }
 
@@ -2298,6 +2578,40 @@ function toggleMobileView() {
   if (btn) { btn.textContent = on ? '🖥 Desktop' : '📱 Mobile'; btn.classList.toggle('mob-on', on); }
   localStorage.setItem('pawdy_mob', on ? '1' : '0');
   if (!on) closeSidebar();
+}
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  const btn = $('themeToggle');
+  if (btn) btn.textContent = isLight ? '🌙' : '☀️';
+  localStorage.setItem('pawdy_theme', isLight ? 'light' : 'dark');
+  applyChartTheme();
+  const ap = document.querySelector('.panel.active');
+  if (ap) renderActive(ap.id.replace('panel-', ''));
+}
+(function(){
+  if (localStorage.getItem('pawdy_theme') === 'light') {
+    document.documentElement.classList.add('light');
+    const btn = $('themeToggle');
+    if (btn) btn.textContent = '🌙';
+  }
+})();
+function applyChartTheme() {
+  const isLight = document.documentElement.classList.contains('light');
+  const gridColor = isLight ? 'rgba(0,0,0,.07)' : 'rgba(255,255,255,.06)';
+  const tickColor = isLight ? '#6b7280' : '#404868';
+  const tooltipBg = isLight ? 'rgba(255,255,255,.95)' : 'rgba(15,18,28,.92)';
+  const tooltipText = isLight ? '#1a1f2e' : '#e2e6f3';
+  if (cDef.scales) {
+    cDef.scales.x.grid.color = gridColor;
+    cDef.scales.y.grid.color = gridColor;
+    cDef.scales.x.ticks.color = tickColor;
+    cDef.scales.y.ticks.color = tickColor;
+  }
+  if (cDef.plugins && cDef.plugins.tooltip) {
+    cDef.plugins.tooltip.backgroundColor = tooltipBg;
+    cDef.plugins.tooltip.titleColor = tooltipText;
+    cDef.plugins.tooltip.bodyColor = tooltipText;
+  }
 }
 // Restore saved view preference
 (function(){
