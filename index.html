@@ -273,6 +273,13 @@ html.light .pr-desc{color:var(--text2);}
 html.light .badge.ok{background:var(--green-bg);color:var(--green);}
 html.light .badge.warn{background:var(--amber-bg);color:var(--amber);}
 html.light .badge.bad{background:var(--red-bg);color:var(--red);}
+/* ── DAY PICKER ── */
+.day-picker{display:flex;flex-wrap:wrap;gap:3px;margin:6px 0 10px;align-items:center;}
+.day-picker-lbl{font-size:10.5px;color:var(--text3);margin-right:4px;white-space:nowrap;}
+.dp-btn{padding:2px 7px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text2);font-size:10.5px;font-family:var(--mono);cursor:pointer;transition:all .1s;line-height:1.6;}
+.dp-btn:hover{border-color:var(--accent);color:var(--text);}
+.dp-btn.sel{background:var(--accent);border-color:var(--accent);color:#fff;}
+html.light .dp-btn.sel{color:#fff;}
 </style>
 </head>
 <body>
@@ -389,6 +396,7 @@ html.light .badge.bad{background:var(--red-bg);color:var(--red);}
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-shopee"></table></div>
       <!-- Daily section -->
       <div class="wk-sec-hd" style="--sc:var(--shopee);margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD)</div>
+      <div id="day-pick-sh"></div>
       <div class="kpi-grid" id="mtd-sh" style="display:none"></div>
       <div class="g2">
         <div class="card"><div class="card-head">Visitors รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-sh-dy-vis"></canvas></div></div>
@@ -410,6 +418,7 @@ html.light .badge.bad{background:var(--red-bg);color:var(--red);}
       </div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--tiktok)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-tiktok"></table></div>
       <div class="wk-sec-hd" style="--sc:var(--tiktok);margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD)</div>
+      <div id="day-pick-tt"></div>
       <div class="kpi-grid" id="mtd-tt" style="display:none"></div>
       <div class="g2">
         <div class="card"><div class="card-head">Visitors รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-tt-dy-vis"></canvas></div></div>
@@ -428,6 +437,7 @@ html.light .badge.bad{background:var(--red-bg);color:var(--red);}
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--lazada)"></div>GMV vs Target &amp; ROAS</div><div class="chart-wrap" style="height:210px"><canvas id="cv-lz-gmv"></canvas></div></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--lazada)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-lazada"></table></div>
       <div class="wk-sec-hd" style="--sc:var(--lazada);margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD)</div>
+      <div id="day-pick-lz"></div>
       <div class="kpi-grid" id="mtd-lz" style="display:none"></div>
       <div class="g2">
         <div class="card"><div class="card-head">Visitors รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-lz-dy-vis"></canvas></div></div>
@@ -446,6 +456,7 @@ html.light .badge.bad{background:var(--red-bg);color:var(--red);}
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--line)"></div>GMV vs Target</div><div class="chart-wrap" style="height:210px"><canvas id="cv-ln-gmv"></canvas></div></div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--line)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-line"></table></div>
       <div class="wk-sec-hd" style="--sc:var(--line);margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD)</div>
+      <div id="day-pick-ln"></div>
       <div class="kpi-grid" id="mtd-ln" style="display:none"></div>
       <div class="g2">
         <div class="card"><div class="card-head">Orders รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-ln-dy-ord"></canvas></div></div>
@@ -462,6 +473,7 @@ html.light .badge.bad{background:var(--red-bg);color:var(--red);}
       </div>
       <div class="card"><div class="card-head"><div class="cdot" style="background:var(--fb)"></div>KPI รายเดือน</div><table class="tbl" id="tbl-fb"></table></div>
       <div class="wk-sec-hd" style="--sc:#4a90e2;margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD)</div>
+      <div id="day-pick-fb"></div>
       <div class="kpi-grid" id="mtd-fb" style="display:none"></div>
       <div class="g2">
         <div class="card"><div class="card-head">Reach รายวัน</div><div class="chart-wrap" style="height:190px"><canvas id="cv-fb-dy-reach"></canvas></div></div>
@@ -477,6 +489,7 @@ html.light .badge.bad{background:var(--red-bg);color:var(--red);}
     <div class="panel" id="panel-live">
       <div class="kpi-grid" id="kpi-live"></div>
 
+      <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>📊 Total Live Sales รายเดือน — ทุกช่อง รวมกัน</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-total-live"></canvas></div></div>
       <div class="g2">
         <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>Total GMV ทุกช่อง รายเดือน</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-total-gmv"></canvas></div></div>
         <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>Live Sales รายเดือน (แยกช่อง)</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-sales"></canvas></div></div>
@@ -1266,7 +1279,7 @@ function mtdKpiHtml(label, stats, fmt_='B', color='var(--accent)') {
   const prev = stats.prev>0 ? `<span style="font-size:10px;color:var(--text3)">เดือนก่อน: ${fmt_==='B'?fmtB(stats.prev):fmt_==='pct'?stats.prev.toFixed(1)+'%':fmt(stats.prev)}</span>` : '';
   return `<div class="kpi" style="--kc:${color}"><div class="kpi-lbl">${label} (MTD)</div><div class="kpi-val">${val}</div><div class="kpi-sub">${badge} ${prev}</div></div>`;
 }
-function renderDailyKpis(containerId, m, pM, ch, metrics, color) {
+function renderDailyKpis(containerId, m, pM, ch, metrics, color, maxDay=null) {
   const el = $(containerId); if(!el) return;
   const curDD = DAILY[m]||{}; const prevDD = pM ? DAILY[pM] : null;
   if(!curDD.days||!curDD.days.length){el.style.display='none';return;}
@@ -1276,10 +1289,45 @@ function renderDailyKpis(containerId, m, pM, ch, metrics, color) {
   metrics.forEach(({key,label,fmt:f,color:c})=>{
     const cArr = expandD(curDD.days, curData[key]||[]);
     const pArr = prevDD ? expandD(prevDD.days, prevData[key]||[]) : Array(MAX_DAY).fill(null);
-    const stats = mtdStats(cArr.filter(v=>v!==null), pArr.filter(v=>v!==null));
-    html += mtdKpiHtml(label, stats, f||'B', c||color);
+    const cStat = maxDay!=null ? cArr.slice(0,maxDay) : cArr.filter(v=>v!==null);
+    const pStat = maxDay!=null ? pArr.slice(0,maxDay) : pArr.filter(v=>v!==null);
+    const stats = mtdStats(cStat, pStat);
+    html += mtdKpiHtml(label+(maxDay!=null?` ≤วัน${maxDay}`:''), stats, f||'B', c||color);
   });
   el.innerHTML = html;
+}
+
+// ── Day filter state ──
+const DAYSEL={shopee:null,tiktok:null,lazada:null,line:null,fb:null};
+const _MTD_M={
+  shopee:[{key:'visitors',label:'Visitors',fmt:'N',color:'var(--shopee)'},{key:'orders',label:'Orders',fmt:'N',color:'var(--shopee)'},{key:'sales',label:'Sales (In)',fmt:'B',color:'var(--shopee)'},{key:'offSales',label:'Sales (Off)',fmt:'B',color:'#ff9966'},{key:'inBudget',label:'Budget (In)',fmt:'B',color:'var(--shopee)'}],
+  tiktok:[{key:'visitors',label:'Visitors',fmt:'N'},{key:'orders',label:'Orders',fmt:'N'},{key:'sales',label:'Sales',fmt:'B'},{key:'budget',label:'Budget',fmt:'B'}],
+  lazada:[{key:'visitors',label:'Visitors',fmt:'N'},{key:'orders',label:'Orders',fmt:'N'},{key:'sales',label:'Sales',fmt:'B'},{key:'budget',label:'Budget',fmt:'B'}],
+  line:[{key:'orders',label:'Orders',fmt:'N'},{key:'sales',label:'Sales',fmt:'B'}],
+  fb:[{key:'reach',label:'Reach',fmt:'N',color:'#4a90e2'},{key:'orders',label:'Orders',fmt:'N',color:'#4a90e2'},{key:'sales',label:'Sales',fmt:'B',color:'#4a90e2'},{key:'budgetIbSales',label:'Budget IB/Sales',fmt:'B',color:'#4a90e2'}],
+};
+const _MTD_C={shopee:'var(--shopee)',tiktok:'var(--tiktok)',lazada:'var(--lazada)',line:'var(--line)',fb:'#4a90e2'};
+const _MTD_KID={shopee:'mtd-sh',tiktok:'mtd-tt',lazada:'mtd-lz',line:'mtd-ln',fb:'mtd-fb'};
+const _MTD_PID={shopee:'day-pick-sh',tiktok:'day-pick-tt',lazada:'day-pick-lz',line:'day-pick-ln',fb:'day-pick-fb'};
+
+function buildDayPicker(pickId, ch) {
+  const el=$(pickId); if(!el) return;
+  const _m=CUR==='all'?'may':CUR;
+  const curDD=DAILY[_m]||{};
+  const days=curDD.days&&curDD.days.length?curDD.days.filter(d=>d>=1&&d<=31):[];
+  const maxUsed=days.length?Math.max(...days):31;
+  const sel=DAYSEL[ch];
+  let h='<div class="day-picker"><span class="day-picker-lbl">📅 ถึงวันที่:</span>';
+  h+=`<button class="dp-btn${sel===null?' sel':''}" onclick="setDay('${ch}',null)">ทั้งหมด</button>`;
+  for(let d=1;d<=maxUsed;d++) h+=`<button class="dp-btn${sel===d?' sel':''}" onclick="setDay('${ch}',${d})">${d}</button>`;
+  h+='</div>';
+  el.innerHTML=h;
+}
+function setDay(ch, day) {
+  DAYSEL[ch]=day;
+  const _m=CUR==='all'?'may':CUR, _pM=prevMapD[_m];
+  renderDailyKpis(_MTD_KID[ch], _m, _pM, ch, _MTD_M[ch], _MTD_C[ch], day);
+  buildDayPicker(_MTD_PID[ch], ch);
 }
 
 // ════ SHOPEE ════
@@ -1301,7 +1349,8 @@ function renderShopee(){
     {key:'sales',label:'Sales (In)',fmt:'B',color:'var(--shopee)'},
     {key:'offSales',label:'Sales (Off)',fmt:'B',color:'#ff9966'},
     {key:'inBudget',label:'Budget (In)',fmt:'B',color:'var(--shopee)'},
-  ], 'var(--shopee)');
+  ], 'var(--shopee)', DAYSEL.shopee);
+  buildDayPicker('day-pick-sh','shopee');
   if(curDD_sh.days&&curDD_sh.days.length) setTimeout(()=>{
     const SH='#ff4820', SH2='#ff9966';
     const cV=expandD(curDD_sh.days,curDD_sh.shopee.visitors), pV=prevDD_sh?expandD(prevDD_sh.days,prevDD_sh.shopee.visitors):Array(31).fill(null);
@@ -1335,7 +1384,8 @@ function renderTiktok(){
   renderDailyKpis('mtd-tt',_m,_pM,'tiktok',[
     {key:'visitors',label:'Visitors',fmt:'N'},{key:'orders',label:'Orders',fmt:'N'},
     {key:'sales',label:'Sales',fmt:'B'},{key:'budget',label:'Budget',fmt:'B'},
-  ],'var(--tiktok)');
+  ],'var(--tiktok)', DAYSEL.tiktok);
+  buildDayPicker('day-pick-tt','tiktok');
   if(curDD_tt.days&&curDD_tt.days.length) setTimeout(()=>{
     const TT='#44d4d4', cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
     const cV=expandD(curDD_tt.days,curDD_tt.tiktok.visitors),pV=prevDD_tt?expandD(prevDD_tt.days,prevDD_tt.tiktok.visitors):Array(31).fill(null);
@@ -1365,7 +1415,8 @@ function renderLazada(){
   renderDailyKpis('mtd-lz',_m,_pM,'lazada',[
     {key:'visitors',label:'Visitors',fmt:'N'},{key:'orders',label:'Orders',fmt:'N'},
     {key:'sales',label:'Sales',fmt:'B'},{key:'budget',label:'Budget',fmt:'B'},
-  ],'var(--lazada)');
+  ],'var(--lazada)', DAYSEL.lazada);
+  buildDayPicker('day-pick-lz','lazada');
   if(curDD_lz.days&&curDD_lz.days.length) setTimeout(()=>{
     const LZ='#6070ff', cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
     mkLineD('cv-lz-dy-vis',[lnD(cL+' Visitors',expandD(curDD_lz.days,curDD_lz.lazada.visitors),LZ),lnD(pL+' Visitors',prevDD_lz?expandD(prevDD_lz.days,prevDD_lz.lazada.visitors):Array(31).fill(null),LZ,true)]);
@@ -1390,7 +1441,8 @@ function renderLine(){
   const curDD_ln=DAILY[_m]||{}, prevDD_ln=_pM?DAILY[_pM]:null;
   renderDailyKpis('mtd-ln',_m,_pM,'line',[
     {key:'orders',label:'Orders',fmt:'N'},{key:'sales',label:'Sales',fmt:'B'},
-  ],'var(--line)');
+  ],'var(--line)', DAYSEL.line);
+  buildDayPicker('day-pick-ln','line');
   if(curDD_ln.days&&curDD_ln.days.length) setTimeout(()=>{
     const LN='#00b856', cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
     mkLineD('cv-ln-dy-ord',[lnD(cL+' Orders',expandD(curDD_ln.days,curDD_ln.line.orders),LN),lnD(pL+' Orders',prevDD_ln?expandD(prevDD_ln.days,prevDD_ln.line.orders):Array(31).fill(null),LN,true)]);
@@ -1412,7 +1464,8 @@ function renderFb(){
   renderDailyKpis('mtd-fb',_m,_pM,'fb',[
     {key:'reach',label:'Reach',fmt:'N',color:'#4a90e2'},{key:'orders',label:'Orders',fmt:'N',color:'#4a90e2'},
     {key:'sales',label:'Sales',fmt:'B',color:'#4a90e2'},{key:'budgetIbSales',label:'Budget IB/Sales',fmt:'B',color:'#4a90e2'},
-  ],'#4a90e2');
+  ],'#4a90e2', DAYSEL.fb);
+  buildDayPicker('day-pick-fb','fb');
   if(curDD_fb.days&&curDD_fb.days.length) setTimeout(()=>{
     const FB='#4a90e2', FB2='#82b4f0', cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
     mkLineD('cv-fb-dy-reach',[lnD(cL+' Reach',expandD(curDD_fb.days,curDD_fb.fb.reach),FB),lnD(pL+' Reach',prevDD_fb?expandD(prevDD_fb.days,prevDD_fb.fb.reach):Array(31).fill(null),FB,true)]);
@@ -1457,6 +1510,15 @@ function renderLive(){
   function getMCSales(m,ch,mc){ const d2=MC_SPH[m]?.[ch]?.[mc]; return d2?d2.sales:0; }
 
   setTimeout(()=>{
+    // Total Live Sales all live channels by month
+    mkChart('cv-lv-total-live',{type:'bar',data:{labels:an,datasets:[
+      {label:'TikTok Official',data:ak.map(m=>DB[m].live.off||0),backgroundColor:'rgba(255,122,176,.8)',borderRadius:3,stack:'live'},
+      {label:'TikTok Raksus',data:ak.map(m=>DB[m].live.raks||0),backgroundColor:'rgba(176,111,255,.8)',borderRadius:3,stack:'live'},
+      {label:'Shopee Live',data:ak.map(m=>DB[m].live.shop||0),backgroundColor:'rgba(255,72,32,.75)',borderRadius:3,stack:'live'},
+      {label:'CEO Live',data:ak.map(m=>DB[m].live.ceo||0),backgroundColor:'rgba(255,193,77,.8)',borderRadius:3,stack:'live'},
+      {label:'Total Live',data:ak.map(m=>DB[m].live.total||0),type:'line',borderColor:'#ffffff',backgroundColor:'rgba(255,255,255,.05)',tension:.3,pointRadius:5,pointHoverRadius:8,fill:false,borderWidth:2.5,spanGaps:false,yAxisID:'y'},
+    ]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,stacked:true,ticks:{...cDef.scales.y.ticks,callback:v=>fmtB(v)}}}}});
+
     // Total GMV all channels by month
     mkChart('cv-lv-total-gmv',{type:'bar',data:{labels:an,datasets:[
       {label:'Shopee',data:ak.map(m=>DB[m].shopee.sales),backgroundColor:'rgba(255,72,32,.8)',borderRadius:3},
