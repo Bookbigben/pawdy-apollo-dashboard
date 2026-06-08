@@ -1129,13 +1129,26 @@ function renderOverview(){
   $('ov-channels').innerHTML=CH_CFG.filter(c=>c.k!=='line').map(c=>{const cd=d[c.k],p=pctN(cd.sales,cd.target);return`<div class="kpi" style="--kc:${c.color}"><div class="kpi-lbl">${c.label}</div><div class="kpi-val">${fmtB(cd.sales)}</div><div class="kpi-sub"><span class="badge ${bCls(p)}">${p}%</span><span style="color:var(--text3)">${fmtB(cd.target)}</span></div></div>`;}).join('')+
   '<div style="grid-column:1/-1;padding:4px 12px 2px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-top:1px solid var(--border);margin-top:4px">── ช่องทางเพิ่มเติม ──</div>'+
   EXT_CH_CFG.map(c=>{const cd=extD[c.k]||{},p=pctN(cd.sales||0,cd.target||0);return`<div class="kpi" style="--kc:${c.color}"><div class="kpi-lbl">${c.label}</div><div class="kpi-val">${fmtB(cd.sales||0)}</div><div class="kpi-sub"><span class="badge ${bCls(p)}">${p}%</span><span style="color:var(--text3)">${fmtB(cd.target||0)}</span></div></div>`;}).join('');
+  // Build combined channel list for charts & table (main - Line OA + ext)
+  const ovAllChs = [
+    ...CH_CFG.filter(c=>c.k!=='line').map(c=>({...c, isExt:false})),
+    ...EXT_CH_CFG.map(c=>({...c, isExt:true}))
+  ];
+  const ovSales  = c => c.isExt ? (extD[c.k]?.sales||0)  : (d[c.k]?.sales||0);
+  const ovTarget = c => c.isExt ? (extD[c.k]?.target||0) : (d[c.k]?.target||0);
+  const ovOrders = c => c.isExt ? 0 : (d[c.k]?.orders||0);
   setTimeout(()=>{
-    const L=CH_CFG.map(c=>c.label);
-    mkChart('cv-ov-bar',{type:'bar',data:{labels:L,datasets:[{label:'Actual',data:CH_CFG.map(c=>d[c.k].sales),backgroundColor:CH_CFG.map(c=>c.color+'bb'),borderRadius:4},{label:'Target',data:CH_CFG.map(c=>d[c.k].target),backgroundColor:'rgba(255,255,255,0.06)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:{...legOpts}}}});
-    const ps=CH_CFG.map(c=>pctN(d[c.k].sales,d[c.k].target));
+    const L=ovAllChs.map(c=>c.label);
+    mkChart('cv-ov-bar',{type:'bar',data:{labels:L,datasets:[
+      {label:'Actual', data:ovAllChs.map(ovSales),  backgroundColor:ovAllChs.map(c=>c.color+'bb'), borderRadius:4},
+      {label:'Target', data:ovAllChs.map(ovTarget), backgroundColor:'rgba(255,255,255,0.06)',       borderRadius:4}
+    ]},options:{...cDef,plugins:{...cDef.plugins,legend:{...legOpts}}}});
+    const ps=ovAllChs.map(c=>pctN(ovSales(c),ovTarget(c)));
     mkChart('cv-ov-ach',{type:'bar',data:{labels:L,datasets:[{label:'%',data:ps,backgroundColor:ps.map(p=>p>=100?'rgba(45,232,160,.7)':p>=85?'rgba(255,193,77,.7)':'rgba(255,92,92,.7)'),borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,tooltip:{...cDef.plugins.tooltip,callbacks:{label:ctx=>ctx.raw+'%'}}},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>v+'%'}}}}});
   },30);
-  $('ov-table').innerHTML=`<thead><tr><th>Channel</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>Progress</th></tr></thead><tbody>${CH_CFG.map(c=>{const cd=d[c.k],p=pctN(cd.sales,cd.target);return`<tr><td class="hl" style="color:${c.color}">${c.label}</td><td class="num">${fmtB(cd.target)}</td><td class="num">${fmtB(cd.sales)}</td><td class="num"><span class="badge ${bCls(p)}">${p}%</span></td><td class="num">${cd.orders.toLocaleString()}</td><td><div class="prog"><div class="prog-bar"><div class="prog-fill" style="width:${Math.min(p,100)}%;background:${c.color}"></div></div><span class="prog-pct ${bCls(p)}">${p}%</span></div></td></tr>`;}).join('')}</tbody>`;
+  $('ov-table').innerHTML=`<thead><tr><th>Channel</th><th>Target</th><th>Actual</th><th>%</th><th>Orders</th><th>Progress</th></tr></thead><tbody>${
+    ovAllChs.map(c=>{const s=ovSales(c),tg=ovTarget(c),p=pctN(s,tg),ord=ovOrders(c);return`<tr><td class="hl" style="color:${c.color}">${c.label}</td><td class="num">${fmtB(tg)}</td><td class="num">${fmtB(s)}</td><td class="num"><span class="badge ${bCls(p)}">${p}%</span></td><td class="num">${ord>0?ord.toLocaleString():'-'}</td><td><div class="prog"><div class="prog-bar"><div class="prog-fill" style="width:${Math.min(p,100)}%;background:${c.color}"></div></div><span class="prog-pct ${bCls(p)}">${p}%</span></div></td></tr>`;}).join('')
+  }</tbody>`;
 }
 
 // ════ COMPARE ════
