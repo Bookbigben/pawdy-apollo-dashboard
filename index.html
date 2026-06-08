@@ -1020,8 +1020,8 @@ const aMK  = () => { const upTo = CUR === 'all' ? MK.length - 1 : MK.indexOf(CUR
 const aMN  = () => aMK().map(m => MN[MK.indexOf(m)]);
 
 function extTotal(m,field){ const e=DB[m].ext||{}; return EXT_CH_CFG.reduce((s,c)=>s+(e[c.k]?.[field]||0),0); }
-function gmvTotal(m){ return CH_CFG.reduce((s,c)=>s+DB[m][c.k].sales,0)+extTotal(m,'sales'); }
-function tgtTotal(m){ return CH_CFG.reduce((s,c)=>s+DB[m][c.k].target,0)+extTotal(m,'target'); }
+function gmvTotal(m){ return CH_CFG.filter(c=>c.k!=='line').reduce((s,c)=>s+(ovCh(m,c.k).sales||0),0)+extTotal(m,'sales'); }
+function tgtTotal(m){ return CH_CFG.filter(c=>c.k!=='line').reduce((s,c)=>s+(ovCh(m,c.k).target||0),0)+extTotal(m,'target'); }
 
 function aggAll() {
   const ak = aMK(), n = ak.length||1;
@@ -1062,11 +1062,60 @@ function killChart(id){if(REG[id]){REG[id].destroy();delete REG[id];}}
 function mkChart(id,cfg){killChart(id);const el=$(id);if(!el)return;REG[id]=new Chart(el,cfg);}
 
 // ════ OVERVIEW ════
+// ── Overview helpers: use _allch for Jun+ months ──
+const _JUN_I = MK.indexOf('jun');
+function ovCh(m, k) {
+  // For Jun+, use allch sheet data if available; else fall back to individual
+  if (MK.indexOf(m) >= _JUN_I && DB[m]._allch?.[k] !== undefined)
+    return {...(DB[m][k]||{}), sales: DB[m]._allch[k].sales||0, target: DB[m]._allch[k].target||0};
+  return DB[m][k] || {sales:0,orders:0,target:0};
+}
+function aggOv() {
+  // Aggregate overview data: uses _allch for Jun+ months
+  const ak = aMK();
+  const r = {};
+  CH_CFG.forEach(({k}) => {
+    r[k] = {sales:0, orders:0, target:0, budget:0, visitors:0, reach:0, cr:0, aov:0, roas:0, roi:0};
+    ak.forEach(m => {
+      const cd = ovCh(m, k);
+      r[k].sales    += cd.sales    || 0;
+      r[k].target   += cd.target   || 0;
+      r[k].orders   += DB[m][k]?.orders   || 0;
+      r[k].budget   += DB[m][k]?.budget   || 0;
+      r[k].visitors += DB[m][k]?.visitors || 0;
+      r[k].reach    += DB[m][k]?.reach    || 0;
+    });
+  });
+  r.live={off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0};
+  r.affi={sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0};
+  r.ext={};
+  for (const {k} of EXT_CH_CFG) r.ext[k]={sales:0,orders:0,target:0};
+  ak.forEach(m=>{
+    Object.keys(r.live).forEach(k=>r.live[k]+=DB[m].live[k]||0);
+    Object.keys(r.affi).forEach(k=>r.affi[k]+=DB[m].affi[k]||0);
+    for (const {k} of EXT_CH_CFG) {
+      r.ext[k].sales  += DB[m].ext?.[k]?.sales  || 0;
+      r.ext[k].target += DB[m].ext?.[k]?.target || 0;
+    }
+  });
+  return r;
+}
+
 function renderOverview(){
-  const d=getData(), ak=aMK(), an=aMN();
-  const ts=CH_CFG.reduce((s,c)=>s+d[c.k].sales,0);
-  const tt=CH_CFG.reduce((s,c)=>s+d[c.k].target,0);
-  const to=CH_CFG.reduce((s,c)=>s+d[c.k].orders,0);
+  const ak=aMK(), an=aMN();
+  // For specific month: build overview-data using _allch for Jun+
+  let d;
+  if (CUR==='all') {
+    d = aggOv();
+  } else {
+    const base = DB[CUR];
+    d = {...base};
+    CH_CFG.forEach(({k})=>{ d[k]=ovCh(CUR,k); });
+    if (!d.ext) d.ext={};
+  }
+  const ts=CH_CFG.filter(c=>c.k!=='line').reduce((s,c)=>s+(d[c.k]?.sales||0),0)+EXT_CH_CFG.reduce((s,c)=>s+(d.ext?.[c.k]?.sales||0),0);
+  const tt=CH_CFG.filter(c=>c.k!=='line').reduce((s,c)=>s+(d[c.k]?.target||0),0)+EXT_CH_CFG.reduce((s,c)=>s+(d.ext?.[c.k]?.target||0),0);
+  const to=CH_CFG.reduce((s,c)=>s+(d[c.k]?.orders||0),0);
   const tp=pctN(ts,tt);
   const isP=CUR!=='all'&&DB[CUR]&&DB[CUR].partial;
   const isE=CUR!=='all'&&DB[CUR]&&DB[CUR].empty;
@@ -1972,6 +2021,7 @@ const _ALLCH_MAP = {
 function applyAllChData(rows, m) {
   const d = DB[m]; if (!d) return;
   if (!d.ext) d.ext = {};
+  if (!d._allch) d._allch = {};
   for (const {k} of EXT_CH_CFG) {
     if (!d.ext[k]) d.ext[k] = {sales:0, orders:0, target:0};
   }
@@ -1983,14 +2033,13 @@ function applyAllChData(rows, m) {
     if (!dbKey) continue;
     const target = pvNum(row[1]) || 0;
     const mtd    = pvNum(row[2]) || 0;
-    if (['shopee','lazada','tiktok','fb'].includes(dbKey)) {
-      // Update existing channel MTD sales from this sheet (for June+)
-      if (mtd > 0)    d[dbKey].sales  = mtd;
-      if (target > 0) d[dbKey].target = target;
-    } else {
+    // Store in _allch (separate from per-channel data)
+    d._allch[dbKey] = {sales: mtd, target: target};
+    // Also update ext channels for display
+    if (!['shopee','lazada','tiktok','fb'].includes(dbKey)) {
       if (!d.ext[dbKey]) d.ext[dbKey] = {sales:0,orders:0,target:0};
-      if (mtd > 0)    d.ext[dbKey].sales  = mtd;
-      if (target > 0) d.ext[dbKey].target = target;
+      d.ext[dbKey].sales  = mtd;
+      d.ext[dbKey].target = target;
     }
   }
   if (d.empty) d.empty = false;
