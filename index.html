@@ -490,10 +490,7 @@ html.light .dp-btn.sel{color:#fff;}
       <div class="kpi-grid" id="kpi-live"></div>
 
       <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>📊 Total Live Sales รายเดือน — ทุกช่อง รวมกัน</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-total-live"></canvas></div></div>
-      <div class="g2">
-        <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>Total GMV ทุกช่อง รายเดือน</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-total-gmv"></canvas></div></div>
-        <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>Live Sales รายเดือน (แยกช่อง)</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-sales"></canvas></div></div>
-      </div>
+      <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>Live Sales รายเดือน (แยกช่อง)</div><div class="chart-wrap" style="height:260px"><canvas id="cv-lv-sales"></canvas></div></div>
       <div class="g2">
         <div class="card"><div class="card-head"><div class="cdot" style="background:#ff7ab0"></div>SPH รายช่อง (฿/ชม.)</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-sph-ch"></canvas></div></div>
         <div class="card"><div class="card-head"><div class="cdot" style="background:var(--amber)"></div>Average ROI รายเดือน</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-roi-avg"></canvas></div></div>
@@ -504,15 +501,10 @@ html.light .dp-btn.sel{color:#fff;}
         <div class="card"><div class="card-head"><div class="cdot" style="background:#b06fff"></div>SPH รายMC — TikTok Raksus</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-mc-raks"></canvas></div></div>
         <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>SPH รายMC — Shopee Live</div><div class="chart-wrap" style="height:220px"><canvas id="cv-lv-mc-shop"></canvas></div></div>
       </div>
-      <div class="card"><div class="card-head"><div class="cdot" style="background:#a78bfa"></div>📈 SPH Trend รายMC — TikTok Official</div><div class="chart-wrap" style="height:260px"><canvas id="cv-lv-trend-off"></canvas></div></div>
-      <div class="g2">
-        <div class="card"><div class="card-head"><div class="cdot" style="background:#b06fff"></div>📈 SPH Trend รายMC — TikTok Raksus</div><div class="chart-wrap" style="height:240px"><canvas id="cv-lv-trend-raks"></canvas></div></div>
-        <div class="card"><div class="card-head"><div class="cdot" style="background:var(--shopee)"></div>📈 SPH Trend รายMC — Shopee Live</div><div class="chart-wrap" style="height:240px"><canvas id="cv-lv-trend-shop"></canvas></div></div>
-      </div>
-      <div class="card"><div class="card-head"><div class="cdot" style="background:var(--amber)"></div>📈 SPH Trend รายMC — CEO Live</div><div class="chart-wrap" style="height:200px"><canvas id="cv-lv-trend-ceo"></canvas></div></div>
 
       <!-- Daily charts + MTD -->
-      <div class="wk-sec-hd" style="--sc:#ff7ab0;margin-top:8px">📅 รายวัน เทียบเดือนก่อน (MTD) — ทุกช่อง รวมกัน</div>
+      <div class="wk-sec-hd" style="--sc:#ff7ab0;margin-top:8px">📅 รายวัน Live — เทียบเดือนก่อน (MTD)</div>
+      <div id="day-pick-lv"></div>
       <div class="kpi-grid" id="mtd-lv" style="display:none"></div>
       <div class="g2">
         <div class="card"><div class="card-head">Orders รายวัน (ทุกช่อง)</div><div class="chart-wrap" style="height:190px"><canvas id="cv-lv-dy-ord"></canvas></div></div>
@@ -689,6 +681,8 @@ html.light .dp-btn.sel{color:#fff;}
             <option value="300000" selected>ทุก 5 นาที</option>
             <option value="900000">ทุก 15 นาที</option>
             <option value="1800000">ทุก 30 นาที</option>
+            <option value="3600000">ทุก 1 ชั่วโมง</option>
+            <option value="86400000">ทุก 24 ชั่วโมง (อัปเดตรายวัน)</option>
           </select>
           <button class="btn btn-pri" onclick="applyRefreshInterval()">✓ บันทึก</button>
         </div>
@@ -776,6 +770,7 @@ const DB = {
     fb:    {sales:0,orders:0,reach:0,budget:0,roas:0,target:1700000},
     live:  {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},
     affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
+    ext:   {admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},
     empty:true,
   },
   feb:{
@@ -786,6 +781,7 @@ const DB = {
     fb:    {sales:0,orders:0,reach:0,budget:0,roas:0,target:1500000},
     live:  {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},
     affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
+    ext:   {admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},
     empty:true,
   },
   mar:{
@@ -796,6 +792,7 @@ const DB = {
     fb:    {sales:0,orders:0,reach:0,budget:0,roas:0,target:1500000},
     live:  {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},
     affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
+    ext:   {admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},
     empty:true,
   },
   apr:{
@@ -806,6 +803,7 @@ const DB = {
     fb:    {sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},
     live:  {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},
     affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
+    ext:   {admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},
     empty:true,
   },
   may:{
@@ -816,15 +814,16 @@ const DB = {
     fb:    {sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},
     live:  {off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},
     affi:  {sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},
+    ext:   {admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},
     empty:true,
   },
-  jun:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},empty:true},
-  jul:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},empty:true},
-  aug:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},empty:true},
-  sep:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},empty:true},
-  oct:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},empty:true},
-  nov:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},empty:true},
-  dec:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},empty:true}
+  jun:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},ext:{admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},empty:true},
+  jul:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},ext:{admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},empty:true},
+  aug:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},ext:{admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},empty:true},
+  sep:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},ext:{admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},empty:true},
+  oct:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},ext:{admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},empty:true},
+  nov:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},ext:{admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},empty:true},
+  dec:{shopee:{sales:0,orders:0,visitors:0,cr:0,aov:0,roi:0,budget:0,target:9200000},tiktok:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,reach:0,budget:0,target:4800000},lazada:{sales:0,orders:0,visitors:0,cr:0,aov:0,roas:0,budget:0,target:1300000},line:{sales:0,orders:0,cr:0,aov:0,target:2000000},fb:{sales:0,orders:0,reach:0,budget:0,roas:0,target:1200000},live:{off:0,raks:0,shop:0,ceo:0,total:0,hr_off:0,hr_raks:0,hr_shop:0,hr_ceo:0},affi:{sh_s:0,sh_o:0,tt_s:0,tt_o:0,lzd_s:0,lzd_o:0},ext:{admin:{sales:0,orders:0,target:0},directB2B:{sales:0,orders:0,target:0},lineMyShop:{sales:0,orders:0,target:0},pawdyMember:{sales:0,orders:0,target:0},website:{sales:0,orders:0,target:0},petShop:{sales:0,orders:0,target:0},event:{sales:0,orders:0,target:0}},empty:true}
 };
 
 const WEEKLY = {
@@ -999,6 +998,13 @@ const MC_SPH = {
     'Best':{hr:4,sales:2282,sph:570}
   },
   },
+  jun:{tt_off:{},tt_raks:{},shopee:{},ceo:{}},
+  jul:{tt_off:{},tt_raks:{},shopee:{},ceo:{}},
+  aug:{tt_off:{},tt_raks:{},shopee:{},ceo:{}},
+  sep:{tt_off:{},tt_raks:{},shopee:{},ceo:{}},
+  oct:{tt_off:{},tt_raks:{},shopee:{},ceo:{}},
+  nov:{tt_off:{},tt_raks:{},shopee:{},ceo:{}},
+  dec:{tt_off:{},tt_raks:{},shopee:{},ceo:{}},
 };
 
 let CUR = 'may';
@@ -1013,8 +1019,9 @@ const bCls = p => p >= 100 ? 'ok' : p >= 85 ? 'warn' : 'bad';
 const aMK  = () => { const upTo = CUR === 'all' ? MK.length - 1 : MK.indexOf(CUR); return MK.filter((m, i) => !DB[m].empty && i <= upTo); };
 const aMN  = () => aMK().map(m => MN[MK.indexOf(m)]);
 
-function gmvTotal(m){ return CH_CFG.reduce((s,c)=>s+DB[m][c.k].sales,0); }
-function tgtTotal(m){ return CH_CFG.reduce((s,c)=>s+DB[m][c.k].target,0); }
+function extTotal(m,field){ const e=DB[m].ext||{}; return EXT_CH_CFG.reduce((s,c)=>s+(e[c.k]?.[field]||0),0); }
+function gmvTotal(m){ return CH_CFG.reduce((s,c)=>s+DB[m][c.k].sales,0)+extTotal(m,'sales'); }
+function tgtTotal(m){ return CH_CFG.reduce((s,c)=>s+DB[m][c.k].target,0)+extTotal(m,'target'); }
 
 function aggAll() {
   const ak = aMK(), n = ak.length||1;
@@ -1069,7 +1076,10 @@ function renderOverview(){
     <div class="kpi" style="--kc:var(--accent)"><div class="kpi-lbl">Total Orders</div><div class="kpi-val">${to.toLocaleString()}</div><div class="kpi-sub">ทุก Channel</div></div>
     <div class="kpi" style="--kc:#ff7ab0"><div class="kpi-lbl">Live Sales</div><div class="kpi-val">${fmtB(d.live.total)}</div><div class="kpi-sub">${ts?(d.live.total/ts*100).toFixed(1):0}% ของ GMV</div></div>
     <div class="kpi" style="--kc:${tp>=100?'var(--green)':tp>=85?'var(--amber)':'var(--red)'}"><div class="kpi-lbl">Achievement</div><div class="kpi-val" style="color:${tp>=100?'var(--green)':tp>=85?'var(--amber)':'var(--red)'}">${tp}%</div><div class="kpi-sub">vs Target</div></div>`;
-  $('ov-channels').innerHTML=CH_CFG.map(c=>{const cd=d[c.k],p=pctN(cd.sales,cd.target);return`<div class="kpi" style="--kc:${c.color}"><div class="kpi-lbl">${c.label}</div><div class="kpi-val">${fmtB(cd.sales)}</div><div class="kpi-sub"><span class="badge ${bCls(p)}">${p}%</span><span style="color:var(--text3)">${fmtB(cd.target)}</span></div></div>`;}).join('');
+  const extD = d.ext || {};
+  $('ov-channels').innerHTML=CH_CFG.filter(c=>c.k!=='line').map(c=>{const cd=d[c.k],p=pctN(cd.sales,cd.target);return`<div class="kpi" style="--kc:${c.color}"><div class="kpi-lbl">${c.label}</div><div class="kpi-val">${fmtB(cd.sales)}</div><div class="kpi-sub"><span class="badge ${bCls(p)}">${p}%</span><span style="color:var(--text3)">${fmtB(cd.target)}</span></div></div>`;}).join('')+
+  '<div style="grid-column:1/-1;padding:4px 12px 2px;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;border-top:1px solid var(--border);margin-top:4px">── ช่องทางเพิ่มเติม ──</div>'+
+  EXT_CH_CFG.map(c=>{const cd=extD[c.k]||{},p=pctN(cd.sales||0,cd.target||0);return`<div class="kpi" style="--kc:${c.color}"><div class="kpi-lbl">${c.label}</div><div class="kpi-val">${fmtB(cd.sales||0)}</div><div class="kpi-sub"><span class="badge ${bCls(p)}">${p}%</span><span style="color:var(--text3)">${fmtB(cd.target||0)}</span></div></div>`;}).join('');
   setTimeout(()=>{
     const L=CH_CFG.map(c=>c.label);
     mkChart('cv-ov-bar',{type:'bar',data:{labels:L,datasets:[{label:'Actual',data:CH_CFG.map(c=>d[c.k].sales),backgroundColor:CH_CFG.map(c=>c.color+'bb'),borderRadius:4},{label:'Target',data:CH_CFG.map(c=>d[c.k].target),backgroundColor:'rgba(255,255,255,0.06)',borderRadius:4}]},options:{...cDef,plugins:{...cDef.plugins,legend:{...legOpts}}}});
@@ -1298,7 +1308,7 @@ function renderDailyKpis(containerId, m, pM, ch, metrics, color, maxDay=null) {
 }
 
 // ── Day filter state ──
-const DAYSEL={shopee:null,tiktok:null,lazada:null,line:null,fb:null};
+const DAYSEL={shopee:null,tiktok:null,lazada:null,line:null,fb:null,live:null};
 const _MTD_M={
   shopee:[{key:'visitors',label:'Visitors',fmt:'N',color:'var(--shopee)'},{key:'orders',label:'Orders',fmt:'N',color:'var(--shopee)'},{key:'sales',label:'Sales (In)',fmt:'B',color:'var(--shopee)'},{key:'offSales',label:'Sales (Off)',fmt:'B',color:'#ff9966'},{key:'inBudget',label:'Budget (In)',fmt:'B',color:'var(--shopee)'}],
   tiktok:[{key:'visitors',label:'Visitors',fmt:'N'},{key:'orders',label:'Orders',fmt:'N'},{key:'sales',label:'Sales',fmt:'B'},{key:'budget',label:'Budget',fmt:'B'}],
@@ -1307,8 +1317,8 @@ const _MTD_M={
   fb:[{key:'reach',label:'Reach',fmt:'N',color:'#4a90e2'},{key:'orders',label:'Orders',fmt:'N',color:'#4a90e2'},{key:'sales',label:'Sales',fmt:'B',color:'#4a90e2'},{key:'budgetIbSales',label:'Budget IB/Sales',fmt:'B',color:'#4a90e2'}],
 };
 const _MTD_C={shopee:'var(--shopee)',tiktok:'var(--tiktok)',lazada:'var(--lazada)',line:'var(--line)',fb:'#4a90e2'};
-const _MTD_KID={shopee:'mtd-sh',tiktok:'mtd-tt',lazada:'mtd-lz',line:'mtd-ln',fb:'mtd-fb'};
-const _MTD_PID={shopee:'day-pick-sh',tiktok:'day-pick-tt',lazada:'day-pick-lz',line:'day-pick-ln',fb:'day-pick-fb'};
+const _MTD_KID={shopee:'mtd-sh',tiktok:'mtd-tt',lazada:'mtd-lz',line:'mtd-ln',fb:'mtd-fb',live:'mtd-lv'};
+const _MTD_PID={shopee:'day-pick-sh',tiktok:'day-pick-tt',lazada:'day-pick-lz',line:'day-pick-ln',fb:'day-pick-fb',live:'day-pick-lv'};
 
 function buildDayPicker(pickId, ch) {
   const el=$(pickId); if(!el) return;
@@ -1499,10 +1509,10 @@ function renderLive(){
   const mcClr=mc=>MC_COLORS[mc]||'#8892b0';
 
   // ── All MC names across all months ──
-  const allMCs_off=  [...new Set(ak.flatMap(m=>Object.keys(MC_SPH[m]?.tt_off||{})))].filter(x=>x!=='-');
-  const allMCs_raks= [...new Set(ak.flatMap(m=>Object.keys(MC_SPH[m]?.tt_raks||{})))].filter(x=>x!=='-');
-  const allMCs_shop= [...new Set(ak.flatMap(m=>Object.keys(MC_SPH[m]?.shopee||{})))].filter(x=>x!=='-');
-  const allMCs_ceo=  [...new Set(ak.flatMap(m=>Object.keys(MC_SPH[m]?.ceo||{})))].filter(x=>x!=='-');
+  const allMCs_off=  [...new Set(MK.flatMap(m=>Object.keys(MC_SPH[m]?.tt_off||{})))].filter(x=>x!=='-');
+  const allMCs_raks= [...new Set(MK.flatMap(m=>Object.keys(MC_SPH[m]?.tt_raks||{})))].filter(x=>x!=='-');
+  const allMCs_shop= [...new Set(MK.flatMap(m=>Object.keys(MC_SPH[m]?.shopee||{})))].filter(x=>x!=='-');
+  const allMCs_ceo=  [...new Set(MK.flatMap(m=>Object.keys(MC_SPH[m]?.ceo||{})))].filter(x=>x!=='-');
   const allMCs_all=  [...new Set([...allMCs_off,...allMCs_raks,...allMCs_shop,...allMCs_ceo])];
 
   function getMCSPH(m,ch,mc){ const d2=MC_SPH[m]?.[ch]?.[mc]; return d2?d2.sph:0; }
@@ -1518,15 +1528,6 @@ function renderLive(){
       {label:'CEO Live',data:ak.map(m=>DB[m].live.ceo||0),backgroundColor:'rgba(255,193,77,.8)',borderRadius:3,stack:'live'},
       {label:'Total Live',data:ak.map(m=>DB[m].live.total||0),type:'line',borderColor:'#ffffff',backgroundColor:'rgba(255,255,255,.05)',tension:.3,pointRadius:5,pointHoverRadius:8,fill:false,borderWidth:2.5,spanGaps:false,yAxisID:'y'},
     ]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{x:cDef.scales.x,y:{...cDef.scales.y,stacked:true,ticks:{...cDef.scales.y.ticks,callback:v=>fmtB(v)}}}}});
-
-    // Total GMV all channels by month
-    mkChart('cv-lv-total-gmv',{type:'bar',data:{labels:an,datasets:[
-      {label:'Shopee',data:ak.map(m=>DB[m].shopee.sales),backgroundColor:'rgba(255,72,32,.8)',borderRadius:3},
-      {label:'TikTok',data:ak.map(m=>DB[m].tiktok.sales),backgroundColor:'rgba(66,212,212,.8)',borderRadius:3},
-      {label:'Lazada',data:ak.map(m=>DB[m].lazada.sales),backgroundColor:'rgba(96,112,255,.8)',borderRadius:3},
-      {label:'Line OA',data:ak.map(m=>DB[m].line.sales),backgroundColor:'rgba(0,184,86,.8)',borderRadius:3},
-      {label:'Facebook',data:ak.map(m=>DB[m].fb.sales),backgroundColor:'rgba(46,128,255,.8)',borderRadius:3},
-    ]},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts}}});
 
     // Live Sales by channel per month
     mkChart('cv-lv-sales',{type:'bar',data:{labels:an,datasets:[
@@ -1564,50 +1565,60 @@ function renderLive(){
     mkChart('cv-lv-mc-off',{type:'bar',data:{labels:an,datasets:allMCs_off.map(mc=>({label:mc,data:ak.map(m=>getMCSPH(m,'tt_off',mc)),backgroundColor:mcClr(mc)+'cc',borderRadius:3}))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
     mkChart('cv-lv-mc-raks',{type:'bar',data:{labels:an,datasets:allMCs_raks.map(mc=>({label:mc,data:ak.map(m=>getMCSPH(m,'tt_raks',mc)),backgroundColor:mcClr(mc)+'cc',borderRadius:3}))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
     mkChart('cv-lv-mc-shop',{type:'bar',data:{labels:an,datasets:allMCs_shop.map(mc=>({label:mc,data:ak.map(m=>getMCSPH(m,'shopee',mc)),backgroundColor:mcClr(mc)+'cc',borderRadius:3}))},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});
-    const mkTrendCh=(id,chKey,mcs)=>{const ds=mcs.map(mc=>({label:mc,data:ak.map(m=>{const e=MC_SPH[m]?.[chKey]?.[mc];return e&&e.hr>0?Math.round(e.sales/e.hr):null;}),borderColor:mcClr(mc),backgroundColor:mcClr(mc)+'33',tension:.35,pointRadius:5,pointHoverRadius:8,pointBorderWidth:2,pointBorderColor:'#0a0c12',fill:false,borderWidth:2.5,spanGaps:false})).filter(ds=>ds.data.some(v=>v!==null));if(!ds.length){killChart(id);return;}mkChart(id,{type:'line',data:{labels:an,datasets:ds},options:{...cDef,plugins:{...cDef.plugins,legend:legOpts},scales:{...cDef.scales,y:{...cDef.scales.y,ticks:{...cDef.scales.y.ticks,callback:v=>'฿'+fmt(v)}}}}});};
-    mkTrendCh('cv-lv-trend-off','tt_off',allMCs_off);
-    mkTrendCh('cv-lv-trend-raks','tt_raks',allMCs_raks);
-    mkTrendCh('cv-lv-trend-shop','shopee',allMCs_shop);
-    mkTrendCh('cv-lv-trend-ceo','ceo',allMCs_ceo);
-
-    // Daily charts (all channels combined)
-    const _m=CUR==='all'?'may':CUR, _pM=prevMapD[_m];
+    // Daily charts (all channels combined) + Live MTD with day picker
+    const _m=CUR==='all'?'jun':CUR, _pM=prevMapD[_m];
     const cDD=DAILY[_m]||{}, pDD=_pM?DAILY[_pM]:null;
     const mtdEl=$('mtd-lv');
-    if(cDD.days&&cDD.days.length&&mtdEl){
-      mtdEl.style.display='';
-      // Compute combined daily arrays
-      const combineChannels=(dd,ch_keys,metric)=>{
-        if(!dd||!dd.days||!dd.days.length)return Array(31).fill(null);
-        const r=Array(31).fill(null);
-        dd.days.forEach((d,i)=>{
-          if(d<1||d>31)return;
-          const sum=ch_keys.reduce((s,ch)=>s+(dd[ch]?.[metric]?.[i]||0),0);
-          r[d-1]=(r[d-1]||0)+sum;
-        });
-        return r;
-      };
+    const combineChannels=(dd,ch_keys,metric)=>{
+      if(!dd||!dd.days||!dd.days.length)return Array(31).fill(null);
+      const r=Array(31).fill(null);
+      dd.days.forEach((d,i)=>{
+        if(d<1||d>31)return;
+        const sum=ch_keys.reduce((s,ch)=>s+(dd[ch]?.[metric]?.[i]||0),0);
+        r[d-1]=(r[d-1]||0)+sum;
+      });
+      return r;
+    };
+    if(cDD.days&&cDD.days.length){
       const ordCur=combineChannels(cDD,['shopee','tiktok','lazada','line','fb'],'orders');
       const ordPrev=combineChannels(pDD,['shopee','tiktok','lazada','line','fb'],'orders');
       const visCur=combineChannels(cDD,['shopee','tiktok','lazada'],'visitors');
       const visPrev=combineChannels(pDD,['shopee','tiktok','lazada'],'visitors');
-      // shopee budget key is inBudget not budget — fix:
       const spendCurFixed=Array(31).fill(null);
-      cDD.days&&cDD.days.forEach((d,i)=>{if(d<1||d>31)return;spendCurFixed[d-1]=(cDD.shopee?.inBudget?.[i]||0)+(cDD.tiktok?.budget?.[i]||0)+(cDD.lazada?.budget?.[i]||0)+(cDD.fb?.budgetIbSales?.[i]||0)+(cDD.fb?.budgetAware?.[i]||0);});
+      cDD.days.forEach((d,i)=>{if(d<1||d>31)return;spendCurFixed[d-1]=(cDD.shopee?.inBudget?.[i]||0)+(cDD.tiktok?.budget?.[i]||0)+(cDD.lazada?.budget?.[i]||0)+(cDD.fb?.budgetIbSales?.[i]||0)+(cDD.fb?.budgetAware?.[i]||0);});
       const spendPrevFixed=Array(31).fill(null);
       pDD&&pDD.days&&pDD.days.forEach((d,i)=>{if(d<1||d>31)return;spendPrevFixed[d-1]=(pDD.shopee?.inBudget?.[i]||0)+(pDD.tiktok?.budget?.[i]||0)+(pDD.lazada?.budget?.[i]||0)+(pDD.fb?.budgetIbSales?.[i]||0)+(pDD.fb?.budgetAware?.[i]||0);});
-
       const cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
       mkLineD('cv-lv-dy-ord',[lnD(cL+' Orders',ordCur,'#ff7ab0'),lnD(pL+' Orders',ordPrev,'#ff7ab0',true)]);
       mkLineD('cv-lv-dy-vis',[lnD(cL+' Visitors',visCur,'#a78bfa'),lnD(pL+' Visitors',visPrev,'#a78bfa',true)]);
       mkLineD('cv-lv-dy-spend',[lnD(cL+' Spend',spendCurFixed,'#fbbf24'),lnD(pL+' Spend',spendPrevFixed,'#fbbf24',true)]);
-
-      // MTD KPI boxes
-      const ordStats=mtdStats(ordCur.filter(v=>v!==null),ordPrev.filter(v=>v!==null));
-      const visStats=mtdStats(visCur.filter(v=>v!==null),visPrev.filter(v=>v!==null));
-      const spStats=mtdStats(spendCurFixed.filter(v=>v!==null),spendPrevFixed.filter(v=>v!==null));
-      mtdEl.innerHTML=mtdKpiHtml('Orders รวม',ordStats,'N','#ff7ab0')+mtdKpiHtml('Visitors รวม',visStats,'N','#a78bfa')+mtdKpiHtml('Ads Spend รวม',spStats,'B','#fbbf24');
-    }
+      // MTD Live KPI boxes with day picker
+      if(mtdEl){
+        mtdEl.style.display='';
+        const day=DAYSEL.live;
+        const slc=arr=>day!=null?arr.slice(0,day):arr.filter(v=>v!==null);
+        const ordStats=mtdStats(slc(ordCur),slc(ordPrev));
+        const spStats=mtdStats(slc(spendCurFixed),slc(spendPrevFixed));
+        // AOV = total sales / total orders from daily
+        const salCur=combineChannels(cDD,['shopee','tiktok','lazada','line','fb'],'sales');
+        const salPrev=combineChannels(pDD,['shopee','tiktok','lazada','line','fb'],'sales');
+        const salSlcC=slc(salCur).reduce((s,v)=>s+(v||0),0);
+        const salSlcP=slc(salPrev).reduce((s,v)=>s+(v||0),0);
+        const ordSlcC=slc(ordCur).reduce((s,v)=>s+(v||0),0);
+        const ordSlcP=slc(ordPrev).reduce((s,v)=>s+(v||0),0);
+        const aovC=ordSlcC>0?Math.round(salSlcC/ordSlcC):0;
+        const aovP=ordSlcP>0?Math.round(salSlcP/ordSlcP):0;
+        const aovMom=aovP>0?((aovC-aovP)/aovP*100).toFixed(1):null;
+        const aovStats={cur:aovC,prev:aovP,mom:aovMom};
+        // Live Sales MTD (monthly total vs prev month)
+        const liveC=DB[_m].live.total||0, liveP=_pM?DB[_pM].live.total||0:0;
+        const liveMom=liveP>0?((liveC-liveP)/liveP*100).toFixed(1):null;
+        const liveStats={cur:liveC,prev:liveP,mom:liveMom};
+        mtdEl.innerHTML=mtdKpiHtml('Live Sales'+(day!=null?` ≤วัน${day}`:''),liveStats,'B','#ff7ab0')+mtdKpiHtml('Orders'+(day!=null?` ≤วัน${day}`:''),ordStats,'N','#a78bfa')+mtdKpiHtml('AOV'+(day!=null?` ≤วัน${day}`:''),aovStats,'B','#fbbf24')+mtdKpiHtml('Ads Spend'+(day!=null?` ≤วัน${day}`:''),spStats,'B','#fb923c');
+      }
+    } else if(mtdEl){ mtdEl.style.display='none'; }
+    // Build day picker for Live
+    buildDayPicker('day-pick-lv','live');
   },30);
 
   // Table 1: Monthly Live Performance
@@ -1814,6 +1825,7 @@ const LS_INTERVAL_KEY = 'pawdy_refresh_ms';
 const LS_DB_CACHE    = 'pawdy_db';
 const LS_DAILY_CACHE = 'pawdy_daily';
 const LS_CACHE_TIME  = 'pawdy_ts';
+const LS_ALLCH_PFX   = 'pawdy_allch_';
 
 // Embedded snapshot — replaced by downloadWithEmbeddedUrls()
 const EMBEDDED_DATA = null;
@@ -1857,10 +1869,11 @@ function cacheAgeLabel(ts) {
 // ── DEFAULT_SHEET_URLS — URLs ฝังในไฟล์ (ใช้งานได้ทุกเครื่องที่เปิดไฟล์นี้) ──
 // ค่าเหล่านี้จะถูกอัปเดตอัตโนมัติเมื่อกด "💾 ดาวน์โหลดไฟล์พร้อม URL"
 const DEFAULT_SHEET_URLS = {
-  jan:{ch:'',live:'',affi:''},feb:{ch:'',live:'',affi:''},mar:{ch:'',live:'',affi:''},
-  apr:{ch:'',live:'',affi:''},may:{ch:'',live:'',affi:''},jun:{ch:'',live:'',affi:''},
-  jul:{ch:'',live:'',affi:''},aug:{ch:'',live:'',affi:''},sep:{ch:'',live:'',affi:''},
-  oct:{ch:'',live:'',affi:''},nov:{ch:'',live:'',affi:''},dec:{ch:'',live:'',affi:''},
+  jan:{ch:'',live:'',affi:'',allch:''},feb:{ch:'',live:'',affi:'',allch:''},mar:{ch:'',live:'',affi:'',allch:''},
+  apr:{ch:'',live:'',affi:'',allch:''},may:{ch:'',live:'',affi:'',allch:''},
+  jun:{ch:'',live:'',affi:'',allch:'https://docs.google.com/spreadsheets/d/e/2PACX-1vQMsl22oosxLjvsAZrGHlIWploIUnVjGQQONUSL5XHMejKrX2kQAQsXFN1-3RUZEdmNaxKEpN6sg2rJ/pub?gid=0&single=true&output=csv'},
+  jul:{ch:'',live:'',affi:'',allch:''},aug:{ch:'',live:'',affi:'',allch:''},sep:{ch:'',live:'',affi:'',allch:''},
+  oct:{ch:'',live:'',affi:'',allch:''},nov:{ch:'',live:'',affi:'',allch:''},dec:{ch:'',live:'',affi:'',allch:''},
 };
 let autoRefreshTimer = null;
 
@@ -1936,6 +1949,51 @@ function findChannelStarts(rows, upTo) {
   }
   // Fallback to confirmed Jan layout
   return {sh:1, lz:9, ln:17, tt:22, fb:33, ig:42};
+}
+
+// ── EXT channels config ──
+const EXT_CH_CFG = [
+  {k:'admin',       label:'Admin',              color:'#64748b'},
+  {k:'directB2B',   label:'Direct B2B',         color:'#ec4899'},
+  {k:'lineMyShop',  label:'LINE MyShop',         color:'#06c755'},
+  {k:'pawdyMember', label:'Line Pawdy Member',   color:'#8b5cf6'},
+  {k:'website',     label:'Website',             color:'#6366f1'},
+  {k:'petShop',     label:'Pet Shop',            color:'#f59e0b'},
+  {k:'event',       label:'Event',               color:'#fb923c'},
+];
+// Map sheet channel labels → DB keys
+const _ALLCH_MAP = {
+  'shopee':'shopee','lazada':'lazada','tiktok':'tiktok','facebook':'fb',
+  'admin':'admin','direct_b2b':'directB2B','line myshop':'lineMyShop',
+  'line_pawdy member club':'pawdyMember','website':'website',
+  'pet shop':'petShop','event':'event',
+};
+
+function applyAllChData(rows, m) {
+  const d = DB[m]; if (!d) return;
+  if (!d.ext) d.ext = {};
+  for (const {k} of EXT_CH_CFG) {
+    if (!d.ext[k]) d.ext[k] = {sales:0, orders:0, target:0};
+  }
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const label = (row[0]||'').trim().toLowerCase();
+    if (!label) continue;
+    const dbKey = _ALLCH_MAP[label];
+    if (!dbKey) continue;
+    const target = pvNum(row[1]) || 0;
+    const mtd    = pvNum(row[2]) || 0;
+    if (['shopee','lazada','tiktok','fb'].includes(dbKey)) {
+      // Update existing channel MTD sales from this sheet (for June+)
+      if (mtd > 0)    d[dbKey].sales  = mtd;
+      if (target > 0) d[dbKey].target = target;
+    } else {
+      if (!d.ext[dbKey]) d.ext[dbKey] = {sales:0,orders:0,target:0};
+      if (mtd > 0)    d.ext[dbKey].sales  = mtd;
+      if (target > 0) d.ext[dbKey].target = target;
+    }
+  }
+  if (d.empty) d.empty = false;
 }
 
 function applySheetData(rows, targetMonth) {
@@ -2170,6 +2228,8 @@ function setupAutoRefresh(ms) {
       if (chUrl)   { try { const rows = await fetchSheetRows(chUrl);   applySheetData(rows, m); if(DB[m]) DB[m].empty=false; } catch(_){} }
       if (liveUrl) { try { const rows = await fetchSheetRows(liveUrl); applyLiveData(rows, m); } catch(_){} }
       if (affiUrl) { try { const rows = await fetchSheetRows(affiUrl); applyAffiData(rows, m); } catch(_){} }
+      const allChUrl2 = localStorage.getItem(LS_ALLCH_PFX + m);
+      if (allChUrl2) { try { const rows = await fetchSheetRows(allChUrl2); applyAllChData(rows, m); } catch(_){} }
     }
     const ap = document.querySelector('.panel.active');
     if (ap) renderActive(ap.id.replace('panel-', ''));
@@ -2347,6 +2407,10 @@ function buildMonthCfgUI() {
         <span class="mc-tag">🛒</span>
         <input id="mc-affi-${m}" class="url-input" value="${localStorage.getItem(LS_AFFI_PFX+m)||''}" placeholder="Affiliate: ...pub?gid=...&amp;output=csv">
       </div>
+      <div class="mc-field" style="margin-top:5px">
+        <span class="mc-tag">🏪</span>
+        <input id="mc-allch-${m}" class="url-input" value="${localStorage.getItem(LS_ALLCH_PFX+m)||''}" placeholder="All Channels (ทุกช่องทาง): ...pub?gid=...&amp;output=csv">
+      </div>
       <div id="mc-status-${m}" class="status"></div>
     </div>`).join('');
 }
@@ -2357,11 +2421,12 @@ async function loadMonthAll(m) {
     if (s) { s.textContent = msg; s.className = 'status ' + cls; }
   };
   const _def = DEFAULT_SHEET_URLS[m] || {};
-  const chUrl   = (($('mc-ch-'   + m) || {}).value || '').trim() || localStorage.getItem(LS_PREFIX   + m) || _def.ch   || '';
-  const liveUrl = (($('mc-live-' + m) || {}).value || '').trim() || localStorage.getItem(LS_LIVE_PFX + m) || _def.live || '';
-  const affiUrl = (($('mc-affi-' + m) || {}).value || '').trim() || localStorage.getItem(LS_AFFI_PFX + m) || _def.affi || '';
+  const chUrl   = (($('mc-ch-'    + m) || {}).value || '').trim() || localStorage.getItem(LS_PREFIX   + m) || _def.ch   || '';
+  const liveUrl = (($('mc-live-'  + m) || {}).value || '').trim() || localStorage.getItem(LS_LIVE_PFX + m) || _def.live || '';
+  const affiUrl = (($('mc-affi-'  + m) || {}).value || '').trim() || localStorage.getItem(LS_AFFI_PFX + m) || _def.affi || '';
+  const allChUrl= (($('mc-allch-' + m) || {}).value || '').trim() || localStorage.getItem(LS_ALLCH_PFX+ m) || '';
 
-  if (!chUrl && !liveUrl && !affiUrl) { setS('กรุณาใส่ URL อย่างน้อย 1 ช่อง', 'err'); return; }
+  if (!chUrl && !liveUrl && !affiUrl && !allChUrl) { setS('กรุณาใส่ URL อย่างน้อย 1 ช่อง', 'err'); return; }
   setS('กำลังโหลด...', 'info');
 
   let ok = 0;
@@ -2391,11 +2456,16 @@ async function loadMonthAll(m) {
     } catch(e) {}
   }
 
-  const timeStr = new Date().toLocaleTimeString('th-TH');
-  setS(`✓ โหลดสำเร็จ ${ok} แหล่งข้อมูล — ${timeStr}`, 'ok');
-  $('syncLbl').textContent = `Synced · ${timeStr}`;
-  setSyncDot(true);
+  if (allChUrl) {
+    try {
+      const rows = await fetchSheetRows(allChUrl);
+      applyAllChData(rows, m);
+      localStorage.setItem(LS_ALLCH_PFX + m, allChUrl);
+      ok++;
+    } catch(e) {}
+  }
   saveDataCache();
+  setS(`✓ โหลดสำเร็จ (${ok} แหล่ง)`, 'ok');
   const ap = document.querySelector('.panel.active');
   if (ap) renderActive(ap.id.replace('panel-', ''));
 }
@@ -2758,6 +2828,8 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
       if (chUrl)   { try { const rows = await fetchSheetRows(chUrl);   applySheetData(rows, m); if(DB[m]) DB[m].empty=false; anyLoaded=true; } catch(_){} }
       if (liveUrl) { try { const rows = await fetchSheetRows(liveUrl); applyLiveData(rows, m);  anyLoaded=true; } catch(_){} }
       if (affiUrl) { try { const rows = await fetchSheetRows(affiUrl); applyAffiData(rows, m);  anyLoaded=true; } catch(_){} }
+      const allchUrl2 = localStorage.getItem(LS_ALLCH_PFX + m) || def.allch || '';
+      if (allchUrl2) { try { const rows = await fetchSheetRows(allchUrl2); applyAllChData(rows, m); anyLoaded=true; } catch(_){} }
     }
     if (anyLoaded) {
       saveDataCache();
