@@ -830,6 +830,10 @@ MK.forEach(m => { DAILY[m] = {
   ig:    {reach:[],orders:[],sales:[],visitorShopee:[],budgetShopee:[],budgetAware:[],roas:[]},
 };});
 
+// ── Live daily aggregates (จากชีต Live รายเซสชัน รวมทุกช่อง ต่อวัน) ──
+// {เดือน:{days:[...], ord:[31], vis:[31], spend:[31]}} — index = วันที่-1, null = ไม่มีข้อมูล
+const LIVE_DAILY = {};
+
 const MC_SPH = {
   jan: {
   tt_off: {
@@ -1303,8 +1307,9 @@ let LIVE_DAY=null;
 function buildLiveDayPicker(){
   const el=$('day-pick-lv'); if(!el) return;
   const _m=CUR==='all'?'may':CUR;
-  const curDD=DAILY[_m]||{};
-  const days=curDD.days&&curDD.days.length?curDD.days.filter(d=>d>=1&&d<=31):[];
+  // ใช้วันจากชีต Live ก่อน ถ้าไม่มีค่อย fallback ไป channel daily
+  const srcDays=(LIVE_DAILY[_m]&&LIVE_DAILY[_m].days&&LIVE_DAILY[_m].days.length)?LIVE_DAILY[_m].days:((DAILY[_m]||{}).days||[]);
+  const days=srcDays.filter(d=>d>=1&&d<=31);
   if(!days.length){el.innerHTML='';return;}
   const maxUsed=Math.max(...days);
   const sel=LIVE_DAY;
@@ -1322,29 +1327,40 @@ function setLiveDay(day){
 // maxDay = null → ทั้งเดือน ; เลือกวัน → รวมตั้งแต่ต้นเดือน (วันที่ 1) ถึงวันที่เลือก เทียบเดือนก่อนช่วงเดียวกัน
 function renderLiveDaily(maxDay){
   const _m=CUR==='all'?'may':CUR, _pM=prevMapD[_m];
-  const cDD=DAILY[_m]||{}, pDD=_pM?DAILY[_pM]:null;
   const mtdEl=$('mtd-lv');
-  if(!(cDD.days&&cDD.days.length&&mtdEl)){ if(mtdEl)mtdEl.style.display='none'; return; }
-  mtdEl.style.display='';
-  // รวมทุกช่อง → array ความยาว 31 (index = วันที่-1)
-  const combineChannels=(dd,ch_keys,metric)=>{
-    if(!dd||!dd.days||!dd.days.length)return Array(31).fill(null);
-    const r=Array(31).fill(null);
-    dd.days.forEach((d,i)=>{
-      if(d<1||d>31)return;
-      const sum=ch_keys.reduce((s,ch)=>s+(dd[ch]?.[metric]?.[i]||0),0);
-      r[d-1]=(r[d-1]||0)+sum;
-    });
-    return r;
-  };
-  const ordCur=combineChannels(cDD,['shopee','tiktok','lazada','line','fb'],'orders');
-  const ordPrev=combineChannels(pDD,['shopee','tiktok','lazada','line','fb'],'orders');
-  const visCur=combineChannels(cDD,['shopee','tiktok','lazada'],'visitors');
-  const visPrev=combineChannels(pDD,['shopee','tiktok','lazada'],'visitors');
-  const spendCurFixed=Array(31).fill(null);
-  cDD.days&&cDD.days.forEach((d,i)=>{if(d<1||d>31)return;spendCurFixed[d-1]=(cDD.shopee?.inBudget?.[i]||0)+(cDD.tiktok?.budget?.[i]||0)+(cDD.lazada?.budget?.[i]||0)+(cDD.fb?.budgetIbSales?.[i]||0)+(cDD.fb?.budgetAware?.[i]||0);});
-  const spendPrevFixed=Array(31).fill(null);
-  pDD&&pDD.days&&pDD.days.forEach((d,i)=>{if(d<1||d>31)return;spendPrevFixed[d-1]=(pDD.shopee?.inBudget?.[i]||0)+(pDD.tiktok?.budget?.[i]||0)+(pDD.lazada?.budget?.[i]||0)+(pDD.fb?.budgetIbSales?.[i]||0)+(pDD.fb?.budgetAware?.[i]||0);});
+  const LD=LIVE_DAILY[_m], LDp=_pM?LIVE_DAILY[_pM]:null;
+  const cDD=DAILY[_m]||{}, pDD=_pM?DAILY[_pM]:null;
+  let ordCur,ordPrev,visCur,visPrev,spendCurFixed,spendPrevFixed;
+  const blank=()=>Array(31).fill(null);
+
+  if(LD&&LD.days&&LD.days.length){
+    // ── จากชีต Live (รายเซสชัน รวมทุกช่อง) ──
+    ordCur=LD.ord; visCur=LD.vis; spendCurFixed=LD.spend;
+    const hasP = LDp&&LDp.days&&LDp.days.length;
+    ordPrev=hasP?LDp.ord:blank(); visPrev=hasP?LDp.vis:blank(); spendPrevFixed=hasP?LDp.spend:blank();
+  } else if(cDD.days&&cDD.days.length){
+    // ── fallback: รวม daily ของชีต Channel (พฤติกรรมเดิม) ──
+    const combineChannels=(dd,ch_keys,metric)=>{
+      if(!dd||!dd.days||!dd.days.length)return blank();
+      const r=blank();
+      dd.days.forEach((d,i)=>{ if(d<1||d>31)return; const sum=ch_keys.reduce((s,ch)=>s+(dd[ch]?.[metric]?.[i]||0),0); r[d-1]=(r[d-1]||0)+sum; });
+      return r;
+    };
+    ordCur=combineChannels(cDD,['shopee','tiktok','lazada','line','fb'],'orders');
+    ordPrev=combineChannels(pDD,['shopee','tiktok','lazada','line','fb'],'orders');
+    visCur=combineChannels(cDD,['shopee','tiktok','lazada'],'visitors');
+    visPrev=combineChannels(pDD,['shopee','tiktok','lazada'],'visitors');
+    spendCurFixed=blank();
+    cDD.days.forEach((d,i)=>{if(d<1||d>31)return;spendCurFixed[d-1]=(cDD.shopee?.inBudget?.[i]||0)+(cDD.tiktok?.budget?.[i]||0)+(cDD.lazada?.budget?.[i]||0)+(cDD.fb?.budgetIbSales?.[i]||0)+(cDD.fb?.budgetAware?.[i]||0);});
+    spendPrevFixed=blank();
+    pDD&&pDD.days&&pDD.days.forEach((d,i)=>{if(d<1||d>31)return;spendPrevFixed[d-1]=(pDD.shopee?.inBudget?.[i]||0)+(pDD.tiktok?.budget?.[i]||0)+(pDD.lazada?.budget?.[i]||0)+(pDD.fb?.budgetIbSales?.[i]||0)+(pDD.fb?.budgetAware?.[i]||0);});
+  } else {
+    // ไม่มีข้อมูลรายวันเลย
+    if(mtdEl)mtdEl.style.display='none';
+    ['cv-lv-dy-ord','cv-lv-dy-vis','cv-lv-dy-spend'].forEach(killChart);
+    return;
+  }
+  if(mtdEl)mtdEl.style.display='';
 
   const cL=MN[MK.indexOf(_m)], pL=MN[MK.indexOf(_pM)]||'';
   mkLineD('cv-lv-dy-ord',[lnD(cL+' Orders',ordCur,'#ff7ab0'),lnD(pL+' Orders',ordPrev,'#ff7ab0',true)]);
@@ -1527,7 +1543,11 @@ function renderLive(){
 
   // ── MC colors ──
   const MC_COLORS={'Ploy':'#f472b6','Aee':'#60a5fa','Fon':'#34d399','Big':'#fbbf24','Nanny':'#a78bfa','Preaw':'#fb923c','Mee':'#94a3b8','Biw':'#f87171','Nat':'#2dd4bf','Nail':'#c084fc','Best':'#86efac'};
-  const mcClr=mc=>MC_COLORS[mc]||'#8892b0';
+  // normalize ชื่อแปรผัน: "P'fon"/"P'Fon"→fon, "Praew"→preaw ฯลฯ
+  const mcNorm=mc=>{ let s=(mc||'').toLowerCase().replace(/^p['']\s*/,'').replace(/[^a-zก-๙]/g,''); if(s==='praew')s='preaw'; return s; };
+  const MC_COLORS_N={}; Object.keys(MC_COLORS).forEach(k=>MC_COLORS_N[mcNorm(k)]=MC_COLORS[k]);
+  const PALETTE=['#f472b6','#60a5fa','#34d399','#fbbf24','#a78bfa','#fb923c','#2dd4bf','#c084fc','#f87171','#86efac','#38bdf8','#facc15'];
+  const mcClr=mc=>{ const n=mcNorm(mc); if(MC_COLORS_N[n])return MC_COLORS_N[n]; let h=0; for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))>>>0; return PALETTE[h%PALETTE.length]; };
 
   // ── All MC names across all months ──
   const allMCs_off=  [...new Set(ak.flatMap(m=>Object.keys(MC_SPH[m]?.tt_off||{})))].filter(x=>x!=='-');
@@ -1804,6 +1824,8 @@ const LS_INTERVAL_KEY = 'pawdy_refresh_ms';
 // ── Data cache keys ──
 const LS_DB_CACHE    = 'pawdy_db';
 const LS_DAILY_CACHE = 'pawdy_daily';
+const LS_MCSPH_CACHE = 'pawdy_mcsph';
+const LS_LVDAY_CACHE = 'pawdy_livedaily';
 const LS_CACHE_TIME  = 'pawdy_ts';
 
 // Embedded snapshot — replaced by downloadWithEmbeddedUrls()
@@ -1815,6 +1837,8 @@ function saveDataCache() {
     const dsnap = {};
     MK.forEach(m => { if (DAILY[m] && DAILY[m].days && DAILY[m].days.length) dsnap[m] = DAILY[m]; });
     localStorage.setItem(LS_DAILY_CACHE, JSON.stringify(dsnap));
+    localStorage.setItem(LS_MCSPH_CACHE, JSON.stringify(MC_SPH));
+    localStorage.setItem(LS_LVDAY_CACHE, JSON.stringify(LIVE_DAILY));
     localStorage.setItem(LS_CACHE_TIME, Date.now().toString());
   } catch(e) {}
 }
@@ -1823,6 +1847,8 @@ function restoreDataCache(src) {
   try {
     const dbRaw    = src ? src.db    : localStorage.getItem(LS_DB_CACHE);
     const dailyRaw = src ? src.daily : localStorage.getItem(LS_DAILY_CACHE);
+    const mcRaw    = src ? src.mcsph : localStorage.getItem(LS_MCSPH_CACHE);
+    const lvdRaw   = src ? src.livedaily : localStorage.getItem(LS_LVDAY_CACHE);
     const ts       = src ? src.ts    : parseInt(localStorage.getItem(LS_CACHE_TIME) || '0');
     if (!dbRaw) return 0;
     const dbData    = typeof dbRaw    === 'string' ? JSON.parse(dbRaw)    : dbRaw;
@@ -1831,6 +1857,8 @@ function restoreDataCache(src) {
       if (dbData[m])              Object.assign(DB[m],    dbData[m]);
       if (dailyData && dailyData[m]) Object.assign(DAILY[m], dailyData[m]);
     });
+    if (mcRaw)  { try { const mc = typeof mcRaw==='string'?JSON.parse(mcRaw):mcRaw;   Object.keys(mc).forEach(k => MC_SPH[k] = mc[k]); } catch(_){} }
+    if (lvdRaw) { try { const lv = typeof lvdRaw==='string'?JSON.parse(lvdRaw):lvdRaw; Object.keys(lv).forEach(k => LIVE_DAILY[k] = lv[k]); } catch(_){} }
     return ts || Date.now();
   } catch(e) { return 0; }
 }
@@ -2245,6 +2273,7 @@ async function loadLiveSheet(silent = false) {
       }
     }
 
+    parseLiveDetail(rows, m);
     if (d.empty) d.empty = false;
     localStorage.setItem(LS_LIVE_PFX + m, url);
     if (inputEl && !inputEl.value.trim()) inputEl.value = url;
@@ -2424,6 +2453,77 @@ function applyLiveData(rows, m) {
     if (hO||hR||hC||hS) { d.live.hr_off=hO; d.live.hr_raks=hR; d.live.hr_ceo=hC; d.live.hr_shop=hS; }
   }
   if (d.empty) d.empty = false;
+  parseLiveDetail(rows, m);
+}
+
+// อ่านรายละเอียดรายเซสชันในชีต Live (4 บล็อก: Official/Raksus/Shopee/CEO)
+// → สร้าง MC_SPH[m] (ราย MC ต่อช่อง) และ LIVE_DAILY[m] (Order/Viewer/Ads Spent รายวัน รวมทุกช่อง)
+function parseLiveDetail(rows, m) {
+  if (!DB[m] || !rows || !rows.length) return;
+  // หาแถว header ที่มี 'MC Name'
+  let hi = -1;
+  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    if ((rows[i]||[]).some(c => (c||'').trim() === 'MC Name')) { hi = i; break; }
+  }
+  if (hi < 0) return;
+  const hdr = rows[hi];
+  const mcCols = [];
+  hdr.forEach((c, ci) => { if ((c||'').trim() === 'MC Name') mcCols.push(ci); });
+  if (!mcCols.length) return;
+  const findCol = (label, start, end) => { for (let ci = Math.max(0,start); ci < end; ci++) if ((hdr[ci]||'').trim() === label) return ci; return -1; };
+  // บล็อกเรียงซ้าย→ขวาตามเทมเพลตคงที่: Official, Raksus, Shopee, CEO
+  const blockOrder = ['tt_off','tt_raks','shopee','ceo'];
+  const hasLetter = s => /[A-Za-zก-๙]/.test(s);
+  const mcAgg = {tt_off:{}, tt_raks:{}, shopee:{}, ceo:{}};
+  const dOrd = Array(31).fill(0), dVis = Array(31).fill(0), dSpend = Array(31).fill(0), dHas = Array(31).fill(false);
+
+  mcCols.forEach((mcCol, bi) => {
+    const start = mcCol - 4;
+    const end = (bi + 1 < mcCols.length) ? mcCols[bi+1] - 4 : hdr.length;
+    const ch = blockOrder[bi];
+    if (!ch || !mcAgg[ch]) return;
+    const cDate = findCol('Date', start, end);
+    const cHr   = findCol('Time (Hour)', start, end);
+    const cView = findCol('Viewer', start, end);
+    const cOrd  = findCol('Order', start, end);
+    const cSale = findCol('Total sales', start, end);
+    const cSpnt = findCol('Ads Spent', start, end);
+    for (let ri = hi + 1; ri < rows.length; ri++) {
+      const r = rows[ri] || [];
+      const name = (r[mcCol]||'').trim();
+      if (!name || name === '-' || !hasLetter(name)) continue;  // ข้ามแถวที่ "ชื่อ" เป็นตัวเลข/ว่าง
+      const hr = cHr>=0 ? pvNum(r[cHr]) : 0;
+      const sales = cSale>=0 ? pvNum(r[cSale]) : 0;
+      if (hr > 0 || sales > 0) {
+        const key = name.toLowerCase();
+        const e = mcAgg[ch][key] || (mcAgg[ch][key] = {disp:name, hr:0, sales:0});
+        e.hr += hr; e.sales += sales;
+      }
+      const day = parseInt((r[cDate]||'').trim().split(',')[0]);
+      if (day >= 1 && day <= 31) {
+        if (cOrd>=0)  dOrd[day-1]   += pvNum(r[cOrd]);
+        if (cView>=0) dVis[day-1]   += pvNum(r[cView]);
+        if (cSpnt>=0) dSpend[day-1] += pvNum(r[cSpnt]);
+        dHas[day-1] = true;
+      }
+    }
+  });
+
+  // เขียน MC_SPH[m] (เฉพาะเมื่อ parse ได้จริง — มิเช่นนั้นคง static seed ไว้)
+  const out = {tt_off:{}, tt_raks:{}, shopee:{}, ceo:{}};
+  let got = false;
+  ['tt_off','tt_raks','shopee','ceo'].forEach(ch => {
+    Object.values(mcAgg[ch]).forEach(e => {
+      out[ch][e.disp] = {hr:+e.hr.toFixed(1), sales:Math.round(e.sales), sph: e.hr>0 ? Math.round(e.sales/e.hr) : 0};
+      got = true;
+    });
+  });
+  if (got) MC_SPH[m] = out;
+
+  // เขียน LIVE_DAILY[m]
+  const days = [], ord = Array(31).fill(null), vis = Array(31).fill(null), sp = Array(31).fill(null);
+  for (let i = 0; i < 31; i++) if (dHas[i]) { days.push(i+1); ord[i] = dOrd[i]; vis[i] = dVis[i]; sp[i] = dSpend[i]; }
+  if (days.length) LIVE_DAILY[m] = {days, ord, vis, spend: sp};
 }
 
 function applyAffiData(rows, m) {
@@ -2510,7 +2610,7 @@ function downloadWithEmbeddedUrls() {
 
   const dsnap = {};
   MK.forEach(m => { if (DAILY[m] && DAILY[m].days && DAILY[m].days.length) dsnap[m] = DAILY[m]; });
-  const payload = { db: DB, daily: dsnap, ts: Date.now() };
+  const payload = { db: DB, daily: dsnap, mcsph: MC_SPH, livedaily: LIVE_DAILY, ts: Date.now() };
   const newData = `const EMBEDDED_DATA = ${JSON.stringify(payload)};`;
 
   let html = document.documentElement.outerHTML;
@@ -2549,10 +2649,14 @@ function clearAllData() {
       Object.keys(DAILY[m]).forEach(k => { if (k !== 'days') Object.keys(DAILY[m][k]).forEach(kk => { DAILY[m][k][kk] = []; }); });
     }
   });
+  Object.keys(MC_SPH).forEach(k => delete MC_SPH[k]);
+  Object.keys(LIVE_DAILY).forEach(k => delete LIVE_DAILY[k]);
   $('syncLbl').textContent = 'รอการซิงค์';
   setSyncDot(false);
   localStorage.removeItem(LS_DB_CACHE);
   localStorage.removeItem(LS_DAILY_CACHE);
+  localStorage.removeItem(LS_MCSPH_CACHE);
+  localStorage.removeItem(LS_LVDAY_CACHE);
   localStorage.removeItem(LS_CACHE_TIME);
   const ap = document.querySelector('.panel.active');
   if (ap) renderActive(ap.id.replace('panel-', ''));
@@ -2712,6 +2816,8 @@ document.querySelectorAll('.mt[data-m]').forEach(el => {
     localStorage.removeItem(LS_INTERVAL_KEY);
     localStorage.removeItem(LS_DB_CACHE);
     localStorage.removeItem(LS_DAILY_CACHE);
+    localStorage.removeItem(LS_MCSPH_CACHE);
+    localStorage.removeItem(LS_LVDAY_CACHE);
     localStorage.removeItem(LS_CACHE_TIME);
     localStorage.setItem('pawdy_data_v', DATA_V);
   }
